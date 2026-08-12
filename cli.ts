@@ -1,5 +1,7 @@
 import { defineCommand } from 'citty';
+import { createDoctorCommand } from './commands/doctor';
 import { createInstallCommand } from './commands/install';
+import { createListCommand } from './commands/list';
 import type { Runner } from './runner/runner';
 import type { Platform } from './tool/platform';
 
@@ -12,6 +14,8 @@ export function createCli(runner: Runner, platform: Platform) {
     },
     subCommands: {
       install: createInstallCommand(runner, platform),
+      list: createListCommand(runner, platform),
+      doctor: createDoctorCommand(runner, platform),
     },
   });
 }
