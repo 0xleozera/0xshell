@@ -9,6 +9,7 @@ describe('resolveForPlatform', () => {
   test('resolves the darwin recipe on darwin and the linux recipe on linux', () => {
     const tool = defineTool({
       id: 'slack',
+      stage: 3,
       darwin: brewCask('slack'),
       linux: aptRepo({
         repoName: 'slack',
@@ -27,6 +28,7 @@ describe('resolveForPlatform', () => {
   test('resolves to Unsupported with the reason preserved', () => {
     const tool = defineTool({
       id: 'xcode',
+      stage: 3,
       darwin: brewCask('xcode'),
       linux: unsupported('ferramenta exclusiva da Apple'),
     });
