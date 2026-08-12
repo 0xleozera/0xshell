@@ -18,19 +18,21 @@ describe('slack tool', () => {
     await slack.linux.install(runner);
 
     expect(runner.commands).toEqual([
-      ['mkdir', '-p', '/etc/apt/keyrings'],
+      ['sudo', 'mkdir', '-p', '/etc/apt/keyrings'],
       [
+        'sudo',
         'sh',
         '-c',
         'curl -fsSL https://packagecloud.io/slacktechnologies/slack/gpgkey | gpg --dearmor -o /etc/apt/keyrings/slack.gpg',
       ],
       [
+        'sudo',
         'sh',
         '-c',
         'echo "deb [signed-by=/etc/apt/keyrings/slack.gpg] https://packagecloud.io/slacktechnologies/slack/debian/ jessie main" > /etc/apt/sources.list.d/slack.list',
       ],
-      ['apt', 'update'],
-      ['apt', 'install', '-y', 'slack-desktop'],
+      ['sudo', 'apt', 'update'],
+      ['sudo', 'apt', 'install', '-y', 'slack-desktop'],
     ]);
   });
 });

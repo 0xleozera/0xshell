@@ -1,10 +1,24 @@
 import { describe, expect, test } from 'bun:test';
+import { apt } from '../helpers/apt';
+import { brewCask } from '../helpers/brew-cask';
 import { MockRunner } from '../runner/mock-runner';
+import type { SudoSession } from '../sudo/session';
 import { defineTool, type Tool } from '../tool/define-tool';
 import type { Recipe } from '../tool/recipe';
 import { unsupported } from '../tool/unsupported';
 import type { Outcome } from './outcome';
 import { runInstallPlan } from './run-install-plan';
+
+function fakeSudoSession(events: string[]): SudoSession {
+  return {
+    async start(): Promise<void> {
+      events.push('start');
+    },
+    stop(): void {
+      events.push('stop');
+    },
+  };
+}
 
 function recipe(overrides: Partial<Recipe> = {}): Recipe {
   return {
@@ -158,5 +172,93 @@ describe('runInstallPlan', () => {
       { status: 'installed', id: 'brew' },
       { status: 'installed', id: 'slack' },
     ]);
+  });
+
+  describe('sudo (issue #8)', () => {
+    test('on darwin, no sudo command reaches the Runner, even for a Tool that uses apt on linux', async () => {
+      const runner = new MockRunner();
+      runner.failOn(['brew', 'list', '--cask', 'docker']);
+      const docker = defineTool({
+        id: 'docker',
+        stage: 3,
+        darwin: brewCask('docker'),
+        linux: apt('docker.io'),
+      });
+
+      await runInstallPlan([docker], runner, 'darwin');
+
+      expect(runner.wasRun(['brew', 'install', '--cask', 'docker'])).toBe(true);
+      expect(runner.commands.some((command) => command.includes('sudo'))).toBe(false);
+    });
+
+    test('on darwin, no sudo session is ever created', async () => {
+      const runner = new MockRunner();
+      let sessionCreated = false;
+      const docker = defineTool({ id: 'docker', stage: 3, darwin: brewCask('docker'), linux: apt('docker.io') });
+
+      await runInstallPlan([docker], runner, 'darwin', {
+        createSudoSession: () => {
+          sessionCreated = true;
+          return fakeSudoSession([]);
+        },
+      });
+
+      expect(sessionCreated).toBe(false);
+    });
+
+    test('on linux, apt commands reach the Runner prefixed with sudo', async () => {
+      const runner = new MockRunner();
+      runner.failOn(['dpkg', '-s', 'docker.io']);
+      const docker = defineTool({ id: 'docker', stage: 3, darwin: brewCask('docker'), linux: apt('docker.io') });
+
+      await runInstallPlan([docker], runner, 'linux', { createSudoSession: () => fakeSudoSession([]) });
+
+      expect(runner.wasRun(['sudo', 'apt', 'install', '-y', 'docker.io'])).toBe(true);
+    });
+
+    test('on linux with a privileged Tool, the sudo session starts before the plan runs and stops after', async () => {
+      const runner = new MockRunner();
+      const events: string[] = [];
+      const docker = defineTool({ id: 'docker', stage: 3, darwin: brewCask('docker'), linux: apt('docker.io') });
+
+      await runInstallPlan([docker], runner, 'linux', { createSudoSession: () => fakeSudoSession(events) });
+
+      expect(events).toEqual(['start', 'stop']);
+    });
+
+    test('on linux, without any apt Tool selected, no sudo session is requested', async () => {
+      const runner = new MockRunner();
+      let sessionCreated = false;
+      const slack = defineTool({ id: 'slack', stage: 3, darwin: brewCask('slack'), linux: unsupported('sem cliente Linux oficial') });
+
+      await runInstallPlan([slack], runner, 'linux', {
+        createSudoSession: () => {
+          sessionCreated = true;
+          return fakeSudoSession([]);
+        },
+      });
+
+      expect(sessionCreated).toBe(false);
+      expect(runner.commands.some((command) => command.includes('sudo'))).toBe(false);
+    });
+
+    test('the sudo session still stops when a Stage 0 failure aborts the plan', async () => {
+      const runner = new MockRunner();
+      const events: string[] = [];
+      const brew = tool(
+        'brew',
+        0,
+        recipe({
+          requiresPrivilege: true,
+          install: async () => {
+            throw new Error('curl falhou');
+          },
+        }),
+      );
+
+      await runInstallPlan([brew], runner, 'linux', { createSudoSession: () => fakeSudoSession(events) });
+
+      expect(events).toEqual(['start', 'stop']);
+    });
   });
 });

@@ -21,8 +21,8 @@ export type AptRepoOptions = {
  * `signed-by` na source list — o padrão atual, em vez do `apt-key`
  * depreciado. Sem isso, `apt update` falha com `NO_PUBKEY`.
  *
- * Command generation lives here in one place — #8 adds `sudo` by editing
- * these methods, não tocando cada Tool que usa este Helper.
+ * Command generation lives here in one place — #8 adds `sudo` to every
+ * write here, not to each Tool that uses this Helper.
  */
 export function aptRepo({
   repoName,
@@ -37,15 +37,16 @@ export function aptRepo({
   const sourceLine = `deb [signed-by=${keyringPath}] ${repoUrl} ${distribution} ${components}`;
 
   return {
+    requiresPrivilege: true,
     async install(runner: Runner): Promise<void> {
-      await runChecked(runner, ['mkdir', '-p', '/etc/apt/keyrings']);
-      await runChecked(runner, ['sh', '-c', `curl -fsSL ${keyUrl} | gpg --dearmor -o ${keyringPath}`]);
-      await runChecked(runner, ['sh', '-c', `echo "${sourceLine}" > ${sourceListPath}`]);
-      await runChecked(runner, ['apt', 'update']);
-      await runChecked(runner, ['apt', 'install', '-y', packageName]);
+      await runChecked(runner, ['sudo', 'mkdir', '-p', '/etc/apt/keyrings']);
+      await runChecked(runner, ['sudo', 'sh', '-c', `curl -fsSL ${keyUrl} | gpg --dearmor -o ${keyringPath}`]);
+      await runChecked(runner, ['sudo', 'sh', '-c', `echo "${sourceLine}" > ${sourceListPath}`]);
+      await runChecked(runner, ['sudo', 'apt', 'update']);
+      await runChecked(runner, ['sudo', 'apt', 'install', '-y', packageName]);
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runChecked(runner, ['apt', 'remove', '-y', packageName]);
+      await runChecked(runner, ['sudo', 'apt', 'remove', '-y', packageName]);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       const result = await runner.run(['dpkg', '-s', packageName]);
