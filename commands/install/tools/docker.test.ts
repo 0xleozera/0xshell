@@ -11,7 +11,7 @@ describe('docker tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'docker-desktop']]);
   });
 
-  test('linux imports the docker signing key, then installs engine + compose + buildx as one apt call', async () => {
+  test('linux derives distro and codename from /etc/os-release, then installs engine + compose + buildx as one apt call', async () => {
     const runner = new MockRunner();
 
     await docker.linux.install(runner);
@@ -22,13 +22,13 @@ describe('docker tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg',
+        '. /etc/os-release && curl -fsSL https://download.docker.com/linux/$ID/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg',
       ],
       [
         'sudo',
         'sh',
         '-c',
-        'echo "deb [signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu jammy stable" > /etc/apt/sources.list.d/docker.list',
+        '. /etc/os-release && echo "deb [signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$ID $VERSION_CODENAME stable" > /etc/apt/sources.list.d/docker.list',
       ],
       ['sudo', 'apt', 'update'],
       ['sudo', 'apt', 'install', '-y', 'docker-ce', 'docker-ce-cli', 'containerd.io', 'docker-buildx-plugin', 'docker-compose-plugin'],

@@ -6,7 +6,14 @@ import { runChecked } from '../../../helpers/run-checked';
 
 const keyringPath = '/etc/apt/keyrings/docker.gpg';
 const sourceListPath = '/etc/apt/sources.list.d/docker.list';
-const sourceLine = `deb [signed-by=${keyringPath}] https://download.docker.com/linux/ubuntu jammy stable`;
+// Docker publishes one repo per distro (ubuntu, debian, ...) and per
+// codename (jammy, noble, bookworm, ...) — never a single universal one. $ID
+// and $VERSION_CODENAME are read from /etc/os-release at install time, the
+// same source the official Docker docs source from, instead of a value fixed
+// at Tool-definition time that would be wrong on anything but the one distro
+// release it was written for.
+const keyUrl = 'https://download.docker.com/linux/$ID/gpg';
+const sourceLine = `deb [signed-by=${keyringPath}] https://download.docker.com/linux/$ID $VERSION_CODENAME stable`;
 // Docker Engine + compose + buildx is five packages from one repo. aptRepo's
 // packageName is a single string (see helpers/apt-repo.ts) — passing a
 // space-joined name here would become one bad argv token, not five apt
@@ -30,9 +37,9 @@ export default defineTool({
         'sudo',
         'sh',
         '-c',
-        `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o ${keyringPath}`,
+        `. /etc/os-release && curl -fsSL ${keyUrl} | gpg --dearmor -o ${keyringPath}`,
       ]);
-      await runChecked(runner, ['sudo', 'sh', '-c', `echo "${sourceLine}" > ${sourceListPath}`]);
+      await runChecked(runner, ['sudo', 'sh', '-c', `. /etc/os-release && echo "${sourceLine}" > ${sourceListPath}`]);
       await runChecked(runner, ['sudo', 'apt', 'update']);
       await runChecked(runner, ['sudo', 'apt', 'install', '-y', ...packages]);
     },
