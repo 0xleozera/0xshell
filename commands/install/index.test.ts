@@ -16,8 +16,8 @@ function recipe(overrides: Partial<Recipe> = {}): Recipe {
   };
 }
 
-function tool(id: string, stage: 0 | 1 | 2 | 3, entry: Recipe | Unsupported = recipe()): Tool {
-  return defineTool({ id, stage, darwin: entry, linux: entry });
+function tool(id: string, stage: 0 | 1 | 2 | 3, entry: Recipe | Unsupported = recipe(), tags: string[] = []): Tool {
+  return defineTool({ id, stage, tags, darwin: entry, linux: entry });
 }
 
 describe('install command', () => {
@@ -45,6 +45,7 @@ describe('install command', () => {
     await runCommand(createInstallCommand(runner, 'darwin'), { rawArgs: ['not-a-real-tool'] });
 
     expect(runner.commands).toEqual([]);
+    expect(process.exitCode).not.toBe(0);
     // `run()` sets process.exitCode for the real CLI process; undo it here so
     // it doesn't leak into `bun test`'s own exit code.
     process.exitCode = 0;
@@ -55,6 +56,7 @@ describe('install command', () => {
     const tool = defineTool({
       id: 'slack',
       stage: 3,
+      tags: [],
       darwin: brewCask('slack'),
       linux: unsupported('não usado neste teste'),
     });
@@ -70,6 +72,7 @@ describe('install command', () => {
     const tool = defineTool({
       id: 'xcode',
       stage: 3,
+      tags: [],
       darwin: brewCask('xcode'),
       linux: unsupported('ferramenta exclusiva da Apple'),
     });
@@ -231,6 +234,134 @@ describe('install command', () => {
     expect(flakyInstallCalls).toBe(2);
     process.exitCode = 0;
     logSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
+
+  test('installs exactly the named tools, in Stage order rather than argument order', async () => {
+    const order: string[] = [];
+    const install = (id: string) => async () => {
+      order.push(id);
+    };
+    const neovim = tool('neovim', 2, recipe({ install: install('neovim') }));
+    const docker = tool('docker', 3, recipe({ install: install('docker') }));
+    const slack = tool('slack', 3, recipe({ install: install('slack') }));
+    const findTool = (id: string) => [neovim, docker, slack].find((t) => t.id === id);
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', findTool), {
+      rawArgs: ['docker', 'neovim'],
+    });
+
+    expect(order).toEqual(['neovim', 'docker']);
+    logSpy.mockRestore();
+  });
+
+  test('an unknown name among several fails the whole run and installs nothing', async () => {
+    const installed: string[] = [];
+    const neovim = tool('neovim', 2, recipe({ install: async () => { installed.push('neovim'); } }));
+    const findTool = (id: string) => (id === 'neovim' ? neovim : undefined);
+    const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
+
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', findTool), {
+      rawArgs: ['neovim', 'not-a-real-tool'],
+    });
+
+    expect(installed).toEqual([]);
+    expect(process.exitCode).not.toBe(0);
+    process.exitCode = 0;
+    errorSpy.mockRestore();
+  });
+
+  test('--tag installs exactly the Tools carrying that Tag', async () => {
+    const installed: string[] = [];
+    const catalogWithTags = [
+      tool('slack', 3, recipe({ install: async () => { installed.push('slack'); } }), ['apps']),
+      tool('neovim', 2, recipe({ install: async () => { installed.push('neovim'); } }), ['cli']),
+      tool('bun', 1, recipe({ install: async () => { installed.push('bun'); } }), ['runtimes']),
+    ];
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+    await runCommand(
+      createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalogWithTags),
+      { rawArgs: ['--tag', 'cli'] },
+    );
+
+    expect(installed).toEqual(['neovim']);
+    logSpy.mockRestore();
+  });
+
+  test('--interactive installs exactly the Tools marked in the multiselect', async () => {
+    const installed: string[] = [];
+    const catalogForPrompt = [
+      tool('slack', 3, recipe({ install: async () => { installed.push('slack'); } })),
+      tool('neovim', 2, recipe({ install: async () => { installed.push('neovim'); } })),
+    ];
+    const promptForTools = async (offered: readonly Tool[]) => offered.filter((t) => t.id === 'neovim');
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+    await runCommand(
+      createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalogForPrompt, promptForTools),
+      { rawArgs: ['--interactive'] },
+    );
+
+    expect(installed).toEqual(['neovim']);
+    logSpy.mockRestore();
+  });
+
+  test('without --interactive, the prompt is never invoked', async () => {
+    let promptCalled = false;
+    const promptForTools = async (offered: readonly Tool[]) => {
+      promptCalled = true;
+      return offered;
+    };
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+    await runCommand(
+      createInstallCommand(new MockRunner(), 'darwin', undefined, undefined, promptForTools),
+      { rawArgs: ['slack'] },
+    );
+
+    expect(promptCalled).toBe(false);
+    logSpy.mockRestore();
+  });
+
+  test('--dry-run prints exactly what would run and sends no write command to the Runner', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['brew', 'list', '--cask', 'slack']);
+    const slack = tool(
+      'slack',
+      3,
+      recipe({
+        install: async (r) => {
+          await r.run(['brew', 'install', '--cask', 'slack']);
+        },
+        isInstalled: async (r) => (await r.run(['brew', 'list', '--cask', 'slack'])).exitCode === 0,
+      }),
+    );
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+    await runCommand(createInstallCommand(runner, 'darwin', () => slack), {
+      rawArgs: ['slack', '--dry-run'],
+    });
+
+    expect(logSpy.mock.calls.flat()).toEqual(['→ slack: brew install --cask slack']);
+    expect(runner.wasRun(['brew', 'list', '--cask', 'slack'])).toBe(true);
+    expect(runner.wasRun(['brew', 'install', '--cask', 'slack'])).toBe(false);
+
+    logSpy.mockRestore();
+  });
+
+  test('--dry-run on an unknown name still fails, without printing a dry-run plan', async () => {
+    const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
+    const runner = new MockRunner();
+
+    await runCommand(createInstallCommand(runner, 'darwin'), {
+      rawArgs: ['not-a-real-tool', '--dry-run'],
+    });
+
+    expect(runner.commands).toEqual([]);
+    expect(process.exitCode).not.toBe(0);
+    process.exitCode = 0;
     errorSpy.mockRestore();
   });
 });

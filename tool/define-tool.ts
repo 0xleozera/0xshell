@@ -26,11 +26,13 @@ const platformEntrySchema = z.union([recipeSchema, unsupportedSchema]);
  * Schema for a Tool (ADR-0002). Cada Plataforma (`darwin`, `linux`) resolve
  * para um Recipe ou para `unsupported(motivo)`. `stage` (0–3) fixa a ordem
  * de execução — gerenciador de pacotes → mise → runtimes → apps/CLIs — no
- * lugar de um grafo de dependências (issue #4).
+ * lugar de um grafo de dependências (issue #4). `tags` agrupa Tools para
+ * `sshell install --tag <tag>` (issue #6) e não gera comandos próprios.
  */
 const toolSchema = z.object({
   id: z.string().min(1, 'id não pode ser vazio'),
   stage: z.number().int().min(0).max(3),
+  tags: z.array(z.string()),
   darwin: platformEntrySchema,
   linux: platformEntrySchema,
 });

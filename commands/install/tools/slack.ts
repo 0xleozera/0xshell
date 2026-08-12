@@ -5,6 +5,7 @@ import { defineTool } from '../../../tool/define-tool';
 export default defineTool({
   id: 'slack',
   stage: 3,
+  tags: ['apps'],
   darwin: brewCask('slack'),
   linux: aptRepo({
     repoName: 'slack',
