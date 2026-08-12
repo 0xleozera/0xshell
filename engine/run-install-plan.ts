@@ -9,8 +9,21 @@ import { sortByStage, type StageDirection } from './stage-order';
 
 const FATAL_STAGE = 0;
 
+/** Which Recipe method the plan runs per Tool (issue #11). Defaults to `'install'`. */
+export type PlanAction = 'install' | 'uninstall';
+
 export type RunInstallPlanOptions = {
   readonly direction?: StageDirection;
+  /**
+   * `'install'` (default) or `'uninstall'` (issue #11). Reuses the same
+   * `Outcome` statuses in both directions rather than adding new ones:
+   * `installed` means "the action ran and changed the machine" (installed,
+   * or removed) and `already-installed` means "the machine was already in
+   * the target end-state" (already installed, or already not installed).
+   * The command layer picks the right label for each — the engine and the
+   * shared summary/exit-code logic don't need to know which direction ran.
+   */
+  readonly action?: PlanAction;
   /** Called once per Tool, in execution order, as soon as its Outcome is known. */
   readonly onOutcome?: (outcome: Outcome) => void;
   /** Injectable sudo session factory (issue #8) — tests supply a fake so no real process spawns. */
@@ -34,7 +47,7 @@ function planRequiresPrivilege(tools: readonly Tool[], platform: Platform): bool
   });
 }
 
-async function runOne(tool: Tool, runner: Runner, platform: Platform): Promise<Outcome> {
+async function runOne(tool: Tool, runner: Runner, platform: Platform, action: PlanAction): Promise<Outcome> {
   const entry = resolveForPlatform(tool, platform);
 
   if (isUnsupported(entry)) {
@@ -42,11 +55,19 @@ async function runOne(tool: Tool, runner: Runner, platform: Platform): Promise<O
   }
 
   try {
-    const alreadyInstalled = await entry.isInstalled(runner);
-    if (alreadyInstalled) {
-      return { status: 'already-installed', id: tool.id };
+    const isInstalled = await entry.isInstalled(runner);
+
+    if (action === 'uninstall') {
+      if (!isInstalled) {
+        return { status: 'already-installed', id: tool.id };
+      }
+      await entry.uninstall(runner);
+      return { status: 'installed', id: tool.id };
     }
 
+    if (isInstalled) {
+      return { status: 'already-installed', id: tool.id };
+    }
     await entry.install(runner);
     return { status: 'installed', id: tool.id };
   } catch (error) {
@@ -55,12 +76,15 @@ async function runOne(tool: Tool, runner: Runner, platform: Platform): Promise<O
 }
 
 /**
- * The install engine (issue #4): orders the given Tools by Stage and runs
- * them one at a time — no parallelism, since Homebrew serializes on its own
- * lock anyway and interleaved output would be unreadable. A failure in
- * Stage 0 (the package manager) is fatal and aborts the rest of the plan;
- * a failure in any other Stage is collected and execution continues, so a
- * flaky network blip on install #3 doesn't cost the other nineteen.
+ * The install engine (issue #4), shared with `uninstall` (issue #11) via
+ * `options.action`: orders the given Tools by Stage and runs them one at a
+ * time — no parallelism, since Homebrew serializes on its own lock anyway
+ * and interleaved output would be unreadable. A failure in Stage 0 (the
+ * package manager) is fatal and aborts the rest of the plan; a failure in
+ * any other Stage is collected and execution continues, so a flaky network
+ * blip on install #3 doesn't cost the other nineteen. `uninstall` reuses
+ * this same policy and passes `direction: 'desc'` to tear down in the
+ * opposite order things were built.
  *
  * Testable without citty — the command layer just formats what this returns.
  */
@@ -70,6 +94,7 @@ export async function runInstallPlan(
   platform: Platform,
   options: RunInstallPlanOptions = {},
 ): Promise<readonly Outcome[]> {
+  const action = options.action ?? 'install';
   const ordered = sortByStage(tools, options.direction ?? 'asc');
   const outcomes: Outcome[] = [];
 
@@ -93,7 +118,7 @@ export async function runInstallPlan(
 
   try {
     for (const tool of ordered) {
-      const outcome = await runOne(tool, runner, platform);
+      const outcome = await runOne(tool, runner, platform, action);
       outcomes.push(outcome);
       options.onOutcome?.(outcome);
 

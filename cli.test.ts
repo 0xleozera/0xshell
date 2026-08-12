@@ -5,11 +5,12 @@ import { createInstallCommand } from './commands/install';
 import { MockRunner } from './runner/mock-runner';
 
 describe('cli', () => {
-  test('--help lists the install subcommand', async () => {
+  test('--help lists the install and uninstall subcommands', async () => {
     const usage = await renderUsage(createCli(new MockRunner(), 'darwin'));
 
     expect(usage).toContain('sshell');
     expect(usage).toContain('install');
+    expect(usage).toContain('uninstall');
   });
 
   test('install --help documents the tool argument', async () => {
