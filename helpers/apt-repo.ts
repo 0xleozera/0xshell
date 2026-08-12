@@ -1,5 +1,6 @@
 import type { Runner } from '../runner/runner';
 import type { Recipe } from '../tool/recipe';
+import { runChecked } from './run-checked';
 
 export type AptRepoOptions = {
   /** Nome curto do repositório: nomeia o keyring e o arquivo em sources.list.d. */
@@ -37,14 +38,14 @@ export function aptRepo({
 
   return {
     async install(runner: Runner): Promise<void> {
-      await runner.run(['mkdir', '-p', '/etc/apt/keyrings']);
-      await runner.run(['sh', '-c', `curl -fsSL ${keyUrl} | gpg --dearmor -o ${keyringPath}`]);
-      await runner.run(['sh', '-c', `echo "${sourceLine}" > ${sourceListPath}`]);
-      await runner.run(['apt', 'update']);
-      await runner.run(['apt', 'install', '-y', packageName]);
+      await runChecked(runner, ['mkdir', '-p', '/etc/apt/keyrings']);
+      await runChecked(runner, ['sh', '-c', `curl -fsSL ${keyUrl} | gpg --dearmor -o ${keyringPath}`]);
+      await runChecked(runner, ['sh', '-c', `echo "${sourceLine}" > ${sourceListPath}`]);
+      await runChecked(runner, ['apt', 'update']);
+      await runChecked(runner, ['apt', 'install', '-y', packageName]);
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runner.run(['apt', 'remove', '-y', packageName]);
+      await runChecked(runner, ['apt', 'remove', '-y', packageName]);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       const result = await runner.run(['dpkg', '-s', packageName]);

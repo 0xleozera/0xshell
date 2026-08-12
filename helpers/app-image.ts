@@ -2,6 +2,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import type { Runner } from '../runner/runner';
 import type { Recipe } from '../tool/recipe';
+import { runChecked } from './run-checked';
 
 export type AppImageOptions = {
   /** URL of the AppImage binary to download. */
@@ -22,12 +23,12 @@ export function appImage({ url, binName }: AppImageOptions): Recipe {
 
   return {
     async install(runner: Runner): Promise<void> {
-      await runner.run(['mkdir', '-p', installDir]);
-      await runner.run(['curl', '-fsSL', url, '-o', binPath]);
-      await runner.run(['chmod', '+x', binPath]);
+      await runChecked(runner, ['mkdir', '-p', installDir]);
+      await runChecked(runner, ['curl', '-fsSL', url, '-o', binPath]);
+      await runChecked(runner, ['chmod', '+x', binPath]);
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runner.run(['rm', '-f', binPath]);
+      await runChecked(runner, ['rm', '-f', binPath]);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       const result = await runner.run(['sh', '-c', `command -v ${binName}`]);

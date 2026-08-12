@@ -1,5 +1,6 @@
 import type { Command, Runner } from '../runner/runner';
 import type { Recipe } from '../tool/recipe';
+import { runChecked } from './run-checked';
 
 export type ScriptOptions = {
   /** URL of the remote install script, piped into `sh`. */
@@ -18,10 +19,10 @@ export type ScriptOptions = {
 export function script({ url, uninstallCommand, binName }: ScriptOptions): Recipe {
   return {
     async install(runner: Runner): Promise<void> {
-      await runner.run(['sh', '-c', `curl -fsSL ${url} | sh`]);
+      await runChecked(runner, ['sh', '-c', `curl -fsSL ${url} | sh`]);
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runner.run(uninstallCommand);
+      await runChecked(runner, uninstallCommand);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       const result = await runner.run(['sh', '-c', `command -v ${binName}`]);

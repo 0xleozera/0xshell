@@ -55,4 +55,18 @@ describe('brewCask', () => {
 
     expect(await brewCask('stablyai/orca/orca').isInstalled(runner)).toBe(true);
   });
+
+  test('install() rejects when brew install --cask <id> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['brew', 'install', '--cask', 'slack']);
+
+    await expect(brewCask('slack').install(runner)).rejects.toThrow();
+  });
+
+  test('uninstall() rejects when brew uninstall --cask <id> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['brew', 'uninstall', '--cask', 'slack']);
+
+    await expect(brewCask('slack').uninstall(runner)).rejects.toThrow();
+  });
 });

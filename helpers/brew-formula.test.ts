@@ -32,4 +32,18 @@ describe('brewFormula', () => {
 
     expect(await brewFormula('git').isInstalled(runner)).toBe(false);
   });
+
+  test('install() rejects when brew install <formula> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['brew', 'install', 'git']);
+
+    await expect(brewFormula('git').install(runner)).rejects.toThrow();
+  });
+
+  test('uninstall() rejects when brew uninstall <formula> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['brew', 'uninstall', 'git']);
+
+    await expect(brewFormula('git').uninstall(runner)).rejects.toThrow();
+  });
 });

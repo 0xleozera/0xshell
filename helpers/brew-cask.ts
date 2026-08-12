@@ -1,5 +1,6 @@
 import type { Runner } from '../runner/runner';
 import type { Recipe } from '../tool/recipe';
+import { runChecked } from './run-checked';
 
 /**
  * Helper for Tools installed as a Homebrew cask (ADR-0002). `caskId` accepts
@@ -11,10 +12,10 @@ import type { Recipe } from '../tool/recipe';
 export function brewCask(caskId: string): Recipe {
   return {
     async install(runner: Runner): Promise<void> {
-      await runner.run(['brew', 'install', '--cask', caskId]);
+      await runChecked(runner, ['brew', 'install', '--cask', caskId]);
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runner.run(['brew', 'uninstall', '--cask', caskId]);
+      await runChecked(runner, ['brew', 'uninstall', '--cask', caskId]);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       const result = await runner.run(['brew', 'list', '--cask', caskId]);

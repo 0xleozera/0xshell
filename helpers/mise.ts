@@ -1,5 +1,6 @@
 import type { Runner } from '../runner/runner';
 import type { Recipe } from '../tool/recipe';
+import { runChecked } from './run-checked';
 
 /**
  * Helper for Tools installed as a mise-managed runtime (ADR-0002) — the
@@ -10,10 +11,10 @@ import type { Recipe } from '../tool/recipe';
 export function mise(toolId: string): Recipe {
   return {
     async install(runner: Runner): Promise<void> {
-      await runner.run(['mise', 'install', toolId]);
+      await runChecked(runner, ['mise', 'install', toolId]);
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runner.run(['mise', 'uninstall', toolId]);
+      await runChecked(runner, ['mise', 'uninstall', toolId]);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       const result = await runner.run(['mise', 'ls', toolId]);

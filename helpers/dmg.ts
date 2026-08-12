@@ -1,5 +1,6 @@
 import type { Runner } from '../runner/runner';
 import type { Recipe } from '../tool/recipe';
+import { runChecked } from './run-checked';
 
 export type DmgOptions = {
   /** URL of the .dmg to download. */
@@ -25,19 +26,18 @@ export function dmg({ url, appName }: DmgOptions): Recipe {
 
   return {
     async install(runner: Runner): Promise<void> {
-      await runner.run(['curl', '-fsSL', url, '-o', dmgPath]);
-      await runner.run(['hdiutil', 'attach', dmgPath, '-mountpoint', mountPoint, '-nobrowse', '-quiet']);
+      await runChecked(runner, ['curl', '-fsSL', url, '-o', dmgPath]);
+      // Attach runs outside the try: if it fails, nothing is mounted, so the
+      // finally below must not attempt to detach a volume that never mounted.
+      await runChecked(runner, ['hdiutil', 'attach', dmgPath, '-mountpoint', mountPoint, '-nobrowse', '-quiet']);
       try {
-        const result = await runner.run(['cp', '-R', `${mountPoint}/${appBundle}`, '/Applications/']);
-        if (result.exitCode !== 0) {
-          throw new Error(`falha ao copiar ${appBundle} para /Applications`);
-        }
+        await runChecked(runner, ['cp', '-R', `${mountPoint}/${appBundle}`, '/Applications/']);
       } finally {
         await runner.run(['hdiutil', 'detach', mountPoint, '-quiet']);
       }
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runner.run(['rm', '-rf', appBundlePath]);
+      await runChecked(runner, ['rm', '-rf', appBundlePath]);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       const result = await runner.run(['test', '-d', appBundlePath]);

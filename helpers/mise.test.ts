@@ -47,4 +47,18 @@ describe('mise', () => {
 
     expect(await mise('bun').isInstalled(runner)).toBe(false);
   });
+
+  test('install() rejects when mise install <tool> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['mise', 'install', 'bun']);
+
+    await expect(mise('bun').install(runner)).rejects.toThrow();
+  });
+
+  test('uninstall() rejects when mise uninstall <tool> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['mise', 'uninstall', 'bun']);
+
+    await expect(mise('bun').uninstall(runner)).rejects.toThrow();
+  });
 });

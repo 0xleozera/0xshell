@@ -42,4 +42,25 @@ describe('appImage', () => {
 
     expect(await appImage(options).isInstalled(runner)).toBe(false);
   });
+
+  test('install() rejects when the download fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['curl', '-fsSL', options.url, '-o', binPath]);
+
+    await expect(appImage(options).install(runner)).rejects.toThrow();
+  });
+
+  test('install() rejects when chmod fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['chmod', '+x', binPath]);
+
+    await expect(appImage(options).install(runner)).rejects.toThrow();
+  });
+
+  test('uninstall() rejects when removing the binary fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['rm', '-f', binPath]);
+
+    await expect(appImage(options).uninstall(runner)).rejects.toThrow();
+  });
 });

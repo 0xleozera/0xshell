@@ -38,4 +38,18 @@ describe('script', () => {
 
     expect(await script(options).isInstalled(runner)).toBe(false);
   });
+
+  test('install() rejects when the remote script fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['sh', '-c', `curl -fsSL ${options.url} | sh`]);
+
+    await expect(script(options).install(runner)).rejects.toThrow();
+  });
+
+  test('uninstall() rejects when the uninstall command fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(options.uninstallCommand);
+
+    await expect(script(options).uninstall(runner)).rejects.toThrow();
+  });
 });

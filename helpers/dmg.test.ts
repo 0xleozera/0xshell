@@ -27,6 +27,26 @@ describe('dmg', () => {
     expect(runner.wasRun(['hdiutil', 'detach', '/Volumes/Dia', '-quiet'])).toBe(true);
   });
 
+  test('install() rejects when the download fails, without attempting to mount', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['curl', '-fsSL', options.url, '-o', '/tmp/sshell-Dia.dmg']);
+
+    await expect(dmg(options).install(runner)).rejects.toThrow();
+
+    expect(runner.wasRun(['hdiutil', 'attach', '/tmp/sshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet'])).toBe(
+      false,
+    );
+  });
+
+  test('install() rejects when the mount fails, without attempting to detach', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['hdiutil', 'attach', '/tmp/sshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet']);
+
+    await expect(dmg(options).install(runner)).rejects.toThrow();
+
+    expect(runner.wasRun(['hdiutil', 'detach', '/Volumes/Dia', '-quiet'])).toBe(false);
+  });
+
   test('uninstall() removes the app bundle from /Applications', async () => {
     const runner = new MockRunner();
 
