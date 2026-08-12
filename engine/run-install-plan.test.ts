@@ -181,6 +181,7 @@ describe('runInstallPlan', () => {
       const docker = defineTool({
         id: 'docker',
         stage: 3,
+        tags: ['apps'],
         darwin: brewCask('docker'),
         linux: apt('docker.io'),
       });
@@ -194,7 +195,7 @@ describe('runInstallPlan', () => {
     test('on darwin, no sudo session is ever created', async () => {
       const runner = new MockRunner();
       let sessionCreated = false;
-      const docker = defineTool({ id: 'docker', stage: 3, darwin: brewCask('docker'), linux: apt('docker.io') });
+      const docker = defineTool({ id: 'docker', stage: 3, tags: ['apps'], darwin: brewCask('docker'), linux: apt('docker.io') });
 
       await runInstallPlan([docker], runner, 'darwin', {
         createSudoSession: () => {
@@ -209,7 +210,7 @@ describe('runInstallPlan', () => {
     test('on linux, apt commands reach the Runner prefixed with sudo', async () => {
       const runner = new MockRunner();
       runner.failOn(['dpkg', '-s', 'docker.io']);
-      const docker = defineTool({ id: 'docker', stage: 3, darwin: brewCask('docker'), linux: apt('docker.io') });
+      const docker = defineTool({ id: 'docker', stage: 3, tags: ['apps'], darwin: brewCask('docker'), linux: apt('docker.io') });
 
       await runInstallPlan([docker], runner, 'linux', { createSudoSession: () => fakeSudoSession([]) });
 
@@ -219,7 +220,7 @@ describe('runInstallPlan', () => {
     test('on linux with a privileged Tool, the sudo session starts before the plan runs and stops after', async () => {
       const runner = new MockRunner();
       const events: string[] = [];
-      const docker = defineTool({ id: 'docker', stage: 3, darwin: brewCask('docker'), linux: apt('docker.io') });
+      const docker = defineTool({ id: 'docker', stage: 3, tags: ['apps'], darwin: brewCask('docker'), linux: apt('docker.io') });
 
       await runInstallPlan([docker], runner, 'linux', { createSudoSession: () => fakeSudoSession(events) });
 
@@ -229,7 +230,7 @@ describe('runInstallPlan', () => {
     test('on linux, without any apt Tool selected, no sudo session is requested', async () => {
       const runner = new MockRunner();
       let sessionCreated = false;
-      const slack = defineTool({ id: 'slack', stage: 3, darwin: brewCask('slack'), linux: unsupported('sem cliente Linux oficial') });
+      const slack = defineTool({ id: 'slack', stage: 3, tags: ['apps'], darwin: brewCask('slack'), linux: unsupported('sem cliente Linux oficial') });
 
       await runInstallPlan([slack], runner, 'linux', {
         createSudoSession: () => {
