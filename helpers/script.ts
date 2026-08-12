@@ -1,0 +1,31 @@
+import type { Command, Runner } from '../runner/runner';
+import type { Recipe } from '../tool/recipe';
+
+export type ScriptOptions = {
+  /** URL of the remote install script, piped into `sh`. */
+  readonly url: string;
+  /** Command that undoes the install — remote scripts have no common uninstall path, so the Tool supplies it. */
+  readonly uninstallCommand: Command;
+  /** Name the script installs the binary as, checked via `command -v`. */
+  readonly binName: string;
+};
+
+/**
+ * Helper for Tools installed by piping a remote script into `sh` (ADR-0002)
+ * — `curl | sh`, the classic third-party installer. The pipe needs a shell,
+ * so `install()` is the one place in this Helper that reaches for `sh -c`.
+ */
+export function script({ url, uninstallCommand, binName }: ScriptOptions): Recipe {
+  return {
+    async install(runner: Runner): Promise<void> {
+      await runner.run(['sh', '-c', `curl -fsSL ${url} | sh`]);
+    },
+    async uninstall(runner: Runner): Promise<void> {
+      await runner.run(uninstallCommand);
+    },
+    async isInstalled(runner: Runner): Promise<boolean> {
+      const result = await runner.run(['sh', '-c', `command -v ${binName}`]);
+      return result.exitCode === 0;
+    },
+  };
+}

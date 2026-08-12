@@ -1,7 +1,13 @@
 import type { Runner } from '../runner/runner';
 import type { Recipe } from '../tool/recipe';
 
-/** Helper for Tools installed as a Homebrew cask (ADR-0002). */
+/**
+ * Helper for Tools installed as a Homebrew cask (ADR-0002). `caskId` accepts
+ * both a core cask name (`slack`) and a tap-qualified name
+ * (`stablyai/orca/orca`) — Homebrew resolves either form for `install`,
+ * `uninstall` and `list`, and auto-taps on install when the tap isn't known
+ * yet, so the id is passed straight through to every command.
+ */
 export function brewCask(caskId: string): Recipe {
   return {
     async install(runner: Runner): Promise<void> {

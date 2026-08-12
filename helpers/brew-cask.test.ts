@@ -32,4 +32,27 @@ describe('brewCask', () => {
 
     expect(await brewCask('slack').isInstalled(runner)).toBe(false);
   });
+
+  test('install() accepts a tap-qualified cask id', async () => {
+    const runner = new MockRunner();
+
+    await brewCask('stablyai/orca/orca').install(runner);
+
+    expect(runner.wasRun(['brew', 'install', '--cask', 'stablyai/orca/orca'])).toBe(true);
+  });
+
+  test('uninstall() accepts a tap-qualified cask id', async () => {
+    const runner = new MockRunner();
+
+    await brewCask('stablyai/orca/orca').uninstall(runner);
+
+    expect(runner.wasRun(['brew', 'uninstall', '--cask', 'stablyai/orca/orca'])).toBe(true);
+  });
+
+  test('isInstalled() accepts a tap-qualified cask id', async () => {
+    const runner = new MockRunner();
+    runner.respondTo(['brew', 'list', '--cask', 'stablyai/orca/orca'], { exitCode: 0 });
+
+    expect(await brewCask('stablyai/orca/orca').isInstalled(runner)).toBe(true);
+  });
 });
