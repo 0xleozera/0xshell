@@ -30,7 +30,7 @@ function recipe(overrides: Partial<Recipe> = {}): Recipe {
 }
 
 function tool(id: string, stage: 0 | 1 | 2 | 3, darwin: Recipe | ReturnType<typeof unsupported> = recipe()): Tool {
-  return defineTool({ id, stage, darwin, linux: darwin });
+  return defineTool({ id, stage, tags: [], darwin, linux: darwin });
 }
 
 describe('runInstallPlan', () => {

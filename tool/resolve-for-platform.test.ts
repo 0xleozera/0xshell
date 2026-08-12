@@ -10,6 +10,7 @@ describe('resolveForPlatform', () => {
     const tool = defineTool({
       id: 'slack',
       stage: 3,
+      tags: ['apps'],
       darwin: brewCask('slack'),
       linux: aptRepo({
         repoName: 'slack',
@@ -29,6 +30,7 @@ describe('resolveForPlatform', () => {
     const tool = defineTool({
       id: 'xcode',
       stage: 3,
+      tags: ['apps'],
       darwin: brewCask('xcode'),
       linux: unsupported('ferramenta exclusiva da Apple'),
     });

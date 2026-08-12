@@ -4,7 +4,7 @@ import { unsupported } from '../tool/unsupported';
 import { sortByStage } from './stage-order';
 
 function tool(id: string, stage: 0 | 1 | 2 | 3): Tool {
-  return defineTool({ id, stage, darwin: unsupported('teste'), linux: unsupported('teste') });
+  return defineTool({ id, stage, tags: [], darwin: unsupported('teste'), linux: unsupported('teste') });
 }
 
 describe('sortByStage', () => {

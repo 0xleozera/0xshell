@@ -16,7 +16,11 @@ runtime instalado.
 ## Uso
 
 ```sh
-sshell install
+sshell install                  # instala o catálogo inteiro
+sshell install neovim docker    # instala só os Tools nomeados
+sshell install --tag apps       # instala os Tools de uma Tag
+sshell install --interactive    # escolhe os Tools num multiselect
+sshell install --dry-run        # mostra o que seria executado, sem executar
 ```
 
 ## Desenvolvimento
