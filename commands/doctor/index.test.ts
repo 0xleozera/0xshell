@@ -39,7 +39,7 @@ describe('doctor command', () => {
     logSpy.mockRestore();
   });
 
-  test('ends with a summary of the counts, reused from engine/summary', async () => {
+  test('ends with a doctor-flavored summary of the counts, tallied by engine/summary', async () => {
     const fixture = [
       tool('git', 0, recipe({ isInstalled: async () => true })),
       tool('neovim', 2, recipe({ isInstalled: async () => false })),
@@ -51,9 +51,15 @@ describe('doctor command', () => {
 
     const output = logSpy.mock.calls.flat().join('\n');
     expect(output).toContain('instalados: 1');
+    expect(output).toContain('faltando: 1');
     expect(output).toContain('não suportados: 1');
-    expect(output).toContain('falharam: 1');
-    expect(process.exitCode).not.toBe(0);
+    // doctor never reports things in install's "falhou"/"Falhas:" vocabulary
+    // — a missing Tool is not a failure of the check itself.
+    expect(output).not.toContain('falharam');
+    expect(output).not.toContain('Falhas:');
+    // `alreadyInstalled` is always zero for doctor (see reportOutcome) and
+    // says nothing useful, so it is not printed at all.
+    expect(output).not.toContain('já instalados');
 
     process.exitCode = 0;
     logSpy.mockRestore();
@@ -69,6 +75,18 @@ describe('doctor command', () => {
     await runCommand(createDoctorCommand(new MockRunner(), 'darwin', () => fixture), { rawArgs: [] });
 
     expect(process.exitCode).toBe(0);
+    logSpy.mockRestore();
+  });
+
+  test('exits non-zero when a Tool is missing — a deliberate choice so `doctor && …` can gate a script', async () => {
+    const fixture = [tool('neovim', 2, recipe({ isInstalled: async () => false }))];
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+    await runCommand(createDoctorCommand(new MockRunner(), 'darwin', () => fixture), { rawArgs: [] });
+
+    expect(process.exitCode).not.toBe(0);
+
+    process.exitCode = 0;
     logSpy.mockRestore();
   });
 
