@@ -2,13 +2,14 @@ import { defineCommand } from 'citty';
 import type { Outcome } from '../../engine/outcome';
 import { runInstallPlan } from '../../engine/run-install-plan';
 import { selectTools } from '../../engine/select-tools';
-import { exitCodeForSummary, formatSummary, summarize } from '../../engine/summary';
+import { exitCodeForSummary, summarize } from '../../engine/summary';
 import { catalog, findTool } from '../install/catalog';
 import type { Runner } from '../../runner/runner';
 import type { Tool } from '../../tool/define-tool';
 import type { Platform } from '../../tool/platform';
 import { confirmAll } from './confirm-all';
 import { runDryRun } from './dry-run';
+import { formatUninstallSummary } from './format-summary';
 
 /**
  * Stage 0 (homebrew) and Stage 1 (mise) — the guarded Stages (issue #11,
@@ -49,7 +50,9 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  *
  *  1. No argument at all is an error. Unlike `install`, a bare `uninstall`
  *     never assumes "everything".
- *  2. `--all` asks for interactive confirmation before touching anything.
+ *  2. `--all` asks for interactive confirmation before touching anything —
+ *     except under `--dry-run`, which never executes anything anyway and
+ *     exists precisely so the user can decide *before* confirming.
  *  3. Stage 0 (`homebrew`) and Stage 1 (`mise`) are never reached through
  *     `--all` or `--tag` — only by naming them, which prints a warning
  *     about what goes with them first.
@@ -59,9 +62,11 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  * Reuses `Outcome`'s existing statuses rather than adding uninstall-specific
  * ones: `installed` means "the action ran and changed the machine" (here,
  * removed) and `already-installed` means "already in the target end state"
- * (here, already not installed) — see `run-install-plan.ts`. Only the
- * display strings in `reportOutcome` differ from `install`'s; `summary.ts`,
- * `exitCodeForSummary` and the failure policy are untouched and shared.
+ * (here, already not installed) — see `run-install-plan.ts`. `summary.ts`'s
+ * `summarize()`, `exitCodeForSummary()` and the failure policy are untouched
+ * and shared with `install`; only the printed words differ, in
+ * `reportOutcome` (per-Tool) and `format-summary.ts` (the closing Resumo) —
+ * "instalados: 12" would read as wrong after removing twelve Tools.
  *
  * `lookupTool` / `lookupCatalog` / `confirmAllPrompt` default to the real
  * Catálogo and the real clack prompt but are injectable, same pattern as
@@ -111,7 +116,7 @@ export function createUninstallCommand(
         return;
       }
 
-      if (all) {
+      if (all && !args.dryRun) {
         const confirmed = await confirmAllPrompt();
         if (!confirmed) {
           return;
@@ -154,7 +159,7 @@ export function createUninstallCommand(
 
       const isFiltered = names.length > 0 || Boolean(tag);
       if (!isFiltered) {
-        console.log(formatSummary(summary));
+        console.log(formatUninstallSummary(summary));
       }
     },
   });

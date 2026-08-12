@@ -1,9 +1,11 @@
 import { runCommand } from 'citty';
 import { describe, expect, spyOn, test } from 'bun:test';
+import { apt } from '../../helpers/apt';
+import { brewCask } from '../../helpers/brew-cask';
 import { MockRunner } from '../../runner/mock-runner';
 import { defineTool, type Tool } from '../../tool/define-tool';
 import type { Recipe } from '../../tool/recipe';
-import { type Unsupported } from '../../tool/unsupported';
+import { unsupported, type Unsupported } from '../../tool/unsupported';
 import { createUninstallCommand } from './index';
 
 function recipe(overrides: Partial<Recipe> = {}): Recipe {
@@ -115,6 +117,24 @@ describe('uninstall command', () => {
 
       logSpy.mockRestore();
     });
+
+    test('the closing Resumo uses uninstall vocabulary, not install\'s', async () => {
+      const catalog = [tool('slack', 3, recipe()), tool('xcode', 3, unsupported('ferramenta exclusiva da Apple'))];
+      const confirmAllPrompt = async () => true;
+      const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+      await runCommand(
+        createUninstallCommand(new MockRunner(), 'darwin', undefined, () => catalog, confirmAllPrompt),
+        { rawArgs: ['--all'] },
+      );
+
+      const summary = logSpy.mock.calls.flat().join('\n');
+      expect(summary).toContain('desinstalados: 1');
+      expect(summary).not.toContain('\n  instalados:');
+      expect(summary).not.toContain('\n  já instalados:');
+
+      logSpy.mockRestore();
+    });
   });
 
   describe('guarda-corpo 3: homebrew e mise nunca são alcançados por --all ou --tag', () => {
@@ -198,6 +218,32 @@ describe('uninstall command', () => {
     });
   });
 
+  describe('guarda-corpo: nenhum comando de purga é produzido', () => {
+    test('a brewCask (darwin) uninstall never sends --zap to the Runner', async () => {
+      const runner = new MockRunner();
+      const docker = defineTool({ id: 'docker', stage: 3, tags: [], darwin: brewCask('docker'), linux: apt('docker.io') });
+
+      await runCommand(createUninstallCommand(runner, 'darwin', () => docker), { rawArgs: ['docker'] });
+
+      expect(runner.wasRun(['brew', 'uninstall', '--cask', 'docker'])).toBe(true);
+      expect(
+        runner.commands.some((command) => command.some((arg) => arg.includes('purge') || arg.includes('--zap'))),
+      ).toBe(false);
+    });
+
+    test('an apt (linux) uninstall runs "remove", never "purge"', async () => {
+      const runner = new MockRunner();
+      const docker = defineTool({ id: 'docker', stage: 3, tags: [], darwin: brewCask('docker'), linux: apt('docker.io') });
+
+      await runCommand(createUninstallCommand(runner, 'linux', () => docker), { rawArgs: ['docker'] });
+
+      expect(runner.wasRun(['sudo', 'apt', 'remove', '-y', 'docker.io'])).toBe(true);
+      expect(
+        runner.commands.some((command) => command.some((arg) => arg.includes('purge') || arg.includes('--zap'))),
+      ).toBe(false);
+    });
+  });
+
   describe('--dry-run', () => {
     test('prints exactly what would be removed and sends no write command to the Runner', async () => {
       const runner = new MockRunner();
@@ -238,6 +284,38 @@ describe('uninstall command', () => {
 
       process.exitCode = 0;
       errorSpy.mockRestore();
+    });
+
+    test('--all --dry-run never asks for confirmation, and still shows the plan', async () => {
+      let promptCalled = false;
+      const confirmAllPrompt = async () => {
+        promptCalled = true;
+        return true;
+      };
+      const runner = new MockRunner();
+      const catalog = [
+        tool(
+          'slack',
+          3,
+          recipe({
+            isInstalled: async () => true,
+            uninstall: async (r) => {
+              await r.run(['brew', 'uninstall', '--cask', 'slack']);
+            },
+          }),
+        ),
+      ];
+      const logSpy = spyOn(console, 'log').mockImplementation(() => {});
+
+      await runCommand(createUninstallCommand(runner, 'darwin', undefined, () => catalog, confirmAllPrompt), {
+        rawArgs: ['--all', '--dry-run'],
+      });
+
+      expect(promptCalled).toBe(false);
+      expect(logSpy.mock.calls.flat()).toEqual(['→ slack: brew uninstall --cask slack']);
+      expect(runner.wasRun(['brew', 'uninstall', '--cask', 'slack'])).toBe(false);
+
+      logSpy.mockRestore();
     });
   });
 
