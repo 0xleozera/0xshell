@@ -11,7 +11,11 @@ describe('resolveForPlatform', () => {
       id: 'slack',
       darwin: brewCask('slack'),
       linux: aptRepo({
-        repo: 'deb https://packagecloud.io/slacktechnologies/slack/debian/ jessie main',
+        repoName: 'slack',
+        keyUrl: 'https://packagecloud.io/slacktechnologies/slack/gpgkey',
+        repoUrl: 'https://packagecloud.io/slacktechnologies/slack/debian/',
+        distribution: 'jessie',
+        components: 'main',
         packageName: 'slack-desktop',
       }),
     });
