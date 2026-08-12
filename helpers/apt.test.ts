@@ -32,4 +32,18 @@ describe('apt', () => {
 
     expect(await apt('ripgrep').isInstalled(runner)).toBe(false);
   });
+
+  test('install() rejects when apt install -y <package> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['apt', 'install', '-y', 'ripgrep']);
+
+    await expect(apt('ripgrep').install(runner)).rejects.toThrow();
+  });
+
+  test('uninstall() rejects when apt remove -y <package> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['apt', 'remove', '-y', 'ripgrep']);
+
+    await expect(apt('ripgrep').uninstall(runner)).rejects.toThrow();
+  });
 });

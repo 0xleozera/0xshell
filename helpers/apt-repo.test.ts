@@ -77,4 +77,25 @@ describe('aptRepo', () => {
 
     expect(await aptRepo(options).isInstalled(runner)).toBe(false);
   });
+
+  test('install() rejects when the key import fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['sh', '-c', `curl -fsSL ${options.keyUrl} | gpg --dearmor -o /etc/apt/keyrings/slack.gpg`]);
+
+    await expect(aptRepo(options).install(runner)).rejects.toThrow();
+  });
+
+  test('install() rejects when apt install -y <package> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['apt', 'install', '-y', options.packageName]);
+
+    await expect(aptRepo(options).install(runner)).rejects.toThrow();
+  });
+
+  test('uninstall() rejects when apt remove -y <package> fails', async () => {
+    const runner = new MockRunner();
+    runner.failOn(['apt', 'remove', '-y', options.packageName]);
+
+    await expect(aptRepo(options).uninstall(runner)).rejects.toThrow();
+  });
 });
