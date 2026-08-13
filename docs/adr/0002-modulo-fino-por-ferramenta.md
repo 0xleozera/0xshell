@@ -23,7 +23,7 @@ Num catálogo declarativo, essa fase não teria onde morar sem quebrar a estrutu
 
 ## Decisão
 
-Um módulo por Tool em `commands/install/tools/<id>.ts`, mas **fino**: o corpo é dado,
+Um módulo por Tool em `src/commands/install/tools/<id>.ts`, mas **fino**: o corpo é dado,
 não procedimento. A receita vem de Helpers compartilhados.
 
 ```ts

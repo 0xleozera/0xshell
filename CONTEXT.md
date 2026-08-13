@@ -11,7 +11,7 @@ issue e nos testes — não drifte para os sinônimos listados como "evitar".
 ### Tool (Ferramenta)
 
 Unidade instalável do catálogo. Corresponde a exatamente um módulo em
-`commands/install/tools/<id>.ts`. Um Tool declara seu `id`, suas `tags`, seu `stage`
+`src/commands/install/tools/<id>.ts`. Um Tool declara seu `id`, suas `tags`, seu `stage`
 e uma receita de instalação por plataforma.
 
 _Evitar como sinônimo:_ "package", "dependency", "app". Um Tool pode ser um app de
