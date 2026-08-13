@@ -64,8 +64,9 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  * (here, already not installed) — see `run-install-plan.ts`. `summary.ts`'s
  * `summarize()`, `exitCodeForSummary()` and the failure policy are untouched
  * and shared with `install`; only the printed words differ, in
- * `reportOutcome` (per-Tool) and `format-summary.ts` (the closing `Resumo:`
- * block) — `instalados: 12` would read as wrong after removing twelve Tools.
+ * `reportOutcome` (per-Tool) and `format-summary.ts` (the closing summary
+ * block) — install's "installed: 12" phrasing would read as wrong after
+ * twelve Tools were removed.
  */
 export function createUninstallCommand(
   runner: Runner,

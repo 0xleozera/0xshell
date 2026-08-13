@@ -29,10 +29,10 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
 
 /**
  * Builds the `install [tool...]` command against a Runner, resolving each
- * Tool's recipe for the given Plataforma. Four ways to cut the Catálogo
+ * Tool's recipe for the given Platform. Four ways to cut the Catalog
  * down: by name (`install neovim docker`), by `--tag`, via an
  * `--interactive` multiselect, or not at all — no argument still installs
- * the whole Catálogo, no prompt, since that's the new-machine path where
+ * the whole Catalog, no prompt, since that's the new-machine path where
  * the user wants to walk away while it runs. `--dry-run` prints what a real
  * run would do without ever handing an install/uninstall command to
  * `runner`.

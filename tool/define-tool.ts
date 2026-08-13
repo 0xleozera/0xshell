@@ -23,7 +23,7 @@ const unsupportedSchema = z.custom<Unsupported>(isUnsupported, {
 const platformEntrySchema = z.union([recipeSchema, unsupportedSchema]);
 
 /**
- * Schema for a Tool (ADR-0002). Each Plataforma (`darwin`, `linux`) resolves
+ * Schema for a Tool (ADR-0002). Each Platform (`darwin`, `linux`) resolves
  * to a Recipe or to `unsupported(reason)`. `stage` (0–3) pins the execution
  * order — package manager → mise → runtimes → apps/CLIs — in place of a
  * dependency graph. `tags` groups Tools for `0xshell install --tag <tag>`
@@ -42,7 +42,7 @@ export type Tool = z.infer<typeof toolSchema>;
 /**
  * Validates a Tool definition against the schema. Throws on a bad shape.
  * Generic over the input so each Tool module keeps its concrete Recipe /
- * Unsupported types per Plataforma instead of widening to the union.
+ * Unsupported types per Platform instead of widening to the union.
  */
 export function defineTool<T extends Tool>(definition: T): T {
   return toolSchema.parse(definition) as T;

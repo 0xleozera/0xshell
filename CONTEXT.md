@@ -17,10 +17,13 @@ e uma receita de instalação por plataforma.
 _Evitar como sinônimo:_ "package", "dependency", "app". Um Tool pode ser um app de
 GUI, um binário de CLI ou um runtime — a palavra é a mesma.
 
-### Catálogo
+### Catalog (Catálogo)
 
 O conjunto de todos os Tools registrados. É a única fonte de verdade sobre o que o
 `0xshell` instala. `0xshell list` imprime o Catálogo com o status por plataforma.
+
+Nos comentários de código o termo aparece em inglês (`Catalog`); nas mensagens que o
+CLI imprime, em português (`Catálogo`).
 
 ### Helper
 
@@ -57,9 +60,12 @@ Declaração explícita de que um Tool não existe numa plataforma, acompanhada 
 motivo (`unsupported('sem cliente Linux oficial')`). Um Tool `unsupported` é
 **reportado** no resumo final (`⊘`), nunca pulado em silêncio.
 
-### Plataforma
+### Platform (Plataforma)
 
 `darwin` | `linux`. São as duas únicas plataformas suportadas.
+
+Nos comentários de código o termo aparece em inglês (`Platform`); nas mensagens que o
+CLI imprime, em português (`plataforma`).
 
 ### Tag
 

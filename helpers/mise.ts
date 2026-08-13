@@ -4,7 +4,7 @@ import { runChecked } from './run-checked';
 
 /**
  * Helper for Tools installed as a mise-managed runtime (ADR-0002) — the
- * path every runtime in the Catálogo goes through. `toolId` is whatever
+ * path every runtime in the Catalog goes through. `toolId` is whatever
  * mise itself accepts as the tool identifier: a bare name (`bun`, `go`) or
  * a backend-qualified one (`aqua:neovim/neovim`).
  */

@@ -20,8 +20,8 @@ function formatTool(tool: Tool, platform: Platform): string {
 }
 
 /**
- * Builds the read-only `list` command: prints the whole Catálogo, one line
- * per Tool, with Tag, Stage and support on the current Plataforma. Purely
+ * Builds the read-only `list` command: prints the whole Catalog, one line
+ * per Tool, with Tag, Stage and support on the current Platform. Purely
  * definitional — it never calls `isInstalled()`, so it never needs the
  * Runner for its own logic. `runner` is still accepted so cli.ts can wire
  * every subcommand the same way and so the "no write command" test has a

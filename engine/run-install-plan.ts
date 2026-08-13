@@ -33,7 +33,7 @@ function errorMessage(error: unknown): string {
 }
 
 /**
- * True when at least one Tool in the plan resolves, on this Plataforma, to
+ * True when at least one Tool in the plan resolves, on this Platform, to
  * a Recipe that declares `requiresPrivilege` — the `apt` and `aptRepo`
  * Helpers, so far. Reads the flag instead of inspecting command strings,
  * which would break the moment a new privileged Helper shows up.

@@ -1,5 +1,5 @@
 /**
- * Declares that a Tool does not exist on a Plataforma. Reported with `⊘`
+ * Declares that a Tool does not exist on a Platform. Reported with `⊘`
  * and its reason — never skipped silently (ADR-0002).
  */
 export type Unsupported = {

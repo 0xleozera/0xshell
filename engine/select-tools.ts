@@ -12,14 +12,14 @@ export type SelectToolsResult =
   | { readonly ok: false; readonly error: string };
 
 /**
- * Chooses the subset of the Catálogo an `install` or `uninstall` run acts
+ * Chooses the subset of the Catalog an `install` or `uninstall` run acts
  * on: by name, by Tag, or the whole `catalog` when neither filter is given.
  * Selection is kept separate from the command layer — and from execution —
  * so both commands share it and so `--dry-run` can select the same Tools it
  * would install without touching the Runner.
  *
  * `findTool` (rather than searching `catalog` directly) is what makes a
- * name lookup fail loudly on an unknown id: a name outside the Catálogo
+ * name lookup fail loudly on an unknown id: a name outside the Catalog
  * always fails the whole selection, never installs a partial match in
  * silence.
  */

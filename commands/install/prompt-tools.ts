@@ -8,7 +8,7 @@ export type MultiselectPrompt = (options: {
 
 /**
  * Backs `0xshell install --interactive`: opens a multiselect over the
- * Catálogo and returns exactly the Tools the user marked.
+ * Catalog and returns exactly the Tools the user marked.
  *
  * `multiselect` only ever resolves to a `symbol` on cancellation (its own
  * cancel sentinel, from `@clack/core`), so a plain `typeof` check stands in
