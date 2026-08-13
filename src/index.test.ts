@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 
+const installScript = `${import.meta.dir}/../install.sh`;
+
 const runInstall = async (env: Record<string, string>) => {
-  const proc = Bun.spawn(['sh', '../install.sh'], {
+  const proc = Bun.spawn(['sh', installScript], {
     env: { ...process.env, ...env },
     stdout: 'pipe',
     stderr: 'pipe',

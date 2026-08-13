@@ -7,6 +7,7 @@ import cursorCli from './tools/cursor-cli';
 import dbeaver from './tools/dbeaver';
 import dia from './tools/dia';
 import docker from './tools/docker';
+import git from './tools/git';
 import go from './tools/go';
 import homebrew from './tools/homebrew';
 import logitechGHub from './tools/logitech-g-hub';
@@ -31,6 +32,7 @@ export const catalog: readonly Tool[] = [
   go,
   node,
   neovim,
+  git,
   warp,
   orcaAi,
   slack,
