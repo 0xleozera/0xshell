@@ -5,7 +5,6 @@ import type { Recipe } from '../tool/recipe';
 import { runChecked } from './run-checked';
 
 export type AppImageOptions = {
-  /** URL of the AppImage binary to download. */
   readonly url: string;
   /** Name the binary is installed as, and looked up on the `PATH`. */
   readonly binName: string;

@@ -8,7 +8,6 @@ describe('slack tool', () => {
 
     await slack.darwin.install(runner);
 
-    // This is the test that catches a typo'd cask name.
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'slack']]);
   });
 

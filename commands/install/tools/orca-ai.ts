@@ -7,7 +7,7 @@ export default defineTool({
   stage: 3,
   tags: ['apps'],
   // The core `orca` cask is Plotly's Orca, deprecated and disabled from
-  // 2026-09-01 — never use it. This is the project's own tap (issue #10).
+  // 2026-09-01 — never use it. This is the project's own tap.
   darwin: brewCask('stablyai/orca/orca'),
   linux: appImage({
     url: 'https://download.stably.ai/orca/Orca.AppImage',

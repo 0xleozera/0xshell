@@ -21,8 +21,8 @@ export type AptRepoOptions = {
  * `signed-by` na source list — o padrão atual, em vez do `apt-key`
  * depreciado. Sem isso, `apt update` falha com `NO_PUBKEY`.
  *
- * Command generation lives here in one place — #8 adds `sudo` to every
- * write here, not to each Tool that uses this Helper.
+ * Command generation lives here in one place, so `sudo` is applied to every
+ * write here and not by each Tool that uses this Helper.
  */
 export function aptRepo({
   repoName,

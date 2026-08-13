@@ -12,10 +12,9 @@ import type { Runner } from '../runner/runner';
  *
  * `requiresPrivilege` declares, at the source (the Helper that builds the
  * Recipe), that `install()`/`uninstall()` need root — `apt` and `aptRepo`
- * are the only Helpers that set it (issue #8). The install engine reads
- * this flag across the resolved plan to decide, once, whether to open a
- * sudo session before running anything; it never inspects command strings
- * to guess.
+ * are the only Helpers that set it. The install engine reads this flag
+ * across the resolved plan to decide, once, whether to open a sudo session
+ * before running anything; it never inspects command strings to guess.
  */
 export interface Recipe {
   readonly requiresPrivilege?: boolean;

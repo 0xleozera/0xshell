@@ -1,6 +1,6 @@
 /**
- * What happened to one Tool during a plan run (issue #4). `unsupported` and
- * `failed` both carry a reason so the summary can report them in detail.
+ * What happened to one Tool during a plan run. `unsupported` and `failed`
+ * both carry a reason so the summary can report them in detail.
  */
 export type Outcome =
   | { readonly status: 'installed'; readonly id: string }

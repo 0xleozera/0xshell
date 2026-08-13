@@ -9,7 +9,7 @@ import { isUnsupported } from '../../tool/unsupported';
 /**
  * Prints exactly what `uninstall` would do for each Tool, in reverse Stage
  * order, without ever sending an install/uninstall command to the real
- * Runner (issue #11) — the mirror of `commands/install/dry-run.ts`.
+ * Runner — the mirror of `commands/install/dry-run.ts`.
  *
  * `isInstalled()` is a read, so it deliberately does run against the real
  * `runner`; `uninstall()` runs against a throwaway `RecordingRunner`, purely

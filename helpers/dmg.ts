@@ -3,7 +3,6 @@ import type { Recipe } from '../tool/recipe';
 import { runChecked } from './run-checked';
 
 export type DmgOptions = {
-  /** URL of the .dmg to download. */
   readonly url: string;
   /** App name as it appears on the mounted volume, without `.app` (e.g. `'Dia'`). */
   readonly appName: string;

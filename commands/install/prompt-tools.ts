@@ -1,18 +1,14 @@
 import { cancel, multiselect } from '@clack/prompts';
 import type { Tool } from '../../tool/define-tool';
 
-/** The slice of `@clack/prompts`' `multiselect` this module depends on — narrow enough to fake in a test. */
 export type MultiselectPrompt = (options: {
   message: string;
   options: { value: string; label: string }[];
 }) => Promise<string[] | symbol>;
 
 /**
- * Backs `0xshell install --interactive` (issue #6): opens a clack multiselect
- * over the Catálogo and returns exactly the Tools the user marked. `prompt`
- * defaults to the real `multiselect` but is injectable so tests can supply a
- * fake that resolves immediately — otherwise a test exercising this path
- * would hang waiting on real terminal input, which is worse than no test.
+ * Backs `0xshell install --interactive`: opens a multiselect over the
+ * Catálogo and returns exactly the Tools the user marked.
  *
  * `multiselect` only ever resolves to a `symbol` on cancellation (its own
  * cancel sentinel, from `@clack/core`), so a plain `typeof` check stands in

@@ -21,16 +21,11 @@ function formatTool(tool: Tool, platform: Platform): string {
 
 /**
  * Builds the read-only `list` command: prints the whole Catálogo, one line
- * per Tool, with Tag, Stage and support on the current Plataforma (issue
- * #9). Purely definitional — it never calls `isInstalled()`, so it never
- * needs the Runner for its own logic. `runner` is still accepted so cli.ts
- * can wire every subcommand the same way and so the "no write command"
- * test has a real MockRunner to assert against.
- *
- * `lookupCatalog` defaults to the real Catálogo but is injectable so tests
- * run against a fixture instead of asserting on the real (growing) list of
- * Tools — see #10, landing in parallel, which takes the Catálogo from 1 to
- * 22 Tools.
+ * per Tool, with Tag, Stage and support on the current Plataforma. Purely
+ * definitional — it never calls `isInstalled()`, so it never needs the
+ * Runner for its own logic. `runner` is still accepted so cli.ts can wire
+ * every subcommand the same way and so the "no write command" test has a
+ * real MockRunner to assert against.
  */
 export function createListCommand(
   _runner: Runner,

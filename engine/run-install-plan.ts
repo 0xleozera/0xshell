@@ -9,24 +9,22 @@ import { sortByStage, type StageDirection } from './stage-order';
 
 const FATAL_STAGE = 0;
 
-/** Which Recipe method the plan runs per Tool (issue #11). Defaults to `'install'`. */
 export type PlanAction = 'install' | 'uninstall';
 
 export type RunInstallPlanOptions = {
   readonly direction?: StageDirection;
   /**
-   * `'install'` (default) or `'uninstall'` (issue #11). Reuses the same
-   * `Outcome` statuses in both directions rather than adding new ones:
-   * `installed` means "the action ran and changed the machine" (installed,
-   * or removed) and `already-installed` means "the machine was already in
-   * the target end-state" (already installed, or already not installed).
-   * The command layer picks the right label for each — the engine and the
-   * shared summary/exit-code logic don't need to know which direction ran.
+   * `'install'` (default) or `'uninstall'`. Reuses the same `Outcome`
+   * statuses in both directions rather than adding new ones: `installed`
+   * means "the action ran and changed the machine" (installed, or removed)
+   * and `already-installed` means "the machine was already in the target
+   * end-state" (already installed, or already not installed). The command
+   * layer picks the right label for each — the engine and the shared
+   * summary/exit-code logic don't need to know which direction ran.
    */
   readonly action?: PlanAction;
   /** Called once per Tool, in execution order, as soon as its Outcome is known. */
   readonly onOutcome?: (outcome: Outcome) => void;
-  /** Injectable sudo session factory (issue #8) — tests supply a fake so no real process spawns. */
   readonly createSudoSession?: (runner: Runner) => SudoSession;
 };
 
@@ -36,9 +34,9 @@ function errorMessage(error: unknown): string {
 
 /**
  * True when at least one Tool in the plan resolves, on this Plataforma, to
- * a Recipe that declares `requiresPrivilege` (issue #8) — the `apt` and
- * `aptRepo` Helpers, so far. Reads the flag instead of inspecting command
- * strings, which would break the moment a new privileged Helper shows up.
+ * a Recipe that declares `requiresPrivilege` — the `apt` and `aptRepo`
+ * Helpers, so far. Reads the flag instead of inspecting command strings,
+ * which would break the moment a new privileged Helper shows up.
  */
 function planRequiresPrivilege(tools: readonly Tool[], platform: Platform): boolean {
   return tools.some((tool) => {
@@ -76,17 +74,14 @@ async function runOne(tool: Tool, runner: Runner, platform: Platform, action: Pl
 }
 
 /**
- * The install engine (issue #4), shared with `uninstall` (issue #11) via
- * `options.action`: orders the given Tools by Stage and runs them one at a
- * time — no parallelism, since Homebrew serializes on its own lock anyway
- * and interleaved output would be unreadable. A failure in Stage 0 (the
- * package manager) is fatal and aborts the rest of the plan; a failure in
- * any other Stage is collected and execution continues, so a flaky network
- * blip on install #3 doesn't cost the other nineteen. `uninstall` reuses
- * this same policy and passes `direction: 'desc'` to tear down in the
- * opposite order things were built.
- *
- * Testable without citty — the command layer just formats what this returns.
+ * The install engine, shared with `uninstall` via `options.action`: orders
+ * the given Tools by Stage and runs them one at a time — no parallelism,
+ * since Homebrew serializes on its own lock anyway and interleaved output
+ * would be unreadable. A failure in Stage 0 (the package manager) is fatal
+ * and aborts the rest of the plan; a failure in any other Stage is collected
+ * and execution continues, so a flaky network blip on one install doesn't
+ * cost the other nineteen. `uninstall` reuses this same policy and passes
+ * `direction: 'desc'` to tear down in the opposite order things were built.
  */
 export async function runInstallPlan(
   tools: readonly Tool[],
@@ -99,7 +94,7 @@ export async function runInstallPlan(
   const outcomes: Outcome[] = [];
 
   // Linux only (macOS Homebrew refuses to run as root — never sudo there),
-  // and only when the plan actually touches a privileged Helper (issue #8).
+  // and only when the plan actually touches a privileged Helper.
   const sudoSession =
     platform === 'linux' && planRequiresPrivilege(ordered, platform)
       ? (options.createSudoSession ?? createSudoSession)(runner)

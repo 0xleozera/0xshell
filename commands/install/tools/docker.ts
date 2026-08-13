@@ -19,8 +19,7 @@ const sourceLine = `deb [signed-by=${keyringPath}] https://download.docker.com/l
 // space-joined name here would become one bad argv token, not five apt
 // packages, since Command is argv, not a shell string. custom() rebuilds the
 // same repo-setup shape aptRepo() uses, then installs every package in one
-// `apt install` call (issue #10 — flagged in the PR rather than widening
-// aptRepo's signature, since #11 depends on that Helper's current shape).
+// `apt install` call.
 const packages = ['docker-ce', 'docker-ce-cli', 'containerd.io', 'docker-buildx-plugin', 'docker-compose-plugin'];
 
 export default defineTool({

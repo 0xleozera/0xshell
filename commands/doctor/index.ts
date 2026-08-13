@@ -50,8 +50,8 @@ function formatDoctorSummary(summary: Summary): string {
 /**
  * Builds the read-only `doctor` command: runs `isInstalled()` for every
  * Tool in the Catálogo and reports installed / faltando / não suportado
- * (issue #9). Reuses `summarize()` from `engine/summary.ts` to tally the
- * counts — not `formatSummary`, see `formatDoctorSummary` above for why.
+ * Reuses `summarize()` from `engine/summary.ts` to tally the counts — not
+ * `formatSummary`, see `formatDoctorSummary` above for why.
  *
  * `doctor` only ever calls `entry.isInstalled(runner)`, which the Recipe
  * contract (`tool/recipe.ts`) guarantees never throws and never issues a
@@ -63,9 +63,6 @@ function formatDoctorSummary(summary: Summary): string {
  * fully set up. The direct consequence: on a brand-new machine, where most
  * of the Catálogo is still missing, `doctor` exits non-zero — that is the
  * expected result of an audit that found things to install, not an error.
- *
- * `lookupCatalog` defaults to the real Catálogo but is injectable so tests
- * run against a fixture instead of the real, growing Catálogo (see #10).
  */
 export function createDoctorCommand(
   runner: Runner,

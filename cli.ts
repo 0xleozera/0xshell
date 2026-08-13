@@ -6,7 +6,6 @@ import { createUninstallCommand } from './commands/uninstall';
 import type { Runner } from './runner/runner';
 import type { Platform } from './tool/platform';
 
-/** Root command, built against a Runner and Plataforma so tests can inject both. */
 export function createCli(runner: Runner, platform: Platform) {
   return defineCommand({
     meta: {

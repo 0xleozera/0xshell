@@ -13,7 +13,7 @@ export type Summary = {
   readonly failures: readonly Failure[];
 };
 
-/** Tallies the four counts (issue #4) reused by install, doctor and uninstall. */
+/** Tallies the four counts reused by install, doctor and uninstall. */
 export function summarize(outcomes: readonly Outcome[]): Summary {
   let installed = 0;
   let alreadyInstalled = 0;

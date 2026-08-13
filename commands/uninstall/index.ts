@@ -12,10 +12,9 @@ import { runDryRun } from './dry-run';
 import { formatUninstallSummary } from './format-summary';
 
 /**
- * Stage 0 (homebrew) and Stage 1 (mise) — the guarded Stages (issue #11,
- * guarda-corpo 3). Checked by `stage`, not by id: neither id exists in the
- * real Catálogo yet (they land with #10), and keying off `stage` keeps the
- * rule correct for whichever Tool ends up there.
+ * Stage 0 (homebrew) and Stage 1 (mise) — the guarded Stages, only ever
+ * removed when named explicitly. Checked by `stage`, not by id, so the rule
+ * stays correct for whichever Tool ends up there.
  */
 const GUARDED_STAGES = new Set([0, 1]);
 
@@ -42,7 +41,7 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
 }
 
 /**
- * Builds the `uninstall [tool...]` command (issue #11): same contract as
+ * Builds the `uninstall [tool...]` command: same contract as
  * `install` (filters, idempotency, failure policy, summary, exit code,
  * `--dry-run`) reused as-is, but with four guard rails deliberately
  * asymmetric to it — errar no install custa tempo, errar no uninstall custa
@@ -67,10 +66,6 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  * and shared with `install`; only the printed words differ, in
  * `reportOutcome` (per-Tool) and `format-summary.ts` (the closing Resumo) —
  * "instalados: 12" would read as wrong after removing twelve Tools.
- *
- * `lookupTool` / `lookupCatalog` / `confirmAllPrompt` default to the real
- * Catálogo and the real clack prompt but are injectable, same pattern as
- * `createInstallCommand`, so tests never touch either.
  */
 export function createUninstallCommand(
   runner: Runner,

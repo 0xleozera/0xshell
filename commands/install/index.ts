@@ -29,21 +29,17 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
 
 /**
  * Builds the `install [tool...]` command against a Runner, resolving each
- * Tool's recipe for the given Plataforma (issue #6). Four ways to cut the
- * Catálogo down: by name (`install neovim docker`), by `--tag`, via an
- * `--interactive` clack multiselect, or not at all — no argument still
- * installs the whole Catálogo, no prompt, since that's the new-machine path
- * where the user wants to walk away while it runs. `--dry-run` prints what
- * a real run would do (`commands/install/dry-run.ts`) without ever handing
- * an install/uninstall command to `runner`.
+ * Tool's recipe for the given Plataforma. Four ways to cut the Catálogo
+ * down: by name (`install neovim docker`), by `--tag`, via an
+ * `--interactive` multiselect, or not at all — no argument still installs
+ * the whole Catálogo, no prompt, since that's the new-machine path where
+ * the user wants to walk away while it runs. `--dry-run` prints what a real
+ * run would do without ever handing an install/uninstall command to
+ * `runner`.
  *
  * citty (`^0.2.2`) has no variadic positional, so tool names are read off
  * `args._` — the raw positional list citty always keeps intact — rather
  * than the single `tool` positional slot, which stays only for `--help`.
- *
- * `lookupTool` / `lookupCatalog` / `promptForTools` default to the real
- * Catálogo and the real clack prompt but are injectable so tests don't
- * touch either.
  */
 export function createInstallCommand(
   runner: Runner,

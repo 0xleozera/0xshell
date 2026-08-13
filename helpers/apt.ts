@@ -5,8 +5,8 @@ import { runChecked } from './run-checked';
 /**
  * Helper for Tools installed as an apt package (ADR-0002). `install()` and
  * `uninstall()` write to the system, so each runs under `sudo` individually
- * (issue #8) — the CLI process itself never runs as root. `isInstalled()`
- * only reads `dpkg`, so it needs no privilege.
+ * — the CLI process itself never runs as root. `isInstalled()` only reads
+ * `dpkg`, so it needs no privilege.
  */
 export function apt(packageName: string): Recipe {
   return {

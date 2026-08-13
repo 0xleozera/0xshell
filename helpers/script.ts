@@ -3,11 +3,9 @@ import type { Recipe } from '../tool/recipe';
 import { runChecked } from './run-checked';
 
 export type ScriptOptions = {
-  /** URL of the remote install script, piped into `sh`. */
   readonly url: string;
   /** Command that undoes the install — remote scripts have no common uninstall path, so the Tool supplies it. */
   readonly uninstallCommand: Command;
-  /** Name the script installs the binary as, checked via `command -v`. */
   readonly binName: string;
 };
 

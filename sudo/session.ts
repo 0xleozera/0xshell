@@ -1,7 +1,7 @@
 import type { Runner } from '../runner/runner';
 
 /**
- * Background sudo-credential keep-alive (issue #8). A single `sudo -v` only
+ * Background sudo-credential keep-alive. A single `sudo -v` only
  * validates the credential for sudo's own timestamp window; an install run
  * that takes several minutes needs it refreshed periodically, or `apt`
  * prompts for the password again mid-run with nobody watching. `start()`
@@ -20,7 +20,12 @@ const WARNING =
   'Este setup instala pacotes via apt, que no Linux exige privilégio de root.\n' +
   'A senha a seguir é usada apenas pelo sudo, individualmente, em cada comando apt — o processo do 0xshell não roda como root.';
 
-/** Timer handle type is intentionally opaque — the ambient `setInterval`/`setTimeout` return types disagree between Bun's and Node's lib declarations, and this module doesn't care which one it holds, only that the same value round-trips into `clearInterval`. */
+/**
+ * The timer handle is typed `unknown` on purpose: the ambient
+ * `setInterval`/`setTimeout` return types disagree between Bun's and Node's
+ * lib declarations, and this module only needs the same value to round-trip
+ * into `clearInterval`.
+ */
 export type CreateSudoSessionOptions = {
   readonly intervalMs?: number;
   readonly warn?: (message: string) => void;
