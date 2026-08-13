@@ -53,8 +53,8 @@ describe('doctor command', () => {
     expect(output).toContain('instalados: 1');
     expect(output).toContain('faltando: 1');
     expect(output).toContain('não suportados: 1');
-    // doctor never reports things in install's "falhou"/"Falhas:" vocabulary
-    // — a missing Tool is not a failure of the check itself.
+    // doctor never reports things in install's `falharam`/`Falhas:`
+    // vocabulary — a missing Tool is not a failure of the check itself.
     expect(output).not.toContain('falharam');
     expect(output).not.toContain('Falhas:');
     // `alreadyInstalled` is always zero for doctor (see reportOutcome) and

@@ -4,7 +4,7 @@ import type { Summary } from '../../engine/summary';
  * Uninstall-flavored rendering of the shared `Summary`. `engine/summary.ts`
  * — `summarize()`, its four counts and `exitCodeForSummary()` — is untouched
  * and shared with `install`; only the words printed here differ, because
- * `install`'s `formatSummary` says "instalados: 12" and that reads as wrong
+ * `install`'s `formatSummary` says `instalados: 12` and that reads as wrong
  * after twelve Tools were removed.
  * `summary.installed` still means "the action ran and changed the machine"
  * and `summary.alreadyInstalled` still means "already at the target end

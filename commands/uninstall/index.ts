@@ -44,8 +44,8 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  * Builds the `uninstall [tool...]` command: same contract as
  * `install` (filters, idempotency, failure policy, summary, exit code,
  * `--dry-run`) reused as-is, but with four guard rails deliberately
- * asymmetric to it — errar no install custa tempo, errar no uninstall custa
- * a máquina:
+ * asymmetric to it — getting install wrong costs time, getting uninstall
+ * wrong costs the machine:
  *
  *  1. No argument at all is an error. Unlike `install`, a bare `uninstall`
  *     never assumes "everything".
@@ -64,8 +64,8 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  * (here, already not installed) — see `run-install-plan.ts`. `summary.ts`'s
  * `summarize()`, `exitCodeForSummary()` and the failure policy are untouched
  * and shared with `install`; only the printed words differ, in
- * `reportOutcome` (per-Tool) and `format-summary.ts` (the closing Resumo) —
- * "instalados: 12" would read as wrong after removing twelve Tools.
+ * `reportOutcome` (per-Tool) and `format-summary.ts` (the closing `Resumo:`
+ * block) — `instalados: 12` would read as wrong after removing twelve Tools.
  */
 export function createUninstallCommand(
   runner: Runner,

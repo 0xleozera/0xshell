@@ -23,11 +23,11 @@ const unsupportedSchema = z.custom<Unsupported>(isUnsupported, {
 const platformEntrySchema = z.union([recipeSchema, unsupportedSchema]);
 
 /**
- * Schema for a Tool (ADR-0002). Cada Plataforma (`darwin`, `linux`) resolve
- * para um Recipe ou para `unsupported(motivo)`. `stage` (0–3) fixa a ordem
- * de execução — gerenciador de pacotes → mise → runtimes → apps/CLIs — no
- * lugar de um grafo de dependências. `tags` agrupa Tools para
- * `0xshell install --tag <tag>` e não gera comandos próprios.
+ * Schema for a Tool (ADR-0002). Each Plataforma (`darwin`, `linux`) resolves
+ * to a Recipe or to `unsupported(reason)`. `stage` (0–3) pins the execution
+ * order — package manager → mise → runtimes → apps/CLIs — in place of a
+ * dependency graph. `tags` groups Tools for `0xshell install --tag <tag>`
+ * and produces no commands of its own.
  */
 const toolSchema = z.object({
   id: z.string().min(1, 'id não pode ser vazio'),

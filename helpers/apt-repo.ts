@@ -3,11 +3,11 @@ import type { Recipe } from '../tool/recipe';
 import { runChecked } from './run-checked';
 
 export type AptRepoOptions = {
-  /** Nome curto do repositório: nomeia o keyring e o arquivo em sources.list.d. */
+  /** Short repo name: names the keyring and the file in sources.list.d. */
   readonly repoName: string;
-  /** URL da chave GPG pública (ASCII-armored) que assina o repositório. */
+  /** URL of the public (ASCII-armored) GPG key that signs the repository. */
   readonly keyUrl: string;
-  /** URL base do repositório apt, ex.: 'https://packagecloud.io/slacktechnologies/slack/debian/'. */
+  /** Base URL of the apt repository, e.g. 'https://packagecloud.io/slacktechnologies/slack/debian/'. */
   readonly repoUrl: string;
   readonly distribution: string;
   readonly components: string;
@@ -16,10 +16,10 @@ export type AptRepoOptions = {
 
 /**
  * Helper for Tools installed from a third-party, signed apt repository
- * (ADR-0002). Repositórios de terceiro são assinados: a chave GPG é
- * importada para um keyring próprio em /etc/apt/keyrings e referenciada via
- * `signed-by` na source list — o padrão atual, em vez do `apt-key`
- * depreciado. Sem isso, `apt update` falha com `NO_PUBKEY`.
+ * (ADR-0002). Third-party repositories are signed: the GPG key is imported
+ * into its own keyring under /etc/apt/keyrings and referenced through
+ * `signed-by` in the source list — the current standard, instead of the
+ * deprecated `apt-key`. Without it, `apt update` fails with `NO_PUBKEY`.
  *
  * Command generation lives here in one place, so `sudo` is applied to every
  * write here and not by each Tool that uses this Helper.

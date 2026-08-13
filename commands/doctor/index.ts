@@ -31,10 +31,10 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  * doctor's own presentation of the tally — deliberately not `formatSummary`
  * (install's shared formatter). A missing Tool is counted through the
  * shared `failed` Outcome so `summarize()` can be reused without a new
- * status, but "faltando" is not a failure of the `doctor` command: the
- * check itself always succeeds, it's just reporting what it found. Printing
- * it as "falharam" under a "Falhas:" header — install's vocabulary — would
- * read as something having gone wrong. `alreadyInstalled` is never printed:
+ * status, but a missing Tool (`faltando`) is not a failure of the `doctor`
+ * command: the check itself always succeeds, it's just reporting what it
+ * found. Printing it as `falharam` under a `Falhas:` header — install's
+ * vocabulary — would read as something having gone wrong. `alreadyInstalled` is never printed:
  * `doctor` never produces that Outcome (see `reportOutcome`), so it is
  * always zero and would say nothing.
  */
@@ -49,8 +49,8 @@ function formatDoctorSummary(summary: Summary): string {
 
 /**
  * Builds the read-only `doctor` command: runs `isInstalled()` for every
- * Tool in the Catálogo and reports installed / faltando / não suportado
- * Reuses `summarize()` from `engine/summary.ts` to tally the counts — not
+ * Tool in the Catálogo and reports each one as installed, missing or
+ * unsupported. Reuses `summarize()` from `engine/summary.ts` to tally the counts — not
  * `formatSummary`, see `formatDoctorSummary` above for why.
  *
  * `doctor` only ever calls `entry.isInstalled(runner)`, which the Recipe
