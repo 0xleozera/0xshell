@@ -1,4 +1,4 @@
-# CONTEXT — sshell
+# CONTEXT — 0xshell
 
 CLI em Bun que instala, numa máquina nova, o conjunto fixo de ferramentas do setup
 de desenvolvimento. Suporta macOS (Homebrew) e Linux (apt).
@@ -20,7 +20,7 @@ GUI, um binário de CLI ou um runtime — a palavra é a mesma.
 ### Catálogo
 
 O conjunto de todos os Tools registrados. É a única fonte de verdade sobre o que o
-`sshell` instala. `sshell list` imprime o Catálogo com o status por plataforma.
+`0xshell` instala. `0xshell list` imprime o Catálogo com o status por plataforma.
 
 ### Helper
 
@@ -64,7 +64,7 @@ motivo (`unsupported('sem cliente Linux oficial')`). Um Tool `unsupported` é
 ### Tag
 
 Rótulo de agrupamento de Tools (`apps`, `runtimes`, `cli`), consumido por
-`sshell install --tag <tag>`. Tags não criam comandos próprios.
+`0xshell install --tag <tag>`. Tags não criam comandos próprios.
 
 ### doctor
 

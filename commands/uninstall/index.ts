@@ -111,7 +111,7 @@ export function createUninstallCommand(
       const all = args.all;
 
       if (names.length === 0 && !tag && !all) {
-        console.error('sshell uninstall requer um Tool nomeado, --tag ou --all — nada é assumido por padrão.');
+        console.error('0xshell uninstall requer um Tool nomeado, --tag ou --all — nada é assumido por padrão.');
         process.exitCode = 1;
         return;
       }

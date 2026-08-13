@@ -10,7 +10,7 @@ import type { Platform } from './tool/platform';
 export function createCli(runner: Runner, platform: Platform) {
   return defineCommand({
     meta: {
-      name: 'sshell',
+      name: '0xshell',
       description: 'Instala o setup de desenvolvimento numa máquina nova',
     },
     subCommands: {

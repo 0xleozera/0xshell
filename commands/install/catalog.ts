@@ -22,7 +22,7 @@ import warp from './tools/warp';
 import whatsapp from './tools/whatsapp';
 import yarn from './tools/yarn';
 
-/** The Catálogo: every Tool sshell knows how to install. */
+/** The Catálogo: every Tool 0xshell knows how to install. */
 export const catalog: readonly Tool[] = [
   homebrew,
   mise,

@@ -11,7 +11,7 @@ export type RunResult = {
 };
 
 /**
- * The single seam between sshell and the machine (ADR-0003). Every Helper
+ * The single seam between 0xshell and the machine (ADR-0003). Every Helper
  * runs commands through a Runner instead of calling `Bun.$` directly, so
  * tests can swap in a mock and assert on the commands produced without
  * touching the real shell.

@@ -11,8 +11,8 @@ describe('dmg', () => {
     await dmg(options).install(runner);
 
     expect(runner.commands).toEqual([
-      ['curl', '-fsSL', options.url, '-o', '/tmp/sshell-Dia.dmg'],
-      ['hdiutil', 'attach', '/tmp/sshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet'],
+      ['curl', '-fsSL', options.url, '-o', '/tmp/0xshell-Dia.dmg'],
+      ['hdiutil', 'attach', '/tmp/0xshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet'],
       ['cp', '-R', '/Volumes/Dia/Dia.app', '/Applications/'],
       ['hdiutil', 'detach', '/Volumes/Dia', '-quiet'],
     ]);
@@ -29,18 +29,18 @@ describe('dmg', () => {
 
   test('install() rejects when the download fails, without attempting to mount', async () => {
     const runner = new MockRunner();
-    runner.failOn(['curl', '-fsSL', options.url, '-o', '/tmp/sshell-Dia.dmg']);
+    runner.failOn(['curl', '-fsSL', options.url, '-o', '/tmp/0xshell-Dia.dmg']);
 
     await expect(dmg(options).install(runner)).rejects.toThrow();
 
-    expect(runner.wasRun(['hdiutil', 'attach', '/tmp/sshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet'])).toBe(
+    expect(runner.wasRun(['hdiutil', 'attach', '/tmp/0xshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet'])).toBe(
       false,
     );
   });
 
   test('install() rejects when the mount fails, without attempting to detach', async () => {
     const runner = new MockRunner();
-    runner.failOn(['hdiutil', 'attach', '/tmp/sshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet']);
+    runner.failOn(['hdiutil', 'attach', '/tmp/0xshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet']);
 
     await expect(dmg(options).install(runner)).rejects.toThrow();
 

@@ -19,7 +19,7 @@ export type DmgOptions = {
  * mounted.
  */
 export function dmg({ url, appName }: DmgOptions): Recipe {
-  const dmgPath = `/tmp/sshell-${appName}.dmg`;
+  const dmgPath = `/tmp/0xshell-${appName}.dmg`;
   const mountPoint = `/Volumes/${appName}`;
   const appBundle = `${appName}.app`;
   const appBundlePath = `/Applications/${appBundle}`;

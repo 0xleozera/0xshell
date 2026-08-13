@@ -59,7 +59,7 @@ function formatDoctorSummary(summary: Summary): string {
  *
  * Exit code is a deliberate choice, not a side effect of reusing
  * `exitCodeForSummary`: it is non-zero whenever at least one Tool is
- * missing, so `sshell doctor && …` can gate a script on the machine being
+ * missing, so `0xshell doctor && …` can gate a script on the machine being
  * fully set up. The direct consequence: on a brand-new machine, where most
  * of the Catálogo is still missing, `doctor` exits non-zero — that is the
  * expected result of an audit that found things to install, not an error.

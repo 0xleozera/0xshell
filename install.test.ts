@@ -12,19 +12,19 @@ const runInstall = async (env: Record<string, string>) => {
 
 describe('install.sh', () => {
   test('fails with a clear message on an unsupported OS', async () => {
-    const { stderr, exitCode } = await runInstall({ SSHELL_OS: 'Windows_NT', SSHELL_ARCH: 'x86_64' });
+    const { stderr, exitCode } = await runInstall({ OXSHELL_OS: 'Windows_NT', OXSHELL_ARCH: 'x86_64' });
     expect(exitCode).not.toBe(0);
     expect(stderr).toContain('unsupported platform');
   });
 
   test('fails with a clear message on darwin/x64 (no build published)', async () => {
-    const { stderr, exitCode } = await runInstall({ SSHELL_OS: 'Darwin', SSHELL_ARCH: 'x86_64' });
+    const { stderr, exitCode } = await runInstall({ OXSHELL_OS: 'Darwin', OXSHELL_ARCH: 'x86_64' });
     expect(exitCode).not.toBe(0);
     expect(stderr).toContain('unsupported platform');
   });
 
   test('fails with a clear message on linux/arm64 (no build published)', async () => {
-    const { stderr, exitCode } = await runInstall({ SSHELL_OS: 'Linux', SSHELL_ARCH: 'aarch64' });
+    const { stderr, exitCode } = await runInstall({ OXSHELL_OS: 'Linux', OXSHELL_ARCH: 'aarch64' });
     expect(exitCode).not.toBe(0);
     expect(stderr).toContain('unsupported platform');
   });

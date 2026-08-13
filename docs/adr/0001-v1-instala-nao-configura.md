@@ -4,10 +4,10 @@
 
 ## Contexto
 
-O `sshell` nasce para resolver "máquina nova": instalar as ~22 ferramentas do setup
+O `0xshell` nasce para resolver "máquina nova": instalar as ~22 ferramentas do setup
 sem catar link por link. A tentação natural é que ele também **configure** o que
 instalou — dotfiles, `~/.config/nvim`, `.zshrc`, versões default do mise. O próprio
-nome do repositório (`sshell`) sugere que a configuração de shell está no horizonte.
+nome do repositório (`0xshell`) sugere que a configuração de shell está no horizonte.
 
 Instalar e configurar, porém, são problemas com donos diferentes:
 
@@ -24,7 +24,7 @@ O v1 **apenas instala**. O CLI termina seu trabalho em "a ferramenta existe e é
 executável". Nenhum arquivo de configuração do usuário é escrito, lido ou movido.
 
 A configuração vira uma iniciativa própria, com seu próprio grilling — provavelmente
-um comando `sshell config` — depois que o caminho de instalação estiver em uso real.
+um comando `0xshell config` — depois que o caminho de instalação estiver em uso real.
 
 ## Consequências
 
@@ -33,7 +33,7 @@ reserva o lugar onde o `configure()` vai morar: cada Tool é um arquivo próprio
 justamente para receber essa segunda metade sem refatoração.
 
 **Ferramentas que vão exigir configuração numa fase futura** — esta é a lista que
-motiva o `sshell config` e o motivo de o arquivo por Tool existir desde já:
+motiva o `0xshell config` e o motivo de o arquivo por Tool existir desde já:
 
 | Ferramenta            | O que ficará faltando configurar                                |
 | --------------------- | --------------------------------------------------------------- |
@@ -51,13 +51,13 @@ motiva o `sshell config` e o motivo de o arquivo por Tool existir desde já:
 | **go**                | `GOPATH`/`GOBIN` no `PATH`                                        |
 | **bun / pnpm / yarn** | registries e diretório global de binários no `PATH`               |
 
-Consequência aceita: depois de rodar o `sshell` numa máquina nova, o ambiente está
-**instalado mas cru**. A configuração continua manual até o `sshell config` existir.
+Consequência aceita: depois de rodar o `0xshell` numa máquina nova, o ambiente está
+**instalado mas cru**. A configuração continua manual até o `0xshell config` existir.
 
 **A regra vale nas duas direções.** O v1 também desinstala, e desinstalar não apaga
 configuração nem dados do usuário: `apt remove` e nunca `apt purge`, `brew uninstall
 --cask` sem `--zap`. Um CLI que não sabe escrever a configuração de uma ferramenta
-também não tem como saber o que é seguro apagar. Purga fica para o `sshell config`,
+também não tem como saber o que é seguro apagar. Purga fica para o `0xshell config`,
 que é quem terá esse conhecimento.
 
 ## Alternativas consideradas

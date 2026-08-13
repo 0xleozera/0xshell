@@ -23,7 +23,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ github.ref_name }}" \
-            dist/sshell-darwin-arm64 \
-            dist/sshell-linux-x64 \
+            dist/0xshell-darwin-arm64 \
+            dist/0xshell-linux-x64 \
             --title "${{ github.ref_name }}" \
             --generate-notes

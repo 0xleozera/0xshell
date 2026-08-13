@@ -15,7 +15,7 @@ export type AppImageOptions = {
  * Helper for Tools installed as a Linux AppImage (ADR-0002) — the path for
  * Linux apps distributed as a universal AppImage instead of a package. The
  * binary lands in `~/.local/bin`, a user-writable directory that's already
- * on `PATH` on the distros sshell targets, so no `sudo` is needed.
+ * on `PATH` on the distros 0xshell targets, so no `sudo` is needed.
  */
 export function appImage({ url, binName }: AppImageOptions): Recipe {
   const installDir = join(homedir(), '.local', 'bin');

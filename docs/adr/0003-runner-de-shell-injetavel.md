@@ -4,7 +4,7 @@
 
 ## Contexto
 
-O trabalho inteiro do `sshell` é mutar a máquina: instalar o Homebrew, rodar
+O trabalho inteiro do `0xshell` é mutar a máquina: instalar o Homebrew, rodar
 `brew install --cask`, `sudo apt install`, montar `.dmg`. Um CLI assim não tem teste
 unitário óbvio — não dá para rodar `apt install` num teste, e testar de verdade
 exigiria uma máquina descartável por execução.

@@ -18,7 +18,7 @@ const DEFAULT_INTERVAL_MS = 60_000;
 
 const WARNING =
   'Este setup instala pacotes via apt, que no Linux exige privilégio de root.\n' +
-  'A senha a seguir é usada apenas pelo sudo, individualmente, em cada comando apt — o processo do sshell não roda como root.';
+  'A senha a seguir é usada apenas pelo sudo, individualmente, em cada comando apt — o processo do 0xshell não roda como root.';
 
 /** Timer handle type is intentionally opaque — the ambient `setInterval`/`setTimeout` return types disagree between Bun's and Node's lib declarations, and this module doesn't care which one it holds, only that the same value round-trips into `clearInterval`. */
 export type CreateSudoSessionOptions = {

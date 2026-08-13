@@ -8,7 +8,7 @@ export type MultiselectPrompt = (options: {
 }) => Promise<string[] | symbol>;
 
 /**
- * Backs `sshell install --interactive` (issue #6): opens a clack multiselect
+ * Backs `0xshell install --interactive` (issue #6): opens a clack multiselect
  * over the Catálogo and returns exactly the Tools the user marked. `prompt`
  * defaults to the real `multiselect` but is injectable so tests can supply a
  * fake that resolves immediately — otherwise a test exercising this path

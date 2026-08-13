@@ -4,7 +4,7 @@ import { cancel, confirm } from '@clack/prompts';
 export type ConfirmPrompt = (options: { message: string }) => Promise<boolean | symbol>;
 
 /**
- * Backs `sshell uninstall --all` (issue #11, guarda-corpo 2): errar no
+ * Backs `0xshell uninstall --all` (issue #11, guarda-corpo 2): errar no
  * `install` custa tempo, errar no `uninstall` custa a máquina, então
  * `--all` never runs a single command before a human confirms it. `prompt`
  * defaults to the real `confirm` but is injectable — same reasoning as

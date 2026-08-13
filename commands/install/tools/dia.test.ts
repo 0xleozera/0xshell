@@ -9,8 +9,8 @@ describe('dia tool', () => {
     await dia.darwin.install(runner);
 
     expect(runner.commands).toEqual([
-      ['curl', '-fsSL', 'https://diabrowser.com/download/dia.dmg', '-o', '/tmp/sshell-Dia.dmg'],
-      ['hdiutil', 'attach', '/tmp/sshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet'],
+      ['curl', '-fsSL', 'https://diabrowser.com/download/dia.dmg', '-o', '/tmp/0xshell-Dia.dmg'],
+      ['hdiutil', 'attach', '/tmp/0xshell-Dia.dmg', '-mountpoint', '/Volumes/Dia', '-nobrowse', '-quiet'],
       ['cp', '-R', '/Volumes/Dia/Dia.app', '/Applications/'],
       ['hdiutil', 'detach', '/Volumes/Dia', '-quiet'],
     ]);
