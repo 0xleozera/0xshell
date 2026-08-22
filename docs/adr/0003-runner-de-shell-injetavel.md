@@ -2,6 +2,10 @@
 
 **Status:** aceita · 2026-08-12
 
+> **Atualização (ADR-0005):** o Runner passou a ser entregue aos comandos dentro do
+> `CliContext`, montado em `src/cli.ts`. A decisão em si — todo acesso ao shell passa
+> por uma interface injetável — segue valendo sem mudança.
+
 ## Contexto
 
 O trabalho inteiro do `0xshell` é mutar a máquina: instalar o Homebrew, rodar

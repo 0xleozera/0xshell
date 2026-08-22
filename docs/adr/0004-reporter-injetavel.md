@@ -2,6 +2,11 @@
 
 **Status:** aceita · 2026-08-13
 
+> **Atualização (ADR-0005):** a raiz de composição passou a ser `src/cli.ts` (era
+> `index.ts`), e o Reporter chega aos comandos dentro do `CliContext`. Os comandos não
+> têm mais Reporter default: ele é sempre injetado, o que elimina a última chance de um
+> comando renderizar diferente conforme o ambiente do teste.
+
 ## Contexto
 
 Até aqui todo comando escrevia direto no `console`: 27 chamadas de `console.log` /

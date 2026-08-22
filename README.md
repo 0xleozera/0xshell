@@ -21,6 +21,7 @@ runtime instalado.
 0xshell install --tag apps      # instala os Tools de uma Tag
 0xshell install --interactive   # escolhe os Tools num multiselect
 0xshell install --dry-run       # mostra o que seria executado, sem executar
+0xshell install neovim --dry-run  # flags booleanas vêm depois dos ids
 ```
 
 ## Desenvolvimento
