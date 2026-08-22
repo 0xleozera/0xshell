@@ -1,0 +1,28 @@
+{
+  "name": "0xshell",
+  "module": "src/cli.ts",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "0xshell": "./src/cli.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "build:darwin-arm64": "bun build --compile --target=bun-darwin-arm64 ./src/cli.ts --outfile dist/0xshell-darwin-arm64",
+    "build:linux-x64": "bun build --compile --target=bun-linux-x64 ./src/cli.ts --outfile dist/0xshell-linux-x64",
+    "build": "bun run build:darwin-arm64 && bun run build:linux-x64"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.1",
+    "@trpc/server": "^11.18.0",
+    "trpc-cli": "^0.16.0",
+    "zod": "^4.4.3"
+  }
+}

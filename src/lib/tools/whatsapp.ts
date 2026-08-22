@@ -1,0 +1,10 @@
+import { brewCask } from '../helpers/brew-cask';
+import { defineTool, unsupported } from '../tool';
+
+export default defineTool({
+  id: 'whatsapp',
+  stage: 3,
+  tags: ['apps'],
+  darwin: brewCask('whatsapp'),
+  linux: unsupported('sem cliente Linux oficial'),
+});

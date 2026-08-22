@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues live in GitHub Issues for `0xleozera/sshell`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues for `0xleozera/0xshell`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Domain docs
 
