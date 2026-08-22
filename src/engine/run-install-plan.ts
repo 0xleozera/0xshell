@@ -23,8 +23,15 @@ export type RunInstallPlanOptions = {
    * summary/exit-code logic don't need to know which direction ran.
    */
   readonly action?: PlanAction;
+  /**
+   * Called once per Tool, in execution order, just *before* its command
+   * runs. Always paired with `onOutcome`, which closes the same line.
+   */
+  readonly onToolStart?: (tool: Tool) => void;
   /** Called once per Tool, in execution order, as soon as its Outcome is known. */
   readonly onOutcome?: (outcome: Outcome) => void;
+  /** Where the sudo session's password warning goes; defaults to the session's own. */
+  readonly onWarning?: (message: string) => void;
   readonly createSudoSession?: (runner: Runner) => SudoSession;
 };
 
@@ -97,7 +104,7 @@ export async function runInstallPlan(
   // and only when the plan actually touches a privileged Helper.
   const sudoSession =
     platform === 'linux' && planRequiresPrivilege(ordered, platform)
-      ? (options.createSudoSession ?? createSudoSession)(runner)
+      ? (options.createSudoSession ?? ((r: Runner) => createSudoSession(r, { warn: options.onWarning })))(runner)
       : undefined;
 
   const onInterrupt = (): void => {
@@ -113,6 +120,7 @@ export async function runInstallPlan(
 
   try {
     for (const tool of ordered) {
+      options.onToolStart?.(tool);
       const outcome = await runOne(tool, runner, platform, action);
       outcomes.push(outcome);
       options.onOutcome?.(outcome);

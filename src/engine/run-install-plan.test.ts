@@ -418,4 +418,27 @@ describe('runInstallPlan', () => {
       ).toBe(false);
     });
   });
+
+  test('calls onToolStart before the Tool\'s command runs, once per Tool, in execution order', async () => {
+    const events: string[] = [];
+    const tools = [
+      tool('brew', 0, recipe({ install: async () => void events.push('install brew') })),
+      tool('slack', 3, recipe({ install: async () => void events.push('install slack') })),
+    ];
+
+    await runInstallPlan(tools, new MockRunner(), 'darwin', {
+      onToolStart: (t) => events.push(`start ${t.id}`),
+      onOutcome: (o) => events.push(`outcome ${o.id}`),
+    });
+
+    expect(events).toEqual([
+      'start brew',
+      'install brew',
+      'outcome brew',
+      'start slack',
+      'install slack',
+      'outcome slack',
+    ]);
+  });
+
 });

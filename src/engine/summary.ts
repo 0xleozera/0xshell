@@ -45,9 +45,16 @@ export function exitCodeForSummary(summary: Summary): number {
   return summary.failed > 0 ? 1 : 0;
 }
 
+/**
+ * Title the summary block is filed under. It is not part of the body: the
+ * Reporter (ADR-0004) draws the title itself — as a heading in a plain log,
+ * as the label of a framed block in a terminal — so the body here is only
+ * the counts.
+ */
+export const SUMMARY_TITLE = 'Resumo';
+
 export function formatSummary(summary: Summary): string {
   const lines = [
-    'Resumo:',
     `  instalados: ${summary.installed}`,
     `  já instalados: ${summary.alreadyInstalled}`,
     `  não suportados: ${summary.unsupported}`,

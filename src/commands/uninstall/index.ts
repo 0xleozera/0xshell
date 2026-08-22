@@ -2,7 +2,9 @@ import { defineCommand } from 'citty';
 import type { Outcome } from '../../engine/outcome';
 import { runInstallPlan } from '../../engine/run-install-plan';
 import { selectTools } from '../../engine/select-tools';
-import { exitCodeForSummary, summarize } from '../../engine/summary';
+import { exitCodeForSummary, summarize, SUMMARY_TITLE, type Summary } from '../../engine/summary';
+import { createPlainReporter } from '../../reporter/plain-reporter';
+import type { Reporter, ReporterTask } from '../../reporter/reporter';
 import { catalog, findTool } from '../install/catalog';
 import type { Runner } from '../../runner/runner';
 import type { Tool } from '../../tool/define-tool';
@@ -23,22 +25,37 @@ const GUARDED_STAGE_WARNINGS: Record<number, string> = {
   1: 'Aviso: desinstalar o mise (Stage 1) leva junto bun, pnpm, yarn, go, node e neovim.',
 };
 
-function reportOutcome(outcome: Outcome, platform: Platform): void {
+function reportOutcome(task: ReporterTask, outcome: Outcome, platform: Platform): void {
   switch (outcome.status) {
     case 'installed':
-      console.log(`✓ ${outcome.id} desinstalado`);
+      task.succeed(`${outcome.id} desinstalado`);
       break;
     case 'already-installed':
-      console.log(`✓ ${outcome.id} não estava instalado`);
+      task.succeed(`${outcome.id} não estava instalado`);
       break;
     case 'unsupported':
-      console.log(`⊘ ${outcome.id} não suportado em ${platform}: ${outcome.reason}`);
+      task.skip(`${outcome.id} não suportado em ${platform}: ${outcome.reason}`);
       break;
     case 'failed':
-      console.error(`✗ ${outcome.id} falhou: ${outcome.error}`);
+      task.fail(`${outcome.id} falhou: ${outcome.error}`);
       break;
   }
 }
+
+function closingMessage(summary: Summary): string {
+  if (summary.failed === 0) {
+    return 'Desinstalação concluída.';
+  }
+
+  return summary.failed === 1 ? 'Concluído com 1 falha.' : `Concluído com ${summary.failed} falhas.`;
+}
+
+export type UninstallCommandOptions = {
+  readonly lookupTool?: (id: string) => Tool | undefined;
+  readonly lookupCatalog?: () => readonly Tool[];
+  readonly confirmAllPrompt?: (message?: string) => Promise<boolean>;
+  readonly reporter?: Reporter;
+};
 
 /**
  * Builds the `uninstall [tool...]` command: same contract as
@@ -65,16 +82,16 @@ function reportOutcome(outcome: Outcome, platform: Platform): void {
  * `summarize()`, `exitCodeForSummary()` and the failure policy are untouched
  * and shared with `install`; only the printed words differ, in
  * `reportOutcome` (per-Tool) and `format-summary.ts` (the closing summary
- * block) — install's "installed: 12" phrasing would read as wrong after
- * twelve Tools were removed.
+ * block).
  */
-export function createUninstallCommand(
-  runner: Runner,
-  platform: Platform,
-  lookupTool: (id: string) => Tool | undefined = findTool,
-  lookupCatalog: () => readonly Tool[] = () => catalog,
-  confirmAllPrompt: (message?: string) => Promise<boolean> = confirmAll,
-) {
+export function createUninstallCommand(runner: Runner, platform: Platform, options: UninstallCommandOptions = {}) {
+  const {
+    lookupTool = findTool,
+    lookupCatalog = () => catalog,
+    confirmAllPrompt = confirmAll,
+    reporter = createPlainReporter(),
+  } = options;
+
   return defineCommand({
     meta: {
       name: 'uninstall',
@@ -107,10 +124,12 @@ export function createUninstallCommand(
       const all = args.all;
 
       if (names.length === 0 && !tag && !all) {
-        console.error('0xshell uninstall requer um Tool nomeado, --tag ou --all — nada é assumido por padrão.');
+        reporter.error('0xshell uninstall requer um Tool nomeado, --tag ou --all — nada é assumido por padrão.');
         process.exitCode = 1;
         return;
       }
+
+      reporter.intro(args.dryRun ? '0xshell uninstall --dry-run' : '0xshell uninstall');
 
       if (all && !args.dryRun) {
         const confirmed = await confirmAllPrompt();
@@ -121,7 +140,7 @@ export function createUninstallCommand(
 
       const selection = selectTools(lookupCatalog(), lookupTool, { names, tag });
       if (!selection.ok) {
-        console.error(selection.error);
+        reporter.error(selection.error);
         process.exitCode = 1;
         return;
       }
@@ -132,7 +151,10 @@ export function createUninstallCommand(
           selection.tools.filter((tool) => GUARDED_STAGES.has(tool.stage)).map((tool) => tool.stage),
         );
         for (const stage of guardedStages) {
-          console.log(GUARDED_STAGE_WARNINGS[stage]);
+          const warning = GUARDED_STAGE_WARNINGS[stage];
+          if (warning) {
+            reporter.warn(warning);
+          }
         }
         tools = selection.tools;
       } else {
@@ -140,14 +162,28 @@ export function createUninstallCommand(
       }
 
       if (args.dryRun) {
-        await runDryRun(tools, runner, platform);
+        await runDryRun(tools, runner, platform, reporter);
+        reporter.outro('Nada foi executado.');
         return;
       }
+
+      // Opened by `onToolStart` and closed by `onOutcome`, which
+      // `runInstallPlan` always calls in that order, once each per Tool.
+      let line: ReporterTask | undefined;
 
       const outcomes = await runInstallPlan(tools, runner, platform, {
         action: 'uninstall',
         direction: 'desc',
-        onOutcome: (outcome) => reportOutcome(outcome, platform),
+        onToolStart: (tool) => {
+          line = reporter.task(`Desinstalando ${tool.id}`);
+        },
+        onOutcome: (outcome) => {
+          if (line) {
+            reportOutcome(line, outcome, platform);
+            line = undefined;
+          }
+        },
+        onWarning: (message) => reporter.warn(message),
       });
 
       const summary = summarize(outcomes);
@@ -155,8 +191,10 @@ export function createUninstallCommand(
 
       const isFiltered = names.length > 0 || Boolean(tag);
       if (!isFiltered) {
-        console.log(formatUninstallSummary(summary));
+        reporter.block(SUMMARY_TITLE, formatUninstallSummary(summary));
       }
+
+      reporter.outro(closingMessage(summary));
     },
   });
 }

@@ -13,7 +13,6 @@ import type { Summary } from '../../engine/summary';
  */
 export function formatUninstallSummary(summary: Summary): string {
   const lines = [
-    'Resumo:',
     `  desinstalados: ${summary.installed}`,
     `  não estavam instalados: ${summary.alreadyInstalled}`,
     `  não suportados: ${summary.unsupported}`,

@@ -1,6 +1,7 @@
 import { runCommand } from 'citty';
 import { describe, expect, spyOn, test } from 'bun:test';
 import { brewCask } from '../../helpers/brew-cask';
+import { MockReporter } from '../../reporter/mock-reporter';
 import { MockRunner } from '../../runner/mock-runner';
 import { defineTool, type Tool } from '../../tool/define-tool';
 import type { Recipe } from '../../tool/recipe';
@@ -62,7 +63,7 @@ describe('install command', () => {
     });
     runner.failOn(['brew', 'list', '--cask', 'slack']);
 
-    await runCommand(createInstallCommand(runner, 'darwin', () => tool), { rawArgs: ['slack'] });
+    await runCommand(createInstallCommand(runner, 'darwin', { lookupTool: () => tool }), { rawArgs: ['slack'] });
 
     expect(runner.wasRun(['brew', 'install', '--cask', 'slack'])).toBe(true);
   });
@@ -79,7 +80,7 @@ describe('install command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
     process.exitCode = 0;
 
-    await runCommand(createInstallCommand(runner, 'linux', () => tool), { rawArgs: ['xcode'] });
+    await runCommand(createInstallCommand(runner, 'linux', { lookupTool: () => tool }), { rawArgs: ['xcode'] });
 
     expect(runner.commands).toEqual([]);
     expect(logSpy.mock.calls.flat()).toEqual([
@@ -102,7 +103,7 @@ describe('install command', () => {
     ];
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalog), {
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog }), {
       rawArgs: [],
     });
 
@@ -126,7 +127,7 @@ describe('install command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
     const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalog), {
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog }), {
       rawArgs: [],
     });
 
@@ -158,7 +159,7 @@ describe('install command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
     const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalog), {
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog }), {
       rawArgs: [],
     });
 
@@ -181,7 +182,7 @@ describe('install command', () => {
     ];
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalog), {
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog }), {
       rawArgs: [],
     });
 
@@ -224,10 +225,10 @@ describe('install command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
     const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(runner, 'darwin', undefined, catalog), { rawArgs: [] });
+    await runCommand(createInstallCommand(runner, 'darwin', { lookupCatalog: catalog }), { rawArgs: [] });
     expect(installedIds).toEqual(new Set(['brew']));
 
-    await runCommand(createInstallCommand(runner, 'darwin', undefined, catalog), { rawArgs: [] });
+    await runCommand(createInstallCommand(runner, 'darwin', { lookupCatalog: catalog }), { rawArgs: [] });
 
     expect(installedIds).toEqual(new Set(['brew', 'flaky']));
     expect(brewInstallCalls).toBe(1);
@@ -248,7 +249,7 @@ describe('install command', () => {
     const findTool = (id: string) => [neovim, docker, slack].find((t) => t.id === id);
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(new MockRunner(), 'darwin', findTool), {
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupTool: findTool }), {
       rawArgs: ['docker', 'neovim'],
     });
 
@@ -262,7 +263,7 @@ describe('install command', () => {
     const findTool = (id: string) => (id === 'neovim' ? neovim : undefined);
     const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(new MockRunner(), 'darwin', findTool), {
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupTool: findTool }), {
       rawArgs: ['neovim', 'not-a-real-tool'],
     });
 
@@ -282,7 +283,7 @@ describe('install command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
     await runCommand(
-      createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalogWithTags),
+      createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalogWithTags }),
       { rawArgs: ['--tag', 'cli'] },
     );
 
@@ -300,7 +301,7 @@ describe('install command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
     await runCommand(
-      createInstallCommand(new MockRunner(), 'darwin', undefined, () => catalogForPrompt, promptForTools),
+      createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalogForPrompt, promptForTools }),
       { rawArgs: ['--interactive'] },
     );
 
@@ -317,7 +318,7 @@ describe('install command', () => {
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
     await runCommand(
-      createInstallCommand(new MockRunner(), 'darwin', undefined, undefined, promptForTools),
+      createInstallCommand(new MockRunner(), 'darwin', { promptForTools }),
       { rawArgs: ['slack'] },
     );
 
@@ -340,7 +341,7 @@ describe('install command', () => {
     );
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createInstallCommand(runner, 'darwin', () => slack), {
+    await runCommand(createInstallCommand(runner, 'darwin', { lookupTool: () => slack }), {
       rawArgs: ['slack', '--dry-run'],
     });
 
@@ -363,5 +364,97 @@ describe('install command', () => {
     expect(process.exitCode).not.toBe(0);
     process.exitCode = 0;
     errorSpy.mockRestore();
+  });
+});
+
+describe('install command, as reported', () => {
+  test("opens each Tool's line before its command runs, and closes it with the Outcome", async () => {
+    const reporter = new MockReporter();
+    const openWhileInstalling: string[] = [];
+    const catalog = [
+      tool(
+        'brew',
+        0,
+        recipe({
+          install: async () => {
+            openWhileInstalling.push(...reporter.messages('task'));
+          },
+        }),
+      ),
+    ];
+
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog, reporter }), {
+      rawArgs: [],
+    });
+
+    // The line is already open while `install()` runs — that is the whole
+    // point of reporting before the command instead of after it.
+    expect(openWhileInstalling).toEqual(['Instalando brew']);
+    expect(reporter.messages('task', 'succeed')).toEqual(['Instalando brew', 'brew instalado']);
+  });
+
+  test('closes each line under the kind its Outcome deserves', async () => {
+    const reporter = new MockReporter();
+    const catalog = [
+      tool('git', 0, recipe({ isInstalled: async () => true })),
+      tool('slack', 3, recipe()),
+      tool('xcode', 3, unsupported('ferramenta exclusiva da Apple')),
+      tool(
+        'docker',
+        3,
+        recipe({
+          install: async () => {
+            throw new Error('curl falhou');
+          },
+        }),
+      ),
+    ];
+
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog, reporter }), {
+      rawArgs: [],
+    });
+
+    expect(reporter.messages('succeed')).toEqual(['git já estava instalado', 'slack instalado']);
+    expect(reporter.messages('skip')).toEqual(['xcode não suportado em darwin: ferramenta exclusiva da Apple']);
+    expect(reporter.messages('fail')).toEqual(['docker falhou: curl falhou']);
+
+    process.exitCode = 0;
+  });
+
+  test('files the closing summary under its own title and signs off', async () => {
+    const reporter = new MockReporter();
+
+    await runCommand(
+      createInstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => [tool('slack', 3, recipe())], reporter }),
+      { rawArgs: [] },
+    );
+
+    expect(reporter.messages('block')).toEqual(['Resumo:\n  instalados: 1\n  já instalados: 0\n  não suportados: 0\n  falharam: 0']);
+    expect(reporter.messages('outro')).toEqual(['Tudo pronto.']);
+  });
+
+  test('a filtered run reports its Tools and skips the summary block', async () => {
+    const reporter = new MockReporter();
+    const slack = tool('slack', 3, recipe());
+
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { lookupTool: () => slack, reporter }), {
+      rawArgs: ['slack'],
+    });
+
+    expect(reporter.messages('succeed')).toEqual(['slack instalado']);
+    expect(reporter.messages('block')).toEqual([]);
+  });
+
+  test('an unknown name is reported as an error, and never opens a Tool line', async () => {
+    const reporter = new MockReporter();
+
+    await runCommand(createInstallCommand(new MockRunner(), 'darwin', { reporter }), {
+      rawArgs: ['not-a-real-tool'],
+    });
+
+    expect(reporter.messages('error')).toHaveLength(1);
+    expect(reporter.messages('task')).toEqual([]);
+
+    process.exitCode = 0;
   });
 });

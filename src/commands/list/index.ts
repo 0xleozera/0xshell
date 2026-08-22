@@ -1,5 +1,7 @@
 import { defineCommand } from 'citty';
 import { sortByStage } from '../../engine/stage-order';
+import { createPlainReporter } from '../../reporter/plain-reporter';
+import type { Reporter } from '../../reporter/reporter';
 import type { Runner } from '../../runner/runner';
 import type { Tool } from '../../tool/define-tool';
 import type { Platform } from '../../tool/platform';
@@ -19,6 +21,15 @@ function formatTool(tool: Tool, platform: Platform): string {
   return `${tool.id} [stage ${tool.stage}] [tags: ${tags}] ${support}`;
 }
 
+function closingMessage(total: number): string {
+  return total === 1 ? '1 ferramenta no Catálogo.' : `${total} ferramentas no Catálogo.`;
+}
+
+export type ListCommandOptions = {
+  readonly lookupCatalog?: () => readonly Tool[];
+  readonly reporter?: Reporter;
+};
+
 /**
  * Builds the read-only `list` command: prints the whole Catalog, one line
  * per Tool, with Tag, Stage and support on the current Platform. Purely
@@ -26,12 +37,14 @@ function formatTool(tool: Tool, platform: Platform): string {
  * Runner for its own logic. `runner` is still accepted so cli.ts can wire
  * every subcommand the same way and so the "no write command" test has a
  * real MockRunner to assert against.
+ *
+ * The rows are already formatted when they reach the Reporter (`line()`):
+ * `list` describes the Catalog rather than reporting what happened to it,
+ * so its markers say "supported here", not "this went well".
  */
-export function createListCommand(
-  _runner: Runner,
-  platform: Platform,
-  lookupCatalog: () => readonly Tool[] = () => catalog,
-) {
+export function createListCommand(_runner: Runner, platform: Platform, options: ListCommandOptions = {}) {
+  const { lookupCatalog = () => catalog, reporter = createPlainReporter() } = options;
+
   return defineCommand({
     meta: {
       name: 'list',
@@ -39,10 +52,20 @@ export function createListCommand(
     },
     run() {
       const tools = sortByStage(lookupCatalog());
-      for (const tool of tools) {
-        console.log(formatTool(tool, platform));
+
+      reporter.intro('0xshell list');
+
+      // The whole Catalog goes out as one call, not one per Tool: a Reporter
+      // is free to set each `line()` apart from the last (the interactive one
+      // puts a blank rule between them), and twenty-two Tools spaced out like
+      // that stop looking like a table. Sent together they stay one block —
+      // and, line for line, it is the same text either way.
+      if (tools.length > 0) {
+        reporter.line(tools.map((tool) => formatTool(tool, platform)).join('\n'));
       }
-      console.log(NPM_NOTE);
+
+      reporter.info(NPM_NOTE);
+      reporter.outro(closingMessage(tools.length));
     },
   });
 }

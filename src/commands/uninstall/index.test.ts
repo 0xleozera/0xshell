@@ -2,6 +2,7 @@ import { runCommand } from 'citty';
 import { describe, expect, spyOn, test } from 'bun:test';
 import { apt } from '../../helpers/apt';
 import { brewCask } from '../../helpers/brew-cask';
+import { MockReporter } from '../../reporter/mock-reporter';
 import { MockRunner } from '../../runner/mock-runner';
 import { defineTool, type Tool } from '../../tool/define-tool';
 import type { Recipe } from '../../tool/recipe';
@@ -37,7 +38,7 @@ describe('uninstall command', () => {
       }),
     );
 
-    await runCommand(createUninstallCommand(new MockRunner(), 'darwin', () => slack), { rawArgs: ['slack'] });
+    await runCommand(createUninstallCommand(new MockRunner(), 'darwin', { lookupTool: () => slack }), { rawArgs: ['slack'] });
 
     expect(uninstalled).toEqual(['slack']);
   });
@@ -47,7 +48,7 @@ describe('uninstall command', () => {
     const git = tool('git', 3, recipe({ isInstalled: async () => false }));
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createUninstallCommand(runner, 'darwin', () => git), { rawArgs: ['git'] });
+    await runCommand(createUninstallCommand(runner, 'darwin', { lookupTool: () => git }), { rawArgs: ['git'] });
 
     expect(logSpy.mock.calls.flat()).toContain('✓ git não estava instalado');
     expect(process.exitCode).toBe(0);
@@ -87,7 +88,7 @@ describe('uninstall command', () => {
       const confirmAllPrompt = async () => false;
 
       await runCommand(
-        createUninstallCommand(new MockRunner(), 'darwin', undefined, () => catalog, confirmAllPrompt),
+        createUninstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog, confirmAllPrompt }),
         { rawArgs: ['--all'] },
       );
 
@@ -109,7 +110,7 @@ describe('uninstall command', () => {
       const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
       await runCommand(
-        createUninstallCommand(new MockRunner(), 'darwin', undefined, () => catalog, confirmAllPrompt),
+        createUninstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog, confirmAllPrompt }),
         { rawArgs: ['--all'] },
       );
 
@@ -124,7 +125,7 @@ describe('uninstall command', () => {
       const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
       await runCommand(
-        createUninstallCommand(new MockRunner(), 'darwin', undefined, () => catalog, confirmAllPrompt),
+        createUninstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog, confirmAllPrompt }),
         { rawArgs: ['--all'] },
       );
 
@@ -150,7 +151,7 @@ describe('uninstall command', () => {
       ];
       const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-      await runCommand(createUninstallCommand(new MockRunner(), 'darwin', undefined, () => catalog), {
+      await runCommand(createUninstallCommand(new MockRunner(), 'darwin', { lookupCatalog: () => catalog }), {
         rawArgs: ['--tag', 'core'],
       });
 
@@ -182,7 +183,7 @@ describe('uninstall command', () => {
       const findTool = (id: string) => [homebrew, mise].find((t) => t.id === id);
       const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-      await runCommand(createUninstallCommand(new MockRunner(), 'darwin', findTool), {
+      await runCommand(createUninstallCommand(new MockRunner(), 'darwin', { lookupTool: findTool }), {
         rawArgs: ['homebrew', 'mise'],
       });
 
@@ -208,7 +209,7 @@ describe('uninstall command', () => {
       const findTool = (id: string) => [app, runtime, mise, homebrew].find((t) => t.id === id);
       const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-      await runCommand(createUninstallCommand(new MockRunner(), 'darwin', findTool), {
+      await runCommand(createUninstallCommand(new MockRunner(), 'darwin', { lookupTool: findTool }), {
         rawArgs: ['runtime', 'homebrew', 'app', 'mise'],
       });
 
@@ -223,7 +224,7 @@ describe('uninstall command', () => {
       const runner = new MockRunner();
       const docker = defineTool({ id: 'docker', stage: 3, tags: [], darwin: brewCask('docker'), linux: apt('docker.io') });
 
-      await runCommand(createUninstallCommand(runner, 'darwin', () => docker), { rawArgs: ['docker'] });
+      await runCommand(createUninstallCommand(runner, 'darwin', { lookupTool: () => docker }), { rawArgs: ['docker'] });
 
       expect(runner.wasRun(['brew', 'uninstall', '--cask', 'docker'])).toBe(true);
       expect(
@@ -235,7 +236,7 @@ describe('uninstall command', () => {
       const runner = new MockRunner();
       const docker = defineTool({ id: 'docker', stage: 3, tags: [], darwin: brewCask('docker'), linux: apt('docker.io') });
 
-      await runCommand(createUninstallCommand(runner, 'linux', () => docker), { rawArgs: ['docker'] });
+      await runCommand(createUninstallCommand(runner, 'linux', { lookupTool: () => docker }), { rawArgs: ['docker'] });
 
       expect(runner.wasRun(['sudo', 'apt', 'remove', '-y', 'docker.io'])).toBe(true);
       expect(
@@ -260,7 +261,7 @@ describe('uninstall command', () => {
       );
       const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-      await runCommand(createUninstallCommand(runner, 'darwin', () => slack), {
+      await runCommand(createUninstallCommand(runner, 'darwin', { lookupTool: () => slack }), {
         rawArgs: ['slack', '--dry-run'],
       });
 
@@ -275,7 +276,7 @@ describe('uninstall command', () => {
       const runner = new MockRunner();
       const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
 
-      await runCommand(createUninstallCommand(runner, 'darwin', () => undefined), {
+      await runCommand(createUninstallCommand(runner, 'darwin', { lookupTool: () => undefined }), {
         rawArgs: ['not-a-real-tool', '--dry-run'],
       });
 
@@ -307,7 +308,7 @@ describe('uninstall command', () => {
       ];
       const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-      await runCommand(createUninstallCommand(runner, 'darwin', undefined, () => catalog, confirmAllPrompt), {
+      await runCommand(createUninstallCommand(runner, 'darwin', { lookupCatalog: () => catalog, confirmAllPrompt }), {
         rawArgs: ['--all', '--dry-run'],
       });
 
@@ -323,7 +324,7 @@ describe('uninstall command', () => {
     const runner = new MockRunner();
     const errorSpy = spyOn(console, 'error').mockImplementation(() => {});
 
-    await runCommand(createUninstallCommand(runner, 'darwin', () => undefined), {
+    await runCommand(createUninstallCommand(runner, 'darwin', { lookupTool: () => undefined }), {
       rawArgs: ['not-a-real-tool'],
     });
 
@@ -332,5 +333,53 @@ describe('uninstall command', () => {
 
     process.exitCode = 0;
     errorSpy.mockRestore();
+  });
+});
+
+describe('uninstall command, as reported', () => {
+  test("opens each Tool's line before its command runs, in uninstall's own vocabulary", async () => {
+    const reporter = new MockReporter();
+    const catalog = [tool('slack', 3, recipe()), tool('docker', 3, recipe({ isInstalled: async () => false }))];
+
+    await runCommand(
+      createUninstallCommand(new MockRunner(), 'darwin', {
+        lookupCatalog: () => catalog,
+        confirmAllPrompt: async () => true,
+        reporter,
+      }),
+      { rawArgs: ['--all'] },
+    );
+
+    expect(reporter.messages('task')).toEqual(['Desinstalando slack', 'Desinstalando docker']);
+    expect(reporter.messages('succeed')).toEqual(['slack desinstalado', 'docker não estava instalado']);
+    expect(reporter.messages('block')).toEqual([
+      'Resumo:\n  desinstalados: 1\n  não estavam instalados: 1\n  não suportados: 0\n  falharam: 0',
+    ]);
+  });
+
+  test('reports the guarded-Stage warning as a warning, before anything runs', async () => {
+    const reporter = new MockReporter();
+    const homebrew = tool('homebrew', 0, recipe());
+
+    await runCommand(
+      createUninstallCommand(new MockRunner(), 'darwin', { lookupTool: () => homebrew, reporter }),
+      { rawArgs: ['homebrew'] },
+    );
+
+    expect(reporter.messages('warn')).toEqual([HOMEBREW_WARNING]);
+    expect(reporter.reports.findIndex((r) => r.kind === 'warn')).toBeLessThan(
+      reporter.reports.findIndex((r) => r.kind === 'task'),
+    );
+  });
+
+  test('a bare uninstall is reported as an error, and never opens a run', async () => {
+    const reporter = new MockReporter();
+
+    await runCommand(createUninstallCommand(new MockRunner(), 'darwin', { reporter }), { rawArgs: [] });
+
+    expect(reporter.messages('error')).toHaveLength(1);
+    expect(reporter.messages('intro')).toEqual([]);
+
+    process.exitCode = 0;
   });
 });

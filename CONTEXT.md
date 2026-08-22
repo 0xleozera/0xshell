@@ -54,6 +54,20 @@ o erro é coletado e a execução continua.
 Interface de execução de comandos de shell. Em produção é `Bun.$`; nos testes é um
 mock. Todo acesso ao shell passa pelo Runner — nenhum módulo chama `Bun.$` direto.
 
+### Reporter
+
+Interface de saída para o terminal, o par do Runner do outro lado: assim como nenhum
+módulo chama `Bun.$` direto, nenhum comando chama `console.*` direto. O comando
+descreve o que aconteceu; o Reporter decide como aquilo aparece.
+
+Duas implementações, escolhidas em `index.ts` pelo ambiente: `clack-reporter` quando
+`stdout` é um terminal (spinner por Tool, resumo emoldurado) e `plain-reporter` para
+pipe, arquivo, CI e `TERM=dumb` (uma linha por vez, sem ANSI). Ver
+[ADR-0004](docs/adr/0004-reporter-injetavel.md).
+
+_Evitar como sinônimo:_ "logger". Um Reporter não tem níveis nem destinos
+configuráveis; ele tem o vocabulário fechado de terminações que o CLI sabe reportar.
+
 ### Unsupported
 
 Declaração explícita de que um Tool não existe numa plataforma, acompanhada do

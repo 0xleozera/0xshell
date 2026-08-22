@@ -1,5 +1,6 @@
 import { runCommand } from 'citty';
 import { describe, expect, spyOn, test } from 'bun:test';
+import { MockReporter } from '../../reporter/mock-reporter';
 import { MockRunner } from '../../runner/mock-runner';
 import { defineTool, type Tool } from '../../tool/define-tool';
 import type { Recipe } from '../../tool/recipe';
@@ -28,7 +29,7 @@ describe('doctor command', () => {
     ];
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createDoctorCommand(new MockRunner(), 'linux', () => fixture), { rawArgs: [] });
+    await runCommand(createDoctorCommand(new MockRunner(), 'linux', { lookupCatalog: () => fixture }), { rawArgs: [] });
 
     const lines = logSpy.mock.calls.flat();
     expect(lines).toContain('✓ git instalado');
@@ -47,7 +48,7 @@ describe('doctor command', () => {
     ];
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createDoctorCommand(new MockRunner(), 'linux', () => fixture), { rawArgs: [] });
+    await runCommand(createDoctorCommand(new MockRunner(), 'linux', { lookupCatalog: () => fixture }), { rawArgs: [] });
 
     const output = logSpy.mock.calls.flat().join('\n');
     expect(output).toContain('instalados: 1');
@@ -72,7 +73,7 @@ describe('doctor command', () => {
     ];
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createDoctorCommand(new MockRunner(), 'darwin', () => fixture), { rawArgs: [] });
+    await runCommand(createDoctorCommand(new MockRunner(), 'darwin', { lookupCatalog: () => fixture }), { rawArgs: [] });
 
     expect(process.exitCode).toBe(0);
     logSpy.mockRestore();
@@ -82,7 +83,7 @@ describe('doctor command', () => {
     const fixture = [tool('neovim', 2, recipe({ isInstalled: async () => false }))];
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createDoctorCommand(new MockRunner(), 'darwin', () => fixture), { rawArgs: [] });
+    await runCommand(createDoctorCommand(new MockRunner(), 'darwin', { lookupCatalog: () => fixture }), { rawArgs: [] });
 
     expect(process.exitCode).not.toBe(0);
 
@@ -116,7 +117,7 @@ describe('doctor command', () => {
     ];
     const logSpy = spyOn(console, 'log').mockImplementation(() => {});
 
-    await runCommand(createDoctorCommand(runner, 'darwin', () => fixture), { rawArgs: [] });
+    await runCommand(createDoctorCommand(runner, 'darwin', { lookupCatalog: () => fixture }), { rawArgs: [] });
 
     expect(runner.commands).toEqual([['git', '--version']]);
     expect(runner.wasRun(['brew', 'install', 'neovim'])).toBe(false);
@@ -124,5 +125,56 @@ describe('doctor command', () => {
 
     process.exitCode = 0;
     logSpy.mockRestore();
+  });
+});
+
+describe('doctor command, as reported', () => {
+  test('opens a line per Tool while it is checked, and closes it with what was found', async () => {
+    const reporter = new MockReporter();
+    const fixture = [
+      tool('git', 0, recipe({ isInstalled: async () => true })),
+      tool('neovim', 2, recipe({ isInstalled: async () => false })),
+      tool('xcode', 3, unsupported('ferramenta exclusiva da Apple')),
+    ];
+
+    await runCommand(createDoctorCommand(new MockRunner(), 'linux', { lookupCatalog: () => fixture, reporter }), {
+      rawArgs: [],
+    });
+
+    expect(reporter.messages('task')).toEqual(['Verificando git', 'Verificando neovim', 'Verificando xcode']);
+    expect(reporter.messages('succeed')).toEqual(['git instalado']);
+    // A missing Tool is `doctor`'s normal finding, so it is reported as
+    // absent and never through the failure vocabulary of `install`.
+    expect(reporter.messages('absent')).toEqual(['neovim faltando']);
+    expect(reporter.messages('fail')).toEqual([]);
+    expect(reporter.messages('skip')).toEqual(['xcode não suportado em linux: ferramenta exclusiva da Apple']);
+
+    process.exitCode = 0;
+  });
+
+  test('signs off pointing at install when something is missing, and quietly when nothing is', async () => {
+    const missing = new MockReporter();
+    const complete = new MockReporter();
+
+    await runCommand(
+      createDoctorCommand(new MockRunner(), 'darwin', {
+        lookupCatalog: () => [tool('neovim', 2, recipe({ isInstalled: async () => false }))],
+        reporter: missing,
+      }),
+      { rawArgs: [] },
+    );
+    process.exitCode = 0;
+
+    await runCommand(
+      createDoctorCommand(new MockRunner(), 'darwin', {
+        lookupCatalog: () => [tool('neovim', 2, recipe({ isInstalled: async () => true }))],
+        reporter: complete,
+      }),
+      { rawArgs: [] },
+    );
+
+    expect(missing.messages('outro')).toEqual(['Falta 1 ferramenta — rode 0xshell install.']);
+    expect(missing.messages('block')).toEqual(['Resumo:\n  instalados: 0\n  faltando: 1\n  não suportados: 0']);
+    expect(complete.messages('outro')).toEqual(['Máquina em dia.']);
   });
 });
