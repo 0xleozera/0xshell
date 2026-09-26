@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { homedir } from 'node:os';
 import { buildDryRunPlan, formatDryRunPlan } from './dry-run';
 import { createMockRunner } from './mock-runner';
 import type { Recipe } from './recipe';
@@ -164,5 +165,60 @@ describe('dry run (uninstall)', () => {
     await buildDryRunPlan([withId('brew', 0), withId('mise', 1), withId('slack', 3)], createMockRunner(), 'darwin', 'uninstall');
 
     expect(seen).toEqual(['slack', 'mise', 'brew']);
+  });
+});
+
+describe('dry run (configuration)', () => {
+  const home = homedir();
+  const configuration = { root: home, files: [{ path: '.zshrc', content: 'managed\n' }] };
+  const zshrcMatches = ['sh', '-c', 'printf "%s" "$1" | cmp -s - "$2"', 'sh', 'managed\n', `${home}/.zshrc`];
+
+  function configuredTool(entry: Recipe): Tool {
+    return defineTool({ id: 'zsh', stage: 3, tags: [], darwin: entry, linux: entry, configuration });
+  }
+
+  test('lists the files an already-installed Tool would rewrite, without writing them', async () => {
+    const runner = createMockRunner();
+    runner.failOn(zshrcMatches);
+    const zsh = configuredTool(recipe({ isInstalled: async () => true }));
+
+    const plan = await buildDryRunPlan([zsh], runner, 'darwin', 'install');
+
+    expect(lines(plan, 'darwin', 'install')).toEqual(['✎ zsh: escreve ~/.zshrc']);
+    expect(runner.commands).toEqual([zshrcMatches]);
+  });
+
+  test('lists the install commands first, then the files, for a Tool that is missing', async () => {
+    const runner = createMockRunner();
+    runner.failOn(zshrcMatches);
+    const zsh = configuredTool(
+      recipe({
+        install: async (r) => {
+          await r.run(['brew', 'install', 'zsh']);
+        },
+      }),
+    );
+
+    const plan = await buildDryRunPlan([zsh], runner, 'darwin', 'install');
+
+    expect(lines(plan, 'darwin', 'install')).toEqual(['→ zsh: brew install zsh\n✎ zsh: escreve ~/.zshrc']);
+  });
+
+  test('reports nothing to do when the Tool is installed and its files already match', async () => {
+    const zsh = configuredTool(recipe({ isInstalled: async () => true }));
+
+    const plan = await buildDryRunPlan([zsh], createMockRunner(), 'darwin', 'install');
+
+    expect(plan).toEqual([{ status: 'nothing-to-do', id: 'zsh' }]);
+  });
+
+  test('never plans configuration on uninstall', async () => {
+    const runner = createMockRunner();
+    const zsh = configuredTool(recipe({ isInstalled: async () => false }));
+
+    const plan = await buildDryRunPlan([zsh], runner, 'darwin', 'uninstall');
+
+    expect(plan).toEqual([{ status: 'nothing-to-do', id: 'zsh' }]);
+    expect(runner.commands).toEqual([]);
   });
 });

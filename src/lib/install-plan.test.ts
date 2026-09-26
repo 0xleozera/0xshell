@@ -441,3 +441,130 @@ describe('runInstallPlan', () => {
   });
 
 });
+
+describe('runInstallPlan (configuration)', () => {
+  const backup = { home: '/home/leo', version: '20260926-143012' };
+  const configuration = { root: '/home/leo', files: [{ path: '.zshrc', content: 'managed\n' }] };
+  const writeZshrc = ['sh', '-c', 'mkdir -p "$(dirname "$2")" && printf "%s" "$1" > "$2"', 'sh', 'managed\n', '/home/leo/.zshrc'];
+  const zshrcMatches = ['sh', '-c', 'printf "%s" "$1" | cmp -s - "$2"', 'sh', 'managed\n', '/home/leo/.zshrc'];
+
+  function configuredTool(entry: Recipe | ReturnType<typeof unsupported> = recipe()): Tool {
+    return defineTool({ id: 'zsh', stage: 3, tags: [], darwin: entry, linux: entry, configuration });
+  }
+
+  test('configures a Tool right after installing it', async () => {
+    const events: string[] = [];
+    const runner = createMockRunner();
+    runner.failOn(zshrcMatches);
+    const zsh = configuredTool(recipe({ install: async () => void events.push('install') }));
+
+    const outcomes = await runInstallPlan([zsh], runner, 'darwin', {
+      backup,
+      onOutcome: () => events.push('outcome'),
+    });
+
+    expect(outcomes).toEqual([{ status: 'installed', id: 'zsh', configuration: 'applied' }]);
+    expect(runner.wasRun(writeZshrc)).toBe(true);
+    expect(events).toEqual(['install', 'outcome']);
+  });
+
+  test('moves what the Configuration replaces into the run\'s backup before writing', async () => {
+    const runner = createMockRunner();
+    runner.failOn(zshrcMatches);
+    const zsh = configuredTool(recipe({ isInstalled: async () => true }));
+
+    await runInstallPlan([zsh], runner, 'darwin', { backup });
+
+    const moveAside = runner.commands.findIndex((command) =>
+      command.includes('/home/leo/.0xshell/backups/20260926-143012/files/.zshrc'),
+    );
+    expect(moveAside).toBeGreaterThan(-1);
+    expect(moveAside).toBeLessThan(runner.commands.findIndex((command) => command.join(' ') === writeZshrc.join(' ')));
+  });
+
+  test('fails a Tool it cannot back up instead of overwriting without a backup', async () => {
+    const runner = createMockRunner();
+    runner.failOn(zshrcMatches);
+    const zsh = configuredTool(recipe({ isInstalled: async () => true }));
+
+    const outcomes = await runInstallPlan([zsh], runner, 'darwin');
+
+    expect(outcomes[0]).toMatchObject({ status: 'failed', id: 'zsh' });
+    expect(runner.wasRun(writeZshrc)).toBe(false);
+  });
+
+  test('configures a Tool that was already installed', async () => {
+    const runner = createMockRunner();
+    runner.failOn(zshrcMatches);
+    const zsh = configuredTool(recipe({ isInstalled: async () => true }));
+
+    const outcomes = await runInstallPlan([zsh], runner, 'darwin', { backup });
+
+    expect(outcomes).toEqual([{ status: 'already-installed', id: 'zsh', configuration: 'applied' }]);
+    expect(runner.wasRun(writeZshrc)).toBe(true);
+  });
+
+  test('reports an up-to-date configuration as unchanged without writing', async () => {
+    const runner = createMockRunner();
+    const zsh = configuredTool(recipe({ isInstalled: async () => true }));
+
+    const outcomes = await runInstallPlan([zsh], runner, 'darwin', { backup });
+
+    expect(outcomes).toEqual([{ status: 'already-installed', id: 'zsh', configuration: 'unchanged' }]);
+    expect(runner.wasRun(writeZshrc)).toBe(false);
+  });
+
+  test('a configuration failure fails the Tool with its own reason and the plan carries on', async () => {
+    const runner = createMockRunner();
+    runner.failOn(zshrcMatches);
+    runner.failOn(writeZshrc, { stderr: 'Permission denied' });
+    const zsh = configuredTool();
+
+    const outcomes = await runInstallPlan([zsh, tool('slack', 3)], runner, 'darwin', { backup });
+
+    expect(outcomes[0]).toMatchObject({ status: 'failed', id: 'zsh' });
+    expect(outcomes[0]?.status === 'failed' && outcomes[0].error).toStartWith('configuração falhou:');
+    expect(outcomes[1]).toEqual({ status: 'installed', id: 'slack' });
+  });
+
+  test('does not configure a Tool whose install failed', async () => {
+    const runner = createMockRunner();
+    const zsh = configuredTool(
+      recipe({
+        install: async () => {
+          throw new Error('brew falhou');
+        },
+      }),
+    );
+
+    await runInstallPlan([zsh], runner, 'darwin', { backup });
+
+    expect(runner.commands).toEqual([]);
+  });
+
+  test('uninstall never touches configuration', async () => {
+    const runner = createMockRunner();
+    const zsh = configuredTool(recipe({ isInstalled: async () => true }));
+
+    const outcomes = await runInstallPlan([zsh], runner, 'darwin', { action: 'uninstall' });
+
+    expect(outcomes).toEqual([{ status: 'installed', id: 'zsh' }]);
+    expect(runner.commands).toEqual([]);
+  });
+
+  test('does not configure a Tool that is unsupported on the Platform', async () => {
+    const runner = createMockRunner();
+    const zsh = defineTool({
+      id: 'zsh',
+      stage: 3,
+      tags: [],
+      darwin: recipe(),
+      linux: unsupported('sem receita'),
+      configuration,
+    });
+
+    await runInstallPlan([zsh], runner, 'linux', { backup });
+
+    expect(runner.commands).toEqual([]);
+  });
+});

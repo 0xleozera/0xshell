@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Configuration } from './configuration';
 import type { Platform } from './platform';
 import type { Recipe } from './recipe';
 
@@ -45,12 +46,20 @@ const unsupportedSchema = z.custom<Unsupported>(isUnsupported, {
 
 const platformEntrySchema = z.union([recipeSchema, unsupportedSchema]);
 
+const configurationSchema = z.object({
+  root: z.string().min(1, 'root não pode ser vazio'),
+  files: z.array(z.object({ path: z.string().min(1), content: z.string() })).min(1),
+  ownsRoot: z.boolean().optional(),
+}) satisfies z.ZodType<Configuration>;
+
 /**
  * Schema for a Tool (ADR-0002). Each Platform (`darwin`, `linux`) resolves
  * to a Recipe or to `unsupported(reason)`. `stage` (0–3) pins the execution
  * order — package manager → mise → runtimes → apps/CLIs — in place of a
  * dependency graph. `tags` groups Tools for `0xshell install --tag <tag>`
- * and produces no commands of its own.
+ * and produces no commands of its own. `configuration` is what `install`
+ * writes once the Tool is present, on every Platform where it is supported
+ * (ADR-0006).
  */
 const toolSchema = z.object({
   id: z.string().min(1, 'id não pode ser vazio'),
@@ -58,6 +67,7 @@ const toolSchema = z.object({
   tags: z.array(z.string()),
   darwin: platformEntrySchema,
   linux: platformEntrySchema,
+  configuration: configurationSchema.optional(),
 });
 
 export type Tool = z.infer<typeof toolSchema>;

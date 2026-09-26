@@ -40,6 +40,8 @@ function context(overrides: Partial<CliContext> = {}): TestContext {
     runner: createMockRunner(),
     reporter: createMockReporter(),
     platform: 'darwin',
+    home: '/home/leo',
+    now: () => new Date(2026, 8, 26, 14, 30, 12),
     catalog: realCatalog,
     prompts: noPrompts,
     ...overrides,
@@ -386,6 +388,34 @@ describe('install command, as reported', () => {
     expect(ctx.reporter.messages('succeed')).toEqual(['git já estava instalado', 'slack instalado']);
     expect(ctx.reporter.messages('skip')).toEqual(['xcode não suportado em darwin: ferramenta exclusiva da Apple']);
     expect(ctx.reporter.messages('fail')).toEqual(['docker falhou: curl falhou']);
+  });
+
+  test('reports a configuration that already matched the machine as up to date, installed or not', async () => {
+    const configuration = { root: '/home/leo', files: [{ path: '.zshrc', content: 'managed\n' }] };
+    const configured = (id: string, entry: Recipe) =>
+      defineTool({ id, stage: 3, tags: [], darwin: entry, linux: entry, configuration });
+    const ctx = context({
+      catalog: [configured('zsh', recipe()), configured('antigen', recipe({ isInstalled: async () => true }))],
+    });
+
+    await installCommand(input({ tools: ['zsh', 'antigen'] }), ctx);
+
+    expect(ctx.reporter.messages('succeed')).toEqual([
+      'zsh instalado · configuração em dia',
+      'antigen já estava instalado · configuração em dia',
+    ]);
+  });
+
+  test('reports a Tool whose configuration was written', async () => {
+    const configuration = { root: '/home/leo', files: [{ path: '.zshrc', content: 'managed\n' }] };
+    const ctx = context({
+      catalog: [defineTool({ id: 'zsh', stage: 3, tags: [], darwin: recipe(), linux: recipe(), configuration })],
+    });
+    ctx.runner.failOn(['sh', '-c', 'printf "%s" "$1" | cmp -s - "$2"', 'sh', 'managed\n', '/home/leo/.zshrc']);
+
+    await installCommand(input({ tools: ['zsh'] }), ctx);
+
+    expect(ctx.reporter.messages('succeed')).toEqual(['zsh instalado · configuração aplicada']);
   });
 
   test('files the closing summary under its own title and signs off', async () => {

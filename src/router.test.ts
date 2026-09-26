@@ -35,6 +35,8 @@ function context(catalog: readonly Tool[]): TestContext {
     runner: createMockRunner(),
     reporter: createMockReporter(),
     platform: 'darwin',
+    home: '/home/leo',
+    now: () => new Date(2026, 8, 26, 14, 30, 12),
     catalog,
     prompts: noPrompts,
   } as TestContext;

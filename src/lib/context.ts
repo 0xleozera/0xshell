@@ -1,3 +1,4 @@
+import { homedir } from 'node:os';
 import { catalog } from './catalog';
 import { resolvePlatform, type Platform } from './platform';
 import type { Reporter } from './reporter';
@@ -23,7 +24,8 @@ export type CliPrompts = {
  * Everything outside the command that a command is allowed to touch: the
  * machine (`runner`, ADR-0003), the terminal (`reporter`, ADR-0004), the
  * human (`prompts`), the Platform it all runs on and the Catalog it acts
- * upon.
+ * upon. `home` and `now` are here so backups (ADR-0006) are named and placed
+ * by values a test can fix, not by the real clock and home.
  *
  * It is assembled once, in `cli.ts`, and handed down as the tRPC context —
  * so a test drives the very same commands against a MockRunner, a
@@ -35,6 +37,8 @@ export type CliContext = {
   readonly platform: Platform;
   readonly catalog: readonly Tool[];
   readonly prompts: CliPrompts;
+  readonly home: string;
+  readonly now: () => Date;
 };
 
 /**
@@ -50,5 +54,7 @@ export function createCliContext(reporter: Reporter, prompts: CliPrompts): CliCo
     platform: resolvePlatform(),
     catalog,
     prompts,
+    home: homedir(),
+    now: () => new Date(),
   };
 }
