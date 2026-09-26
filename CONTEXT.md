@@ -1,7 +1,7 @@
 # CONTEXT — 0xshell
 
-CLI em Bun que instala, numa máquina nova, o conjunto fixo de ferramentas do setup
-de desenvolvimento. Suporta macOS (Homebrew) e Linux (apt).
+CLI em Bun que instala e configura, numa máquina nova, o conjunto fixo de ferramentas
+do setup de desenvolvimento. Suporta macOS (Homebrew) e Linux (apt).
 
 ## Glossário
 
@@ -11,8 +11,8 @@ issue e nos testes — não drifte para os sinônimos listados como "evitar".
 ### Tool (Ferramenta)
 
 Unidade instalável do catálogo. Corresponde a exatamente um módulo em
-`src/lib/tools/<id>.ts`. Um Tool declara seu `id`, suas `tags`, seu `stage`
-e uma receita de instalação por plataforma.
+`src/lib/tools/<id>.ts`. Um Tool declara seu `id`, suas `tags`, seu `stage`,
+uma receita de instalação por plataforma e, opcionalmente, sua Configuração.
 
 _Evitar como sinônimo:_ "package", "dependency", "app". Um Tool pode ser um app de
 GUI, um binário de CLI ou um runtime — a palavra é a mesma.
@@ -103,6 +103,32 @@ Declaração explícita de que um Tool não existe numa plataforma, acompanhada 
 motivo (`unsupported('sem cliente Linux oficial')`). Um Tool `unsupported` é
 **reportado** no resumo final (`⊘`), nunca pulado em silêncio.
 
+### Configuration (Configuração)
+
+Os arquivos que um Tool escreve depois de instalado: um `root` e a lista de arquivos
+com caminho relativo e conteúdo, embutidos no binário a partir de
+`src/dotfiles/<tool>/`. O `install` aplica a Configuração de cada Tool logo depois de
+instalá-lo ou de encontrá-lo instalado; o `uninstall` nunca a toca. Ver
+[ADR-0006](docs/adr/0006-install-aplica-configuracao.md).
+
+Um arquivo que já bate com o disco não é tocado (`configuração em dia`). Um que difere
+é movido para o Backup da execução antes de ser reescrito. Com `ownsRoot`, o diretório
+inteiro é da Configuração e vai para o Backup como uma unidade.
+
+_Evitar como sinônimo:_ "setup", "settings", "dotfiles" como nome do conceito.
+"Dotfiles" é só o diretório onde o conteúdo mora.
+
+### Backup
+
+O que uma execução de `install` (ou de `restore`) tirou do caminho, em
+`~/.0xshell/backups/<versão>/`. A **versão** é o instante da execução
+(`AAAAMMDD-HHMMSS`). O `manifest.tsv` registra cada caminho como `saved` (existia e foi
+guardado em `files/`) ou `created` (não existia). `0xshell restore <versão>` devolve
+cada caminho a esse estado, guardando antes o estado atual numa versão nova.
+
+_Evitar como sinônimo:_ "snapshot" para a pasta em si. "Snapshot" só aparece para a
+versão que o `restore` cria antes de restaurar.
+
 ### Platform (Plataforma)
 
 `darwin` | `linux`. São as duas únicas plataformas suportadas.
@@ -112,8 +138,9 @@ CLI imprime, em português (`plataforma`).
 
 ### Tag
 
-Rótulo de agrupamento de Tools (`apps`, `runtimes`, `cli`), consumido por
-`0xshell install --tag <tag>`. Tags não criam comandos próprios.
+Rótulo de agrupamento de Tools (`apps`, `runtimes`, `cli`, `shell`), consumido por
+`0xshell install --tag <tag>`. Tags não criam comandos próprios. `shell` agrupa o que
+monta o terminal: zsh, oh-my-zsh, antigen, fzf, eza e carapace.
 
 ### doctor
 

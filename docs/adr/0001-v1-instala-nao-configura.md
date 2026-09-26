@@ -1,6 +1,6 @@
 # ADR-0001 — O v1 instala, não configura
 
-**Status:** aceita · 2026-08-12
+**Status:** aceita · 2026-08-12 · a parte de configuração foi substituída pela [ADR-0006](0006-install-aplica-configuracao.md)
 
 ## Contexto
 
