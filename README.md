@@ -1,69 +1,69 @@
 # 0xshell
 
-CLI em Bun que instala e configura, numa máquina nova, o conjunto fixo de ferramentas do
-setup de desenvolvimento. Suporta macOS (Homebrew) e Linux (apt).
+A Bun CLI that installs and configures, on a new machine, the fixed set of tools of the
+development setup. Supports macOS (Homebrew) and Linux (apt).
 
-## Instalação
+## Installation
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/0xleozera/0xshell/main/install.sh | sh
 ```
 
-O script detecta a Plataforma (`darwin/arm64` ou `linux/x64`), baixa o binário do
-último release e o deixa executável no `PATH`. Não requer Bun nem qualquer outro
-runtime instalado.
+The script detects the Platform (`darwin/arm64` or `linux/x64`), downloads the binary
+from the latest release and leaves it executable on the `PATH`. It needs neither Bun
+nor any other runtime installed.
 
-## Uso
-
-```sh
-0xshell install                 # instala o catálogo inteiro
-0xshell install neovim docker   # instala só os Tools nomeados
-0xshell install --tag apps      # instala os Tools de uma Tag
-0xshell install --interactive   # escolhe os Tools num multiselect
-0xshell install --dry-run       # mostra o que seria executado, sem executar
-0xshell install neovim --dry-run  # flags booleanas vêm depois dos ids
-0xshell install --tag shell     # zsh, oh-my-zsh, antigen, fzf, eza e carapace
-```
-
-## Configuração
-
-Alguns Tools são configurados pelo próprio `install`, logo depois de instalados (ou de
-encontrados já instalados). O tema de tudo é o Tokyo Night, estilo `night`.
-
-| Tool        | Arquivos                                                          |
-| ----------- | ----------------------------------------------------------------- |
-| `zsh`       | `~/.zshrc`, `~/.zprofile`                                         |
-| `oh-my-zsh` | `~/.oh-my-zsh/custom/themes/tokyonight.zsh-theme`                 |
-| `antigen`   | `~/.antigenrc`                                                    |
-| `eza`       | `~/.config/eza/theme.yml`                                         |
-| `neovim`    | `~/.config/nvim` (LazyVim), substituído como um diretório inteiro |
-
-Um arquivo que já está igual não é tocado. Um que difere vai para
-`~/.0xshell/backups/<versão>/` antes de ser reescrito, e o `install` informa a versão no
-final. Ajustes só desta máquina vão em `~/.zshrc.local`, que o 0xshell nunca escreve.
-`--dry-run` lista os arquivos que seriam escritos (`✎`).
+## Usage
 
 ```sh
-0xshell restore                            # lista as versões de backup
-0xshell restore 20260926-143012 --dry-run  # mostra o que voltaria
-0xshell restore 20260926-143012            # volta os arquivos daquela versão
+0xshell install                 # installs the whole Catalog
+0xshell install neovim docker   # installs only the named Tools
+0xshell install --tag apps      # installs the Tools of one Tag
+0xshell install --interactive   # picks the Tools in a multiselect
+0xshell install --dry-run       # shows what would run, without running it
+0xshell install neovim --dry-run  # boolean flags come after the ids
+0xshell install --tag shell     # zsh, oh-my-zsh, antigen, fzf, eza and carapace
 ```
 
-O `restore` devolve cada arquivo ao conteúdo guardado e remove o que aquele `install`
-criou. O estado de antes do restore vira uma versão nova, então dá para desfazê-lo com
-outro `restore`.
+## Configuration
 
-O tema do terminal em si (cores de fundo do Warp, por exemplo) não é configurado: o
-prompt e os plugins usam cores truecolor que ficam certas sobre um fundo Tokyo Night.
+Some Tools are configured by `install` itself, right after they are installed (or
+found already installed). Everything is themed Tokyo Night, `night` style.
 
-## Desenvolvimento
+| Tool        | Files                                                       |
+| ----------- | ----------------------------------------------------------- |
+| `zsh`       | `~/.zshrc`, `~/.zprofile`                                   |
+| `oh-my-zsh` | `~/.oh-my-zsh/custom/themes/tokyonight.zsh-theme`           |
+| `antigen`   | `~/.antigenrc`                                              |
+| `eza`       | `~/.config/eza/theme.yml`                                   |
+| `neovim`    | `~/.config/nvim` (LazyVim), replaced as a whole directory   |
+
+A file that already matches is not touched. One that differs goes to
+`~/.0xshell/backups/<version>/` before being rewritten, and `install` prints the
+version at the end. Settings for this machine only go in `~/.zshrc.local`, which
+0xshell never writes. `--dry-run` lists the files that would be written (`✎`).
+
+```sh
+0xshell restore                            # lists the backup versions
+0xshell restore 20260926-143012 --dry-run  # shows what would come back
+0xshell restore 20260926-143012            # brings back the files of that version
+```
+
+`restore` returns each file to its saved content and removes what that `install`
+created. The state before the restore becomes a new version, so it can be undone with
+another `restore`.
+
+The terminal theme itself (Warp's background colors, for instance) is not configured:
+the prompt and the plugins use truecolor values that look right on a Tokyo Night
+background.
+
+## Development
 
 ```sh
 bun install
 bun test
 bun run typecheck
-bun run build   # gera dist/0xshell-darwin-arm64 e dist/0xshell-linux-x64
+bun run build   # produces dist/0xshell-darwin-arm64 and dist/0xshell-linux-x64
 ```
 
-Veja `CONTEXT.md` para o glossário do domínio e `docs/adr/` para as decisões
-registradas.
+See `CONTEXT.md` for the domain glossary and `docs/adr/` for the recorded decisions.
