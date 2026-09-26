@@ -17,7 +17,7 @@ export type ListResult = {
   readonly tools: readonly ListedTool[];
 };
 
-const NPM_NOTE = 'Nota: o npm vem junto com o node — não é um Tool do mise e não está no Catálogo.';
+const NPM_NOTE = 'Note: npm ships with node — it is not a mise Tool and is not in the Catalog.';
 
 function describeTool(tool: Tool, platform: Platform): ListedTool {
   const entry = resolveForPlatform(tool, platform);
@@ -32,14 +32,14 @@ function describeTool(tool: Tool, platform: Platform): ListedTool {
 export function formatToolRow(listed: ListedTool, platform: Platform): string {
   const tags = listed.tags.length > 0 ? listed.tags.join(', ') : '-';
   const support = listed.supported
-    ? `✓ suportado em ${platform}`
-    : `⊘ não suportado em ${platform}: ${listed.reason}`;
+    ? `✓ supported on ${platform}`
+    : `⊘ not supported on ${platform}: ${listed.reason}`;
 
   return `${listed.id} [stage ${listed.stage}] [tags: ${tags}] ${support}`;
 }
 
 function closingMessage(total: number): string {
-  return total === 1 ? '1 ferramenta no Catálogo.' : `${total} ferramentas no Catálogo.`;
+  return total === 1 ? '1 tool in the Catalog.' : `${total} tools in the Catalog.`;
 }
 
 /**

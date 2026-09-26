@@ -57,7 +57,7 @@ export function isSummarized(value: unknown): value is Summarized {
  * as the label of a framed block in a terminal — so the body here is only
  * the counts.
  */
-export const SUMMARY_TITLE = 'Resumo';
+export const SUMMARY_TITLE = 'Summary';
 
 /**
  * The failure detail is identical in every command's summary block — only
@@ -69,5 +69,5 @@ export function formatFailures(summary: Summary): readonly string[] {
     return [];
   }
 
-  return ['Falhas:', ...summary.failures.map((failure) => `  ✗ ${failure.id}: ${failure.error}`)];
+  return ['Failures:', ...summary.failures.map((failure) => `  ✗ ${failure.id}: ${failure.error}`)];
 }

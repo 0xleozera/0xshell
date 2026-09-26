@@ -1,125 +1,149 @@
 # CONTEXT — 0xshell
 
-CLI em Bun que instala, numa máquina nova, o conjunto fixo de ferramentas do setup
-de desenvolvimento. Suporta macOS (Homebrew) e Linux (apt).
+A Bun CLI that installs and configures, on a new machine, the fixed set of tools of
+the development setup. Supports macOS (Homebrew) and Linux (apt).
 
-## Glossário
+Everything in the project is written in English: code, comments, tests, docs and the
+messages the CLI prints.
 
-Estes termos têm significado preciso neste projeto. Use-os no código, nos títulos de
-issue e nos testes — não drifte para os sinônimos listados como "evitar".
+## Glossary
 
-### Tool (Ferramenta)
+These terms have a precise meaning in this project. Use them in code, issue titles and
+tests — do not drift to the synonyms listed under "avoid".
 
-Unidade instalável do catálogo. Corresponde a exatamente um módulo em
-`src/lib/tools/<id>.ts`. Um Tool declara seu `id`, suas `tags`, seu `stage`
-e uma receita de instalação por plataforma.
+### Tool
 
-_Evitar como sinônimo:_ "package", "dependency", "app". Um Tool pode ser um app de
-GUI, um binário de CLI ou um runtime — a palavra é a mesma.
+An installable unit of the Catalog. It maps to exactly one module in
+`src/lib/tools/<id>.ts`. A Tool declares its `id`, its `tags`, its `stage`, one install
+recipe per Platform and, optionally, its Configuration.
 
-### Catalog (Catálogo)
+_Avoid as a synonym:_ "package", "dependency", "app". A Tool can be a GUI app, a CLI
+binary or a runtime — the word is the same.
 
-O conjunto de todos os Tools registrados. É a única fonte de verdade sobre o que o
-`0xshell` instala. `0xshell list` imprime o Catálogo com o status por plataforma.
+### Catalog
 
-Nos comentários de código o termo aparece em inglês (`Catalog`); nas mensagens que o
-CLI imprime, em português (`Catálogo`).
+The set of all registered Tools. It is the single source of truth about what
+`0xshell` installs. `0xshell list` prints the Catalog with the status per Platform.
 
 ### Helper
 
-Função que constrói a receita de instalação de um Tool para uma plataforma:
-`brewCask`, `brewFormula`, `apt`, `aptRepo`, `mise`, `dmg`, `appImage`, `script`,
-`custom`.
+A function that builds a Tool's install recipe for one Platform: `brewCask`,
+`brewFormula`, `apt`, `aptRepo`, `mise`, `dmg`, `appImage`, `script`, `custom`.
 
-Um Helper carrega três coisas: o `install()`, o `uninstall()` par dele, e o
-`isInstalled()` default daquele meio (ex.: `brewCask` checa `brew list --cask <id>`).
-O módulo do Tool pode sobrescrever qualquer um dos três.
+A Helper carries three things: `install()`, its paired `uninstall()`, and the default
+`isInstalled()` for that install method (e.g. `brewCask` checks
+`brew list --cask <id>`). The Tool module can override any of the three.
 
 ### Stage
 
-Fase fixa de execução, de `0` a `3`. Substitui um grafo de dependências:
+A fixed execution phase, from `0` to `3`. It replaces a dependency graph:
 
-| Stage | Conteúdo                              |
-| ----- | ------------------------------------- |
-| `0`   | Gerenciador de pacotes (Homebrew)     |
-| `1`   | mise                                  |
-| `2`   | Runtimes instalados via mise          |
-| `3`   | Apps e CLIs                           |
+| Stage | Contents                        |
+| ----- | ------------------------------- |
+| `0`   | Package manager (Homebrew)      |
+| `1`   | mise                            |
+| `2`   | Runtimes installed through mise |
+| `3`   | Apps and CLIs                   |
 
-Execução é sequencial dentro e entre stages. Falha no stage `0` é fatal; nas demais,
-o erro é coletado e a execução continua.
+Execution is sequential within and across stages. A failure in stage `0` is fatal; in
+the others, the error is collected and execution continues.
 
 ### Runner
 
-Interface de execução de comandos de shell. Em produção é `Bun.$`; nos testes é um
-mock. Todo acesso ao shell passa pelo Runner — nenhum módulo chama `Bun.$` direto.
+The interface that runs shell commands. In production it is `Bun.$`; in tests it is a
+mock. Every shell access goes through the Runner — no module calls `Bun.$` directly.
 
 ### Reporter
 
-Interface de saída para o terminal, o par do Runner do outro lado: assim como nenhum
-módulo chama `Bun.$` direto, nenhum comando chama `console.*` direto. O comando
-descreve o que aconteceu; o Reporter decide como aquilo aparece.
+The output interface to the terminal, the Runner's counterpart on the other side: just
+as no module calls `Bun.$` directly, no command calls `console.*` directly. The command
+describes what happened; the Reporter decides how it looks.
 
-Duas implementações, escolhidas em `cli.ts` pelo ambiente: `clack-reporter` quando
-`stdout` é um terminal (spinner por Tool, resumo emoldurado) e `plain-reporter` para
-pipe, arquivo, CI e `TERM=dumb` (uma linha por vez, sem ANSI). Ver
-[ADR-0004](docs/adr/0004-reporter-injetavel.md).
+Two implementations, picked in `cli.ts` by the environment: `clack-reporter` when
+`stdout` is a terminal (a spinner per Tool, a framed summary) and `plain-reporter` for
+pipes, files, CI and `TERM=dumb` (one line at a time, no ANSI). See
+[ADR-0004](docs/adr/0004-injectable-reporter.md).
 
-_Evitar como sinônimo:_ "logger". Um Reporter não tem níveis nem destinos
-configuráveis; ele tem o vocabulário fechado de terminações que o CLI sabe reportar.
+_Avoid as a synonym:_ "logger". A Reporter has no levels and no configurable
+destinations; it has the closed vocabulary of endings the CLI knows how to report.
 
 ### Context (CliContext)
 
-Tudo que está fora de um Command e que um Command pode tocar: o Runner (máquina), o
-Reporter (terminal), os prompts (humano), a Platform e o Catálogo. É montado uma única
-vez em `cli.ts` — a raiz de composição — e entregue como contexto do router.
+Everything outside a Command that a Command may touch: the Runner (machine), the
+Reporter (terminal), the prompts (human), the Platform, the Catalog, the home
+directory and the clock. It is assembled once, in `cli.ts` — the composition root —
+and handed over as the router's context.
 
-Um Command recebe `(input, context)` e nada mais: é isso que permite rodar exatamente o
-mesmo Command num teste, contra um MockRunner, um MockReporter e um Catálogo de três
-Tools falsos. Ver [ADR-0005](docs/adr/0005-router-trpc-cli-e-command-por-arquivo.md).
+A Command receives `(input, context)` and nothing else: that is what lets the exact
+same Command run in a test, against a MockRunner, a MockReporter and a Catalog of three
+fake Tools. See [ADR-0005](docs/adr/0005-trpc-cli-router-and-command-per-file.md).
 
-_Evitar como sinônimo:_ "container", "injeção de dependência". O Context não resolve
-nada em tempo de execução; ele é um objeto de valores prontos.
+_Avoid as a synonym:_ "container", "dependency injection". The Context resolves
+nothing at runtime; it is an object of ready values.
 
 ### Command
 
-Um comando do CLI e o caso de uso inteiro dele, num arquivo só
-(`src/commands/<nome>.ts`), exportando `<nome>Command(input, context)`. Resolve a
-entrada, decide, executa os efeitos e devolve **dados** — quem imprime é o Reporter,
-quem traduz erro em exit code é o `cli.ts`.
+One CLI command and its whole use case, in a single file (`src/commands/<name>.ts`),
+exporting `<name>Command(input, context)`. It resolves the input, decides, runs the
+effects and returns **data** — the Reporter prints, and `cli.ts` turns errors into
+exit codes.
 
-Não existe camada de service, handler ou controller abaixo dele: o que dois Commands
-compartilham vira função em `src/lib/`.
+There is no service, handler or controller layer beneath it: whatever two Commands
+share becomes a function in `src/lib/`.
 
 ### Router
 
-`src/router.ts`: a superfície inteira do CLI numa tela — cada comando, sua descrição,
-seus positionals e suas flags, derivados dos schemas zod em `src/schemas/`. O router
-apenas **declara** e amarra cada procedure ao seu Command; nenhuma regra mora nele.
+`src/router.ts`: the whole CLI surface on one screen — each command, its description,
+its positionals and its flags, derived from the zod schemas in `src/schemas/`. The
+router only **declares** and binds each procedure to its Command; no rule lives in it.
 
 ### Unsupported
 
-Declaração explícita de que um Tool não existe numa plataforma, acompanhada do
-motivo (`unsupported('sem cliente Linux oficial')`). Um Tool `unsupported` é
-**reportado** no resumo final (`⊘`), nunca pulado em silêncio.
+An explicit declaration that a Tool does not exist on a Platform, along with the
+reason (`unsupported('no official Linux client')`). An `unsupported` Tool is
+**reported** in the final summary (`⊘`), never skipped silently.
 
-### Platform (Plataforma)
+### Configuration
 
-`darwin` | `linux`. São as duas únicas plataformas suportadas.
+The files a Tool writes once installed: a `root` and the list of files with a relative
+path and content, embedded in the binary from `src/dotfiles/<tool>/`. `install` applies
+each Tool's Configuration right after installing it or finding it installed;
+`uninstall` never touches it. See
+[ADR-0006](docs/adr/0006-install-applies-configuration.md).
 
-Nos comentários de código o termo aparece em inglês (`Platform`); nas mensagens que o
-CLI imprime, em português (`plataforma`).
+A file that already matches the disk is not touched (`configuration up to date`). One
+that differs is moved into the run's Backup before being rewritten. With `ownsRoot`,
+the whole directory belongs to the Configuration and goes into the Backup as a unit.
+
+_Avoid as a synonym:_ "setup", "settings", "dotfiles" as the name of the concept.
+"Dotfiles" is only the directory where the content lives.
+
+### Backup
+
+What one run of `install` (or of `restore`) moved out of the way, in
+`~/.0xshell/backups/<version>/`. The **version** is the moment of the run
+(`YYYYMMDD-HHMMSS`). `manifest.tsv` records each path as `saved` (it existed and was
+kept in `files/`) or `created` (it did not exist). `0xshell restore <version>` returns
+each path to that state, first keeping the current state in a new version.
+
+_Avoid as a synonym:_ "snapshot" for the folder itself. "Snapshot" only names the
+version `restore` creates before restoring.
+
+### Platform
+
+`darwin` | `linux`. They are the only two supported platforms.
 
 ### Tag
 
-Rótulo de agrupamento de Tools (`apps`, `runtimes`, `cli`), consumido por
-`0xshell install --tag <tag>`. Tags não criam comandos próprios.
+A grouping label for Tools (`apps`, `runtimes`, `cli`, `shell`), consumed by
+`0xshell install --tag <tag>`. Tags do not create commands of their own. `shell`
+groups what builds the terminal: zsh, oh-my-zsh, antigen, fzf, eza and carapace.
 
 ### doctor
 
-Comando que apenas **verifica** e nunca escreve. Roda o `isInstalled()` de cada Tool
-do Catálogo e reporta. É o comando de uso recorrente depois do dia 1.
+A command that only **checks** and never writes. It runs `isInstalled()` for every Tool
+in the Catalog and reports. It is the command for recurring use after day 1.
 
-## Decisões registradas
+## Recorded decisions
 
-Ver `docs/adr/`.
+See `docs/adr/`.

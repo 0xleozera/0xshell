@@ -7,5 +7,5 @@ export default defineTool({
   tags: ['apps'],
   // No Homebrew cask for Dia — the .dmg is the only distribution.
   darwin: dmg({ url: 'https://diabrowser.com/download/dia.dmg', appName: 'Dia' }),
-  linux: unsupported('sem cliente Linux, apenas macOS'),
+  linux: unsupported('no Linux client, macOS only'),
 });

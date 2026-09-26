@@ -6,5 +6,5 @@ export default defineTool({
   stage: 3,
   tags: ['apps'],
   darwin: brewCask('raycast'),
-  linux: unsupported('sem cliente Linux, apenas macOS'),
+  linux: unsupported('no Linux client, macOS only'),
 });

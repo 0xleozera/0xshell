@@ -35,6 +35,8 @@ function context(catalog: readonly Tool[]): TestContext {
     runner: createMockRunner(),
     reporter: createMockReporter(),
     platform: 'darwin',
+    home: '/home/leo',
+    now: () => new Date(2026, 8, 26, 14, 30, 12),
     catalog,
     prompts: noPrompts,
   } as TestContext;
@@ -106,7 +108,7 @@ describe('cli surface', () => {
 
     expect(ctx.reporter.messages('line')).toEqual(['\u2192 neovim: mise install neovim']);
     expect(ctx.runner.wasRun(['mise', 'install', 'neovim'])).toBe(false);
-    expect(ctx.reporter.messages('outro')).toEqual(['Nada foi executado.']);
+    expect(ctx.reporter.messages('outro')).toEqual(['Nothing was executed.']);
   });
 
   test('--tag is parsed as a value flag', async () => {
@@ -163,6 +165,17 @@ describe('cli surface', () => {
     expect(listed.exitCode).toBe(0);
     expect(checked.exitCode).toBe(0);
     expect(ctx.reporter.messages('intro')).toEqual(['0xshell list', '0xshell doctor']);
+  });
+
+  test('restore takes the backup version as a positional, and without one is a usage error', async () => {
+    const ctx = context([]);
+    ctx.runner.respondTo(['cat', '/home/leo/.0xshell/backups/20260926-100000/manifest.tsv'], { stdout: '' });
+
+    const named = await run(['restore', '20260926-100000', '--dry-run'], ctx);
+    const bare = await run(['restore'], context([]));
+
+    expect(named.cause).toMatchObject({ dryRun: true, version: '20260926-100000' });
+    expect(exitCodeFor(bare.cause)).toBe(2);
   });
 
   test('an unknown flag is rejected before any command runs', async () => {

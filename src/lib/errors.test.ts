@@ -12,7 +12,7 @@ describe('exitCodeFor', () => {
   });
 
   test('gives a run that legitimately could not do its job 1', () => {
-    expect(exitCodeFor(new CliError('failed', 'falhou'))).toBe(1);
+    expect(exitCodeFor(new CliError('failed', 'failed'))).toBe(1);
   });
 
   test('gives an unexpected error 1', () => {
@@ -32,7 +32,7 @@ describe('exitCodeForResult', () => {
     const summary = summarize([
       { status: 'installed', id: 'slack' },
       { status: 'already-installed', id: 'git' },
-      { status: 'unsupported', id: 'xcode', reason: 'motivo' },
+      { status: 'unsupported', id: 'xcode', reason: 'reason' },
     ]);
 
     expect(exitCodeForResult({ summary })).toBe(0);

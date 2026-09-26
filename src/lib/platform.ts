@@ -4,5 +4,5 @@ export function resolvePlatform(nodePlatform: string = process.platform): Platfo
   if (nodePlatform === 'darwin' || nodePlatform === 'linux') {
     return nodePlatform;
   }
-  throw new Error(`0xshell não suporta a plataforma "${nodePlatform}"`);
+  throw new Error(`0xshell does not support the platform "${nodePlatform}"`);
 }

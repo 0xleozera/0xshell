@@ -6,5 +6,5 @@ export default defineTool({
   stage: 3,
   tags: ['apps'],
   darwin: brewCask('logitech-g-hub'),
-  linux: unsupported('sem cliente Linux oficial'),
+  linux: unsupported('no official Linux client'),
 });

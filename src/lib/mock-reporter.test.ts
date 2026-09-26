@@ -6,47 +6,47 @@ describe('MockReporter', () => {
     const reporter = createMockReporter();
 
     reporter.intro('0xshell install');
-    reporter.task('Instalando neovim').succeed('neovim instalado');
-    reporter.outro('Tudo pronto.');
+    reporter.task('Installing neovim').succeed('neovim installed');
+    reporter.outro('All set.');
 
     expect(reporter.reports).toEqual([
       { kind: 'intro', message: '0xshell install' },
-      { kind: 'task', message: 'Instalando neovim' },
-      { kind: 'succeed', message: 'neovim instalado' },
-      { kind: 'outro', message: 'Tudo pronto.' },
+      { kind: 'task', message: 'Installing neovim' },
+      { kind: 'succeed', message: 'neovim installed' },
+      { kind: 'outro', message: 'All set.' },
     ]);
   });
 
   test('records each ending of a Tool line under its own kind', () => {
     const reporter = createMockReporter();
 
-    reporter.task('a').skip('xcode não suportado em linux: motivo');
-    reporter.task('b').noop('neovim já instalado, nada a fazer');
-    reporter.task('c').absent('neovim faltando');
-    reporter.task('d').fail('docker falhou: curl falhou');
+    reporter.task('a').skip('xcode not supported on linux: reason');
+    reporter.task('b').noop('neovim already installed, nothing to do');
+    reporter.task('c').absent('neovim missing');
+    reporter.task('d').fail('docker failed: curl failed');
 
     expect(reporter.messages('skip', 'noop', 'absent', 'fail')).toEqual([
-      'xcode não suportado em linux: motivo',
-      'neovim já instalado, nada a fazer',
-      'neovim faltando',
-      'docker falhou: curl falhou',
+      'xcode not supported on linux: reason',
+      'neovim already installed, nothing to do',
+      'neovim missing',
+      'docker failed: curl failed',
     ]);
   });
 
   test('keeps a block together with its title, the way a plain log would read it', () => {
     const reporter = createMockReporter();
 
-    reporter.block('Resumo', '  instalados: 2');
+    reporter.block('Summary', '  installed: 2');
 
-    expect(reporter.messages('block')).toEqual(['Resumo:\n  instalados: 2']);
+    expect(reporter.messages('block')).toEqual(['Summary:\n  installed: 2']);
   });
 
   test('output joins everything reported, for assertions that only care that it was said', () => {
     const reporter = createMockReporter();
 
-    reporter.warn('Aviso: leva junto tudo que ele instalou.');
-    reporter.error('Ferramenta desconhecida');
+    reporter.warn('Warning: takes everything it installed with it.');
+    reporter.error('Unknown tool');
 
-    expect(reporter.output).toBe('Aviso: leva junto tudo que ele instalou.\nFerramenta desconhecida');
+    expect(reporter.output).toBe('Warning: takes everything it installed with it.\nUnknown tool');
   });
 });

@@ -1,3 +1,5 @@
+import type { Backup } from './backup';
+import { applyConfiguration, type Configuration, type ConfigureResult } from './configuration';
 import type { Outcome } from './outcome';
 import type { Platform } from './platform';
 import type { Runner } from './runner';
@@ -38,6 +40,11 @@ export type RunInstallPlanOptions = {
   /** Where the sudo session's password warning goes; defaults to the session's own. */
   readonly onWarning?: (message: string) => void;
   readonly createSudoSession?: (runner: Runner) => SudoSession;
+  /**
+   * Where `install` keeps what a Configuration replaces. Required as soon as
+   * the plan configures a Tool; `uninstall` never needs one.
+   */
+  readonly backup?: Backup;
 };
 
 function errorMessage(error: unknown): string {
@@ -57,7 +64,13 @@ function planRequiresPrivilege(tools: readonly Tool[], platform: Platform): bool
   });
 }
 
-async function runOne(tool: Tool, runner: Runner, platform: Platform, action: PlanAction): Promise<Outcome> {
+async function runOne(
+  tool: Tool,
+  runner: Runner,
+  platform: Platform,
+  action: PlanAction,
+  backup: Backup | undefined,
+): Promise<Outcome> {
   const entry = resolveForPlatform(tool, platform);
 
   if (isUnsupported(entry)) {
@@ -68,14 +81,36 @@ async function runOne(tool: Tool, runner: Runner, platform: Platform, action: Pl
     const isInstalled = await entry.isInstalled(runner);
 
     // The machine is already in the end state this action aims at.
-    if (isInstalled === (action === 'install')) {
-      return { status: 'already-installed', id: tool.id };
+    const status = isInstalled === (action === 'install') ? 'already-installed' : 'installed';
+
+    if (status === 'installed') {
+      await (action === 'install' ? entry.install(runner) : entry.uninstall(runner));
     }
 
-    await (action === 'install' ? entry.install(runner) : entry.uninstall(runner));
-    return { status: 'installed', id: tool.id };
+    // An already-installed Tool is configured too: on a machine that came
+    // with zsh, the Configuration is the only thing install has to add.
+    if (action === 'uninstall' || !tool.configuration) {
+      return { status, id: tool.id };
+    }
+
+    return { status, id: tool.id, configuration: await configure(tool.configuration, runner, backup) };
   } catch (error) {
     return { status: 'failed', id: tool.id, error: errorMessage(error) };
+  }
+}
+
+// Prefixed so a failure reads apart from a failed install in the summary:
+// the Tool is on the machine, only its files are not.
+async function configure(
+  configuration: Configuration,
+  runner: Runner,
+  backup: Backup | undefined,
+): Promise<ConfigureResult> {
+  try {
+    if (!backup) throw new Error('no backup to keep the replaced files in');
+    return await applyConfiguration(configuration, runner, backup);
+  } catch (error) {
+    throw new Error(`configuration failed: ${errorMessage(error)}`);
   }
 }
 
@@ -87,6 +122,10 @@ async function runOne(tool: Tool, runner: Runner, platform: Platform, action: Pl
  * and aborts the rest of the plan; a failure in any other Stage is collected
  * and execution continues, so a flaky network blip on one install doesn't
  * cost the other nineteen.
+ *
+ * On `install`, a Tool with a Configuration is configured right after it is
+ * installed (or found installed), before the next Tool starts — so a later
+ * Tool can rely on an earlier one's files being in place (ADR-0006).
  */
 export async function runInstallPlan(
   tools: readonly Tool[],
@@ -119,7 +158,7 @@ export async function runInstallPlan(
   try {
     for (const tool of ordered) {
       options.onToolStart?.(tool);
-      const outcome = await runOne(tool, runner, platform, action);
+      const outcome = await runOne(tool, runner, platform, action, options.backup);
       outcomes.push(outcome);
       options.onOutcome?.(outcome);
 

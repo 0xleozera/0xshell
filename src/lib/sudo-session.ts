@@ -17,8 +17,8 @@ export interface SudoSession {
 const DEFAULT_INTERVAL_MS = 60_000;
 
 const WARNING =
-  'Este setup instala pacotes via apt, que no Linux exige privilégio de root.\n' +
-  'A senha a seguir é usada apenas pelo sudo, individualmente, em cada comando apt — o processo do 0xshell não roda como root.';
+  'This setup installs packages via apt, which on Linux requires root privilege.\n' +
+  'The password below is used only by sudo, individually, on each apt command — the 0xshell process never runs as root.';
 
 /**
  * The timer handle is typed `unknown` on purpose: the ambient
@@ -55,7 +55,7 @@ export function createSudoSession(runner: Runner, options: CreateSudoSessionOpti
       warn(WARNING);
       const result = await runner.run(['sudo', '-v']);
       if (result.exitCode !== 0) {
-        throw new Error('não foi possível validar as credenciais do sudo');
+        throw new Error('could not validate the sudo credentials');
       }
       timer = setIntervalFn(() => {
         void runner.run(['sudo', '-v']);

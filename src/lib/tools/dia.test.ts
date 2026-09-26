@@ -17,6 +17,6 @@ describe('dia tool', () => {
   });
 
   test('linux is unsupported, reported with a reason', () => {
-    expect(dia.linux).toEqual({ unsupported: true, reason: 'sem cliente Linux, apenas macOS' });
+    expect(dia.linux).toEqual({ unsupported: true, reason: 'no Linux client, macOS only' });
   });
 });

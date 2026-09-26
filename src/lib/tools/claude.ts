@@ -6,5 +6,5 @@ export default defineTool({
   stage: 3,
   tags: ['apps'],
   darwin: brewCask('claude'),
-  linux: unsupported('app desktop sem cliente Linux oficial'),
+  linux: unsupported('desktop app with no official Linux client'),
 });

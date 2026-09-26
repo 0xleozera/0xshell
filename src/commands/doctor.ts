@@ -15,17 +15,17 @@ export type DoctorResult = {
 
 function reportOutcome(task: ReporterTask, outcome: Outcome, platform: Platform): void {
   if (outcome.status === 'installed') {
-    return task.succeed(`${outcome.id} instalado`);
+    return task.succeed(`${outcome.id} installed`);
   }
 
   if (outcome.status === 'unsupported') {
-    return task.skip(`${outcome.id} não suportado em ${platform}: ${outcome.reason}`);
+    return task.skip(`${outcome.id} not supported on ${platform}: ${outcome.reason}`);
   }
 
   if (outcome.status === 'failed') {
     // Reported as absent, not as a failure: the check itself succeeded,
     // it just found the Tool missing.
-    return task.absent(`${outcome.id} faltando`);
+    return task.absent(`${outcome.id} missing`);
   }
 
   // doctor never produces `already-installed` — isInstalled() only tells
@@ -45,20 +45,20 @@ function reportOutcome(task: ReporterTask, outcome: Outcome, platform: Platform)
  */
 export function formatDoctorSummary(summary: Summary): string {
   return [
-    `  instalados: ${summary.installed}`,
-    `  faltando: ${summary.failed}`,
-    `  não suportados: ${summary.unsupported}`,
+    `  installed: ${summary.installed}`,
+    `  missing: ${summary.failed}`,
+    `  not supported: ${summary.unsupported}`,
   ].join('\n');
 }
 
 function closingMessage(summary: Summary): string {
   if (summary.failed === 0) {
-    return 'Máquina em dia.';
+    return 'Machine up to date.';
   }
 
   return summary.failed === 1
-    ? 'Falta 1 ferramenta — rode 0xshell install.'
-    : `Faltam ${summary.failed} ferramentas — rode 0xshell install.`;
+    ? '1 tool missing — run 0xshell install.'
+    : `${summary.failed} tools missing — run 0xshell install.`;
 }
 
 async function check(tool: Tool, runner: Runner, platform: Platform): Promise<Outcome> {
@@ -70,7 +70,7 @@ async function check(tool: Tool, runner: Runner, platform: Platform): Promise<Ou
 
   return (await entry.isInstalled(runner))
     ? { status: 'installed', id: tool.id }
-    : { status: 'failed', id: tool.id, error: 'faltando' };
+    : { status: 'failed', id: tool.id, error: 'missing' };
 }
 
 /**
@@ -94,7 +94,7 @@ export async function doctorCommand(_input: DoctorInput, ctx: CliContext): Promi
   reporter.intro('0xshell doctor');
 
   for (const tool of tools) {
-    const line = reporter.task(`Verificando ${tool.id}`);
+    const line = reporter.task(`Checking ${tool.id}`);
     const outcome = await check(tool, runner, platform);
 
     outcomes.push(outcome);
