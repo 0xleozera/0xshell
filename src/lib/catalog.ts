@@ -9,10 +9,12 @@ import claudeCode from './tools/claude-code';
 import cursorCli from './tools/cursor-cli';
 import dbeaver from './tools/dbeaver';
 import dia from './tools/dia';
+import discord from './tools/discord';
 import docker from './tools/docker';
 import eza from './tools/eza';
 import fd from './tools/fd';
 import fzf from './tools/fzf';
+import gh from './tools/gh';
 import git from './tools/git';
 import go from './tools/go';
 import homebrew from './tools/homebrew';
@@ -42,6 +44,7 @@ export const catalog: readonly Tool[] = [
   node,
   neovim,
   git,
+  gh,
   // What the neovim Configuration (LazyVim) needs to work: a C compiler for
   // the treesitter parsers, rg and fd for its pickers.
   buildEssential,
@@ -58,6 +61,7 @@ export const catalog: readonly Tool[] = [
   warp,
   orcaAi,
   slack,
+  discord,
   whatsapp,
   dia,
   claudeCode,

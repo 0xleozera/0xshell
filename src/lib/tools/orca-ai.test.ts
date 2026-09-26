@@ -21,7 +21,8 @@ describe('orca-ai tool', () => {
 
     const [download, install, cleanup] = runner.commands;
     expect(download?.[2]).toContain('https://github.com/stablyai/orca/releases/latest');
-    expect(download?.[2]).toContain('orca-ide_${version}_amd64.deb -o /tmp/0xshell-orca-ide.deb');
+    expect(download?.[2]).toContain('orca-ide_${version}_amd64.deb -o "$1"');
+    expect(download?.slice(3)).toEqual(['sh', '/tmp/0xshell-orca-ide.deb']);
     expect(install).toEqual(aptGetInstall('/tmp/0xshell-orca-ide.deb'));
     expect(cleanup).toEqual(['rm', '-f', '/tmp/0xshell-orca-ide.deb']);
   });

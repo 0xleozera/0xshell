@@ -28,7 +28,7 @@ The set of all registered Tools. It is the single source of truth about what
 ### Helper
 
 A function that builds a Tool's install recipe for one Platform: `brewCask`,
-`brewFormula`, `apt`, `aptRepo`, `mise`, `dmg`, `appImage`, `script`, `custom`.
+`brewFormula`, `apt`, `aptRepo`, `mise`, `deb`, `dmg`, `appImage`, `script`, `custom`.
 
 A Helper carries three things: `install()`, its paired `uninstall()`, and the default
 `isInstalled()` for that install method (e.g. `brewCask` checks
