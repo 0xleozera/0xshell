@@ -3,12 +3,14 @@ import type { TrpcCliMeta } from 'trpc-cli';
 import { doctorCommand } from './commands/doctor';
 import { installCommand } from './commands/install';
 import { listCommand } from './commands/list';
+import { restoreCommand } from './commands/restore';
 import { uninstallCommand } from './commands/uninstall';
 import type { CliContext } from './lib/context';
 import {
   DoctorInputSchema,
   InstallInputSchema,
   ListInputSchema,
+  RestoreInputSchema,
   UninstallInputSchema,
 } from './schemas/commands';
 
@@ -32,6 +34,13 @@ export const router = t.router({
     .meta({ description: 'Desinstala um subconjunto do catálogo — exige um Tool, --tag ou --all' })
     .input(UninstallInputSchema)
     .mutation(({ input, ctx }) => uninstallCommand(input, ctx)),
+
+  restore: t.procedure
+    .meta({
+      description: 'Devolve os arquivos de configuração ao estado de uma versão de backup em ~/.0xshell/backups',
+    })
+    .input(RestoreInputSchema)
+    .mutation(({ input, ctx }) => restoreCommand(input, ctx)),
 
   list: t.procedure
     .meta({ description: 'Lista o catálogo inteiro com Tag, Stage e suporte na plataforma atual' })

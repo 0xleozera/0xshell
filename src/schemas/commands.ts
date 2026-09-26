@@ -25,6 +25,18 @@ export const UninstallInputSchema = z.object({
 
 export type UninstallInput = z.infer<typeof UninstallInputSchema>;
 
+export const RestoreInputSchema = z.object({
+  version: z
+    .string()
+    .min(1)
+    .optional()
+    .meta({ positional: true })
+    .describe('versão do backup em ~/.0xshell/backups (ex.: 20260926-143012); se omitida, lista as disponíveis'),
+  dryRun: z.boolean().default(false).describe('mostra o que seria restaurado, sem executar nada'),
+});
+
+export type RestoreInput = z.infer<typeof RestoreInputSchema>;
+
 /**
  * `list` and `doctor` read the Catalog and the machine and take nothing
  * from the user. The empty schemas are here so every command has one and is
