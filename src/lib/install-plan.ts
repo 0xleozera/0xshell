@@ -107,10 +107,10 @@ async function configure(
   backup: Backup | undefined,
 ): Promise<ConfigureResult> {
   try {
-    if (!backup) throw new Error('nenhum backup para guardar os arquivos substituídos');
+    if (!backup) throw new Error('no backup to keep the replaced files in');
     return await applyConfiguration(configuration, runner, backup);
   } catch (error) {
-    throw new Error(`configuração falhou: ${errorMessage(error)}`);
+    throw new Error(`configuration failed: ${errorMessage(error)}`);
   }
 }
 

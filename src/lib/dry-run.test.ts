@@ -50,16 +50,16 @@ describe('dry run (install)', () => {
     const plan = await buildDryRunPlan([git], createMockRunner(), 'darwin', 'install');
 
     expect(plan).toEqual([{ status: 'nothing-to-do', id: 'git' }]);
-    expect(lines(plan, 'darwin', 'install')).toEqual(['= git já instalado, nada a fazer']);
+    expect(lines(plan, 'darwin', 'install')).toEqual(['= git already installed, nothing to do']);
   });
 
   test('reports an unsupported Tool without touching the Runner at all', async () => {
     const runner = createMockRunner();
-    const xcode = tool('xcode', 3, unsupported('ferramenta exclusiva da Apple'));
+    const xcode = tool('xcode', 3, unsupported('Apple-only tool'));
 
     const plan = await buildDryRunPlan([xcode], runner, 'linux', 'install');
 
-    expect(lines(plan, 'linux', 'install')).toEqual(['⊘ xcode não suportado em linux: ferramenta exclusiva da Apple']);
+    expect(lines(plan, 'linux', 'install')).toEqual(['⊘ xcode not supported on linux: Apple-only tool']);
     expect(runner.commands).toEqual([]);
   });
 
@@ -122,16 +122,16 @@ describe('dry run (uninstall)', () => {
 
     const plan = await buildDryRunPlan([git], createMockRunner(), 'darwin', 'uninstall');
 
-    expect(lines(plan, 'darwin', 'uninstall')).toEqual(['= git não instalado, nada a fazer']);
+    expect(lines(plan, 'darwin', 'uninstall')).toEqual(['= git not installed, nothing to do']);
   });
 
   test('reports an unsupported Tool without touching the Runner at all', async () => {
     const runner = createMockRunner();
-    const xcode = tool('xcode', 3, unsupported('ferramenta exclusiva da Apple'));
+    const xcode = tool('xcode', 3, unsupported('Apple-only tool'));
 
     const plan = await buildDryRunPlan([xcode], runner, 'linux', 'uninstall');
 
-    expect(lines(plan, 'linux', 'uninstall')).toEqual(['⊘ xcode não suportado em linux: ferramenta exclusiva da Apple']);
+    expect(lines(plan, 'linux', 'uninstall')).toEqual(['⊘ xcode not supported on linux: Apple-only tool']);
     expect(runner.commands).toEqual([]);
   });
 
@@ -184,7 +184,7 @@ describe('dry run (configuration)', () => {
 
     const plan = await buildDryRunPlan([zsh], runner, 'darwin', 'install');
 
-    expect(lines(plan, 'darwin', 'install')).toEqual(['✎ zsh: escreve ~/.zshrc']);
+    expect(lines(plan, 'darwin', 'install')).toEqual(['✎ zsh: writes ~/.zshrc']);
     expect(runner.commands).toEqual([zshrcMatches]);
   });
 
@@ -201,7 +201,7 @@ describe('dry run (configuration)', () => {
 
     const plan = await buildDryRunPlan([zsh], runner, 'darwin', 'install');
 
-    expect(lines(plan, 'darwin', 'install')).toEqual(['→ zsh: brew install zsh\n✎ zsh: escreve ~/.zshrc']);
+    expect(lines(plan, 'darwin', 'install')).toEqual(['→ zsh: brew install zsh\n✎ zsh: writes ~/.zshrc']);
   });
 
   test('reports nothing to do when the Tool is installed and its files already match', async () => {

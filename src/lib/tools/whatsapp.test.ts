@@ -12,6 +12,6 @@ describe('whatsapp tool', () => {
   });
 
   test('linux is unsupported, reported with a reason', () => {
-    expect(whatsapp.linux).toEqual({ unsupported: true, reason: 'sem cliente Linux oficial' });
+    expect(whatsapp.linux).toEqual({ unsupported: true, reason: 'no official Linux client' });
   });
 });

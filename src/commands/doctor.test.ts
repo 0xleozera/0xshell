@@ -45,17 +45,17 @@ describe('doctor command', () => {
   const machine = [
     tool('git', 0, recipe({ isInstalled: async () => true })),
     tool('neovim', 2, recipe({ isInstalled: async () => false })),
-    tool('xcode', 3, unsupported('ferramenta exclusiva da Apple')),
+    tool('xcode', 3, unsupported('Apple-only tool')),
   ];
 
-  test('classifies each Tool as installed, faltando or não suportado', async () => {
+  test('classifies each Tool as installed, missing or unsupported', async () => {
     const ctx = context(machine, 'linux');
 
     await doctorCommand({}, ctx);
 
-    expect(ctx.reporter.messages('succeed')).toContain('git instalado');
-    expect(ctx.reporter.messages('absent')).toContain('neovim faltando');
-    expect(ctx.reporter.messages('skip')).toContain('xcode não suportado em linux: ferramenta exclusiva da Apple');
+    expect(ctx.reporter.messages('succeed')).toContain('git installed');
+    expect(ctx.reporter.messages('absent')).toContain('neovim missing');
+    expect(ctx.reporter.messages('skip')).toContain('xcode not supported on linux: Apple-only tool');
   });
 
   test('ends with a doctor-flavored summary of the counts, tallied by the shared summarize()', async () => {
@@ -64,22 +64,22 @@ describe('doctor command', () => {
     await doctorCommand({}, ctx);
 
     const output = ctx.reporter.output;
-    expect(output).toContain('instalados: 1');
-    expect(output).toContain('faltando: 1');
-    expect(output).toContain('não suportados: 1');
+    expect(output).toContain('installed: 1');
+    expect(output).toContain('missing: 1');
+    expect(output).toContain('not supported: 1');
     // doctor never reports things in install's failure vocabulary — a
     // missing Tool is not a failure of the check itself.
-    expect(output).not.toContain('falharam');
-    expect(output).not.toContain('Falhas:');
+    expect(output).not.toContain('failed:');
+    expect(output).not.toContain('Failures:');
     // `alreadyInstalled` is always zero for doctor (see reportOutcome) and
     // says nothing useful, so it is not printed at all.
-    expect(output).not.toContain('já instalados');
+    expect(output).not.toContain('already installed');
   });
 
   test('reports no failure when everything is installed or unsupported, so the shell sees a clean machine', async () => {
     const fixture = [
       tool('git', 0, recipe({ isInstalled: async () => true })),
-      tool('xcode', 3, unsupported('ferramenta exclusiva da Apple')),
+      tool('xcode', 3, unsupported('Apple-only tool')),
     ];
 
     const result = await doctorCommand({}, context(fixture));
@@ -133,19 +133,19 @@ describe('doctor command, as reported', () => {
     const fixture = [
       tool('git', 0, recipe({ isInstalled: async () => true })),
       tool('neovim', 2, recipe({ isInstalled: async () => false })),
-      tool('xcode', 3, unsupported('ferramenta exclusiva da Apple')),
+      tool('xcode', 3, unsupported('Apple-only tool')),
     ];
     const ctx = context(fixture, 'linux');
 
     await doctorCommand({}, ctx);
 
-    expect(ctx.reporter.messages('task')).toEqual(['Verificando git', 'Verificando neovim', 'Verificando xcode']);
-    expect(ctx.reporter.messages('succeed')).toEqual(['git instalado']);
+    expect(ctx.reporter.messages('task')).toEqual(['Checking git', 'Checking neovim', 'Checking xcode']);
+    expect(ctx.reporter.messages('succeed')).toEqual(['git installed']);
     // A missing Tool is `doctor`'s normal finding, so it is reported as
     // absent and never through the failure vocabulary of `install`.
-    expect(ctx.reporter.messages('absent')).toEqual(['neovim faltando']);
+    expect(ctx.reporter.messages('absent')).toEqual(['neovim missing']);
     expect(ctx.reporter.messages('fail')).toEqual([]);
-    expect(ctx.reporter.messages('skip')).toEqual(['xcode não suportado em linux: ferramenta exclusiva da Apple']);
+    expect(ctx.reporter.messages('skip')).toEqual(['xcode not supported on linux: Apple-only tool']);
   });
 
   test('signs off pointing at install when something is missing, and quietly when nothing is', async () => {
@@ -155,8 +155,8 @@ describe('doctor command, as reported', () => {
     await doctorCommand({}, missing);
     await doctorCommand({}, complete);
 
-    expect(missing.reporter.messages('outro')).toEqual(['Falta 1 ferramenta — rode 0xshell install.']);
-    expect(missing.reporter.messages('block')).toEqual(['Resumo:\n  instalados: 0\n  faltando: 1\n  não suportados: 0']);
-    expect(complete.reporter.messages('outro')).toEqual(['Máquina em dia.']);
+    expect(missing.reporter.messages('outro')).toEqual(['1 tool missing — run 0xshell install.']);
+    expect(missing.reporter.messages('block')).toEqual(['Summary:\n  installed: 0\n  missing: 1\n  not supported: 0']);
+    expect(complete.reporter.messages('outro')).toEqual(['Machine up to date.']);
   });
 });

@@ -16,8 +16,8 @@ export type InstallResult =
   | { readonly dryRun: false; readonly summary: Summary; readonly outcomes: readonly Outcome[] };
 
 const CONFIGURATION_SUFFIX: Record<ConfigureResult, string> = {
-  applied: ' · configuração aplicada',
-  unchanged: ' · configuração em dia',
+  applied: ' · configuration applied',
+  unchanged: ' · configuration up to date',
 };
 
 function configurationSuffix(configuration: ConfigureResult | undefined): string {
@@ -26,36 +26,36 @@ function configurationSuffix(configuration: ConfigureResult | undefined): string
 
 function reportOutcome(task: ReporterTask, outcome: Outcome, platform: Platform): void {
   if (outcome.status === 'installed') {
-    return task.succeed(`${outcome.id} instalado${configurationSuffix(outcome.configuration)}`);
+    return task.succeed(`${outcome.id} installed${configurationSuffix(outcome.configuration)}`);
   }
 
   if (outcome.status === 'already-installed') {
-    return task.succeed(`${outcome.id} já estava instalado${configurationSuffix(outcome.configuration)}`);
+    return task.succeed(`${outcome.id} was already installed${configurationSuffix(outcome.configuration)}`);
   }
 
   if (outcome.status === 'unsupported') {
-    return task.skip(`${outcome.id} não suportado em ${platform}: ${outcome.reason}`);
+    return task.skip(`${outcome.id} not supported on ${platform}: ${outcome.reason}`);
   }
 
-  task.fail(`${outcome.id} falhou: ${outcome.error}`);
+  task.fail(`${outcome.id} failed: ${outcome.error}`);
 }
 
 export function formatInstallSummary(summary: Summary): string {
   return [
-    `  instalados: ${summary.installed}`,
-    `  já instalados: ${summary.alreadyInstalled}`,
-    `  não suportados: ${summary.unsupported}`,
-    `  falharam: ${summary.failed}`,
+    `  installed: ${summary.installed}`,
+    `  already installed: ${summary.alreadyInstalled}`,
+    `  not supported: ${summary.unsupported}`,
+    `  failed: ${summary.failed}`,
     ...formatFailures(summary),
   ].join('\n');
 }
 
 function closingMessage(summary: Summary): string {
   if (summary.failed === 0) {
-    return 'Tudo pronto.';
+    return 'All set.';
   }
 
-  return summary.failed === 1 ? 'Concluído com 1 falha.' : `Concluído com ${summary.failed} falhas.`;
+  return summary.failed === 1 ? 'Finished with 1 failure.' : `Finished with ${summary.failed} failures.`;
 }
 
 function appliedConfiguration(outcome: Outcome): boolean {
@@ -101,7 +101,7 @@ export async function installCommand(input: InstallInput, ctx: CliContext): Prom
     for (const line of formatDryRunPlan(plan, platform, 'install')) {
       reporter.line(line);
     }
-    reporter.outro('Nada foi executado.');
+    reporter.outro('Nothing was executed.');
     return { dryRun: true, plan };
   }
 
@@ -113,7 +113,7 @@ export async function installCommand(input: InstallInput, ctx: CliContext): Prom
   const outcomes = await runInstallPlan(tools, runner, platform, {
     backup,
     onToolStart: (tool) => {
-      line = reporter.task(`Instalando ${tool.id}`);
+      line = reporter.task(`Installing ${tool.id}`);
     },
     onOutcome: (outcome) => {
       if (line) {
@@ -131,7 +131,7 @@ export async function installCommand(input: InstallInput, ctx: CliContext): Prom
   }
 
   if (outcomes.some(appliedConfiguration)) {
-    reporter.info(`Arquivos substituídos guardados no backup ${backup.version}: 0xshell restore ${backup.version}`);
+    reporter.info(`Replaced files kept in backup ${backup.version}: 0xshell restore ${backup.version}`);
   }
 
   reporter.outro(closingMessage(summary));

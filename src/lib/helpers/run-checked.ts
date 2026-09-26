@@ -14,6 +14,6 @@ import type { Command, Runner } from '../runner';
 export async function runChecked(runner: Runner, command: Command): Promise<void> {
   const result = await runner.run(command);
   if (result.exitCode !== 0) {
-    throw new Error(`comando falhou (exit ${result.exitCode}): ${command.join(' ')}\n${result.stderr}`);
+    throw new Error(`command failed (exit ${result.exitCode}): ${command.join(' ')}\n${result.stderr}`);
   }
 }

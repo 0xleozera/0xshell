@@ -39,7 +39,7 @@ describe('askToolsToInstall', () => {
     const rejected = askToolsToInstall([tool('slack')], fakePrompt);
 
     await expect(rejected).rejects.toThrow(CliError);
-    await expect(rejected).rejects.toThrow('Instalação cancelada.');
+    await expect(rejected).rejects.toThrow('Install cancelled.');
   });
 });
 
@@ -62,7 +62,7 @@ describe('confirmUninstallAll', () => {
     const rejected = confirmUninstallAll(undefined, fakePrompt);
 
     await expect(rejected).rejects.toThrow(CliError);
-    await expect(rejected).rejects.toThrow('Desinstalação cancelada.');
+    await expect(rejected).rejects.toThrow('Uninstall cancelled.');
   });
 
   test('passes the given message through to the prompt', async () => {

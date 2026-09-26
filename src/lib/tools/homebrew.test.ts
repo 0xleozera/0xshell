@@ -24,6 +24,6 @@ describe('homebrew tool', () => {
   });
 
   test('linux is unsupported because apt already ships with the system', () => {
-    expect(homebrew.linux).toEqual({ unsupported: true, reason: 'apt já vem instalado no sistema' });
+    expect(homebrew.linux).toEqual({ unsupported: true, reason: 'apt already ships with the system' });
   });
 });

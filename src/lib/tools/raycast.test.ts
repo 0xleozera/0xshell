@@ -12,6 +12,6 @@ describe('raycast tool', () => {
   });
 
   test('linux is unsupported, reported with a reason', () => {
-    expect(raycast.linux).toEqual({ unsupported: true, reason: 'sem cliente Linux, apenas macOS' });
+    expect(raycast.linux).toEqual({ unsupported: true, reason: 'no Linux client, macOS only' });
   });
 });

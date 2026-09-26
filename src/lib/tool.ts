@@ -37,17 +37,17 @@ function isRecipe(value: unknown): value is Recipe {
 }
 
 const recipeSchema = z.custom<Recipe>(isRecipe, {
-  message: 'esperado um Recipe com install(), uninstall() e isInstalled()',
+  message: 'expected a Recipe with install(), uninstall() and isInstalled()',
 });
 
 const unsupportedSchema = z.custom<Unsupported>(isUnsupported, {
-  message: 'esperado um Unsupported com reason',
+  message: 'expected an Unsupported with a reason',
 });
 
 const platformEntrySchema = z.union([recipeSchema, unsupportedSchema]);
 
 const configurationSchema = z.object({
-  root: z.string().min(1, 'root não pode ser vazio'),
+  root: z.string().min(1, 'root cannot be empty'),
   files: z.array(z.object({ path: z.string().min(1), content: z.string() })).min(1),
   ownsRoot: z.boolean().optional(),
 }) satisfies z.ZodType<Configuration>;
@@ -62,7 +62,7 @@ const configurationSchema = z.object({
  * (ADR-0006).
  */
 const toolSchema = z.object({
-  id: z.string().min(1, 'id não pode ser vazio'),
+  id: z.string().min(1, 'id cannot be empty'),
   stage: z.number().int().min(0).max(3),
   tags: z.array(z.string()),
   darwin: platformEntrySchema,

@@ -74,7 +74,7 @@ describe('runInstallPlan', () => {
         0,
         recipe({
           install: async () => {
-            throw new Error('curl falhou');
+            throw new Error('curl failed');
           },
         }),
       ),
@@ -100,7 +100,7 @@ describe('runInstallPlan', () => {
 
     const outcomes = await runInstallPlan(tools, createMockRunner(), 'darwin');
 
-    expect(outcomes).toEqual([{ status: 'failed', id: 'brew', error: 'curl falhou' }]);
+    expect(outcomes).toEqual([{ status: 'failed', id: 'brew', error: 'curl failed' }]);
     expect(ran).toEqual([]);
   });
 
@@ -151,12 +151,12 @@ describe('runInstallPlan', () => {
 
   test('reports unsupported without touching the Runner', async () => {
     const runner = createMockRunner();
-    const tools = [tool('xcode', 3, unsupported('ferramenta exclusiva da Apple'))];
+    const tools = [tool('xcode', 3, unsupported('Apple-only tool'))];
 
     const outcomes = await runInstallPlan(tools, runner, 'linux');
 
     expect(outcomes).toEqual([
-      { status: 'unsupported', id: 'xcode', reason: 'ferramenta exclusiva da Apple' },
+      { status: 'unsupported', id: 'xcode', reason: 'Apple-only tool' },
     ]);
     expect(runner.commands).toEqual([]);
   });
@@ -229,7 +229,7 @@ describe('runInstallPlan', () => {
     test('on linux, without any apt Tool selected, no sudo session is requested', async () => {
       const runner = createMockRunner();
       let sessionCreated = false;
-      const slack = defineTool({ id: 'slack', stage: 3, tags: ['apps'], darwin: brewCask('slack'), linux: unsupported('sem cliente Linux oficial') });
+      const slack = defineTool({ id: 'slack', stage: 3, tags: ['apps'], darwin: brewCask('slack'), linux: unsupported('no official Linux client') });
 
       await runInstallPlan([slack], runner, 'linux', {
         createSudoSession: () => {
@@ -251,7 +251,7 @@ describe('runInstallPlan', () => {
         recipe({
           requiresPrivilege: true,
           install: async () => {
-            throw new Error('curl falhou');
+            throw new Error('curl failed');
           },
         }),
       );
@@ -318,7 +318,7 @@ describe('runInstallPlan', () => {
           recipe({
             isInstalled: async () => true,
             uninstall: async () => {
-              throw new Error('brew uninstall falhou');
+              throw new Error('brew uninstall failed');
             },
           }),
         ),
@@ -326,7 +326,7 @@ describe('runInstallPlan', () => {
 
       const outcomes = await runInstallPlan(tools, createMockRunner(), 'darwin', { action: 'uninstall' });
 
-      expect(outcomes).toEqual([{ status: 'failed', id: 'slack', error: 'brew uninstall falhou' }]);
+      expect(outcomes).toEqual([{ status: 'failed', id: 'slack', error: 'brew uninstall failed' }]);
     });
 
     test('with direction "desc", tears down in reverse Stage order', async () => {
@@ -356,7 +356,7 @@ describe('runInstallPlan', () => {
           recipe({
             isInstalled: async () => true,
             uninstall: async () => {
-              throw new Error('brew uninstall falhou');
+              throw new Error('brew uninstall failed');
             },
           }),
         ),
@@ -370,18 +370,18 @@ describe('runInstallPlan', () => {
 
       expect(outcomes).toEqual([
         { status: 'installed', id: 'mise' },
-        { status: 'failed', id: 'brew-a', error: 'brew uninstall falhou' },
+        { status: 'failed', id: 'brew-a', error: 'brew uninstall failed' },
       ]);
       expect(ran).toEqual(['mise']);
     });
 
     test('reports unsupported without touching the Runner or calling uninstall()', async () => {
       const runner = createMockRunner();
-      const tools = [tool('xcode', 3, unsupported('ferramenta exclusiva da Apple'))];
+      const tools = [tool('xcode', 3, unsupported('Apple-only tool'))];
 
       const outcomes = await runInstallPlan(tools, runner, 'darwin', { action: 'uninstall' });
 
-      expect(outcomes).toEqual([{ status: 'unsupported', id: 'xcode', reason: 'ferramenta exclusiva da Apple' }]);
+      expect(outcomes).toEqual([{ status: 'unsupported', id: 'xcode', reason: 'Apple-only tool' }]);
       expect(runner.commands).toEqual([]);
     });
 
@@ -523,7 +523,7 @@ describe('runInstallPlan (configuration)', () => {
     const outcomes = await runInstallPlan([zsh, tool('slack', 3)], runner, 'darwin', { backup });
 
     expect(outcomes[0]).toMatchObject({ status: 'failed', id: 'zsh' });
-    expect(outcomes[0]?.status === 'failed' && outcomes[0].error).toStartWith('configuração falhou:');
+    expect(outcomes[0]?.status === 'failed' && outcomes[0].error).toStartWith('configuration failed:');
     expect(outcomes[1]).toEqual({ status: 'installed', id: 'slack' });
   });
 
@@ -532,7 +532,7 @@ describe('runInstallPlan (configuration)', () => {
     const zsh = configuredTool(
       recipe({
         install: async () => {
-          throw new Error('brew falhou');
+          throw new Error('brew failed');
         },
       }),
     );
@@ -559,7 +559,7 @@ describe('runInstallPlan (configuration)', () => {
       stage: 3,
       tags: [],
       darwin: recipe(),
-      linux: unsupported('sem receita'),
+      linux: unsupported('no recipe'),
       configuration,
     });
 

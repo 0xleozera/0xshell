@@ -10,5 +10,5 @@ export default defineTool({
     uninstallCommand: ['sh', '-c', 'curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh | sh'],
     binName: 'brew',
   }),
-  linux: unsupported('apt já vem instalado no sistema'),
+  linux: unsupported('apt already ships with the system'),
 });

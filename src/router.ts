@@ -25,30 +25,30 @@ const t = initTRPC.meta<TrpcCliMeta>().context<CliContext>().create();
 export const router = t.router({
   install: t.procedure
     .meta({
-      description: 'Instala um subconjunto do catálogo, ou o catálogo inteiro se nenhum filtro for informado',
+      description: 'Installs a subset of the Catalog, or the whole Catalog when no filter is given',
     })
     .input(InstallInputSchema)
     .mutation(({ input, ctx }) => installCommand(input, ctx)),
 
   uninstall: t.procedure
-    .meta({ description: 'Desinstala um subconjunto do catálogo — exige um Tool, --tag ou --all' })
+    .meta({ description: 'Uninstalls a subset of the Catalog — requires a Tool, --tag or --all' })
     .input(UninstallInputSchema)
     .mutation(({ input, ctx }) => uninstallCommand(input, ctx)),
 
   restore: t.procedure
     .meta({
-      description: 'Devolve os arquivos de configuração ao estado de uma versão de backup em ~/.0xshell/backups',
+      description: 'Returns the configuration files to the state of a backup version in ~/.0xshell/backups',
     })
     .input(RestoreInputSchema)
     .mutation(({ input, ctx }) => restoreCommand(input, ctx)),
 
   list: t.procedure
-    .meta({ description: 'Lista o catálogo inteiro com Tag, Stage e suporte na plataforma atual' })
+    .meta({ description: 'Lists the whole Catalog with Tag, Stage and support on the current Platform' })
     .input(ListInputSchema)
     .query(({ input, ctx }) => listCommand(input, ctx)),
 
   doctor: t.procedure
-    .meta({ description: 'Verifica o que está instalado, faltando ou não suportado, sem escrever nada' })
+    .meta({ description: 'Checks what is installed, missing or unsupported, without writing anything' })
     .input(DoctorInputSchema)
     .query(({ input, ctx }) => doctorCommand(input, ctx)),
 });

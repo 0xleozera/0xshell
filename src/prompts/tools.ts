@@ -10,7 +10,7 @@ export type MultiselectPrompt = (options: {
 
 export type ConfirmPrompt = (options: { message: string }) => Promise<boolean | symbol>;
 
-const UNINSTALL_ALL_MESSAGE = 'Isso vai desinstalar TODO o Catálogo. Confirma?';
+const UNINSTALL_ALL_MESSAGE = 'This will uninstall the ENTIRE Catalog. Confirm?';
 
 /**
  * A clack prompt only ever resolves to a `symbol` on cancellation (its own
@@ -41,10 +41,10 @@ export async function askToolsToInstall(
 ): Promise<readonly Tool[]> {
   const selected = orCancel(
     await prompt({
-      message: 'Selecione as ferramentas para instalar',
+      message: 'Select the tools to install',
       options: catalog.map((tool) => ({ value: tool.id, label: tool.id })),
     }),
-    'Instalação cancelada.',
+    'Install cancelled.',
   );
 
   const ids = new Set(selected);
@@ -60,7 +60,7 @@ export async function confirmUninstallAll(
   message: string = UNINSTALL_ALL_MESSAGE,
   prompt: ConfirmPrompt = confirm,
 ): Promise<boolean> {
-  return orCancel(await prompt({ message }), 'Desinstalação cancelada.');
+  return orCancel(await prompt({ message }), 'Uninstall cancelled.');
 }
 
 /** The clack-backed answers, wired into the context by `cli.ts`. */

@@ -30,7 +30,7 @@ export type MockReporter = Reporter & {
 /**
  * Test double for Reporter (ADR-0004), the counterpart of `MockRunner`.
  * Records every call in order, so a test can assert on what the command
- * *reported* — `{ kind: 'skip', message: 'xcode não suportado…' }` — instead
+ * *reported* — `{ kind: 'skip', message: 'xcode not supported…' }` — instead
  * of on the glyphs and colors of one particular rendering.
  *
  * `task()` is recorded too: its `kind: 'task'` entry is the in-progress line,

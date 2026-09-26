@@ -10,25 +10,25 @@ function capture() {
 describe('plain reporter', () => {
   test('marks each ending of a Tool line with its own glyph', () => {
     const { out, reporter } = capture();
-    const task = reporter.task('Instalando neovim…');
+    const task = reporter.task('Installing neovim…');
 
-    task.succeed('neovim instalado');
-    reporter.task('x').skip('xcode não suportado em linux: ferramenta exclusiva da Apple');
-    reporter.task('x').noop('neovim já instalado, nada a fazer');
-    reporter.task('x').absent('neovim faltando');
+    task.succeed('neovim installed');
+    reporter.task('x').skip('xcode not supported on linux: Apple-only tool');
+    reporter.task('x').noop('neovim already installed, nothing to do');
+    reporter.task('x').absent('neovim missing');
 
     expect(out).toEqual([
-      '✓ neovim instalado',
-      '⊘ xcode não suportado em linux: ferramenta exclusiva da Apple',
-      '= neovim já instalado, nada a fazer',
-      '✗ neovim faltando',
+      '✓ neovim installed',
+      '⊘ xcode not supported on linux: Apple-only tool',
+      '= neovim already installed, nothing to do',
+      '✗ neovim missing',
     ]);
   });
 
   test('prints nothing when a task opens — progress is a terminal affordance', () => {
     const { out, err, reporter } = capture();
 
-    reporter.task('Instalando neovim…');
+    reporter.task('Installing neovim…');
 
     expect(out).toEqual([]);
     expect(err).toEqual([]);
@@ -38,7 +38,7 @@ describe('plain reporter', () => {
     const { out, err, reporter } = capture();
 
     reporter.intro('0xshell install');
-    reporter.outro('Concluído');
+    reporter.outro('Done');
 
     expect(out).toEqual([]);
     expect(err).toEqual([]);
@@ -47,15 +47,15 @@ describe('plain reporter', () => {
   test('keeps failures and errors on stderr, and everything else on stdout', () => {
     const { out, err, reporter } = capture();
 
-    reporter.task('x').fail('docker falhou: curl falhou');
-    reporter.error('0xshell uninstall requer um Tool nomeado');
-    reporter.warn('Aviso: desinstalar o Homebrew leva junto tudo que ele instalou.');
+    reporter.task('x').fail('docker failed: curl failed');
+    reporter.error('0xshell uninstall requires a named Tool');
+    reporter.warn('Warning: uninstalling Homebrew takes everything it installed with it.');
     reporter.info('nota');
     reporter.line('neovim [stage 2]');
 
-    expect(err).toEqual(['✗ docker falhou: curl falhou', '0xshell uninstall requer um Tool nomeado']);
+    expect(err).toEqual(['✗ docker failed: curl failed', '0xshell uninstall requires a named Tool']);
     expect(out).toEqual([
-      'Aviso: desinstalar o Homebrew leva junto tudo que ele instalou.',
+      'Warning: uninstalling Homebrew takes everything it installed with it.',
       'nota',
       'neovim [stage 2]',
     ]);
@@ -64,8 +64,8 @@ describe('plain reporter', () => {
   test('renders a block as its title followed by the body', () => {
     const { out, reporter } = capture();
 
-    reporter.block('Resumo', '  instalados: 2\n  falharam: 0');
+    reporter.block('Summary', '  installed: 2\n  failed: 0');
 
-    expect(out).toEqual(['Resumo:\n  instalados: 2\n  falharam: 0']);
+    expect(out).toEqual(['Summary:\n  installed: 2\n  failed: 0']);
   });
 });

@@ -32,7 +32,7 @@ describe('selectTools', () => {
     const catalog = [tool('slack'), tool('neovim')];
 
     expect(() => selectTools(catalog, { names: ['neovim', 'not-a-real-tool'] })).toThrow(
-      'Ferramenta(s) desconhecida(s) no Catálogo: not-a-real-tool',
+      'Unknown tool(s) in the Catalog: not-a-real-tool',
     );
 
     try {

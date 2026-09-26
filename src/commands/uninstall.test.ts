@@ -23,8 +23,8 @@ function tool(id: string, stage: 0 | 1 | 2 | 3, entry: Recipe | Unsupported = re
   return defineTool({ id, stage, tags, darwin: entry, linux: entry });
 }
 
-const HOMEBREW_WARNING = 'Aviso: desinstalar o Homebrew (Stage 0) leva junto tudo que ele instalou.';
-const MISE_WARNING = 'Aviso: desinstalar o mise (Stage 1) leva junto bun, pnpm, yarn, go, node e neovim.';
+const HOMEBREW_WARNING = 'Warning: uninstalling Homebrew (Stage 0) takes everything it installed with it.';
+const MISE_WARNING = 'Warning: uninstalling mise (Stage 1) takes bun, pnpm, yarn, go, node and neovim with it.';
 
 /** No test may reach a prompt it did not ask for: every one of them hangs a script. */
 const noPrompts: CliPrompts = {
@@ -81,23 +81,23 @@ describe('uninstall command', () => {
 
     const result = await uninstallCommand(input({ tools: ['git'] }), ctx);
 
-    expect(ctx.reporter.messages('succeed')).toEqual(['git não estava instalado']);
+    expect(ctx.reporter.messages('succeed')).toEqual(['git was not installed']);
     expect(result).toMatchObject({ summary: { failed: 0 } });
   });
 
-  describe('guarda-corpo 1: sem argumento é erro', () => {
+  describe('guard rail 1: no argument is an error', () => {
     test('nothing reaches the Runner and the run is refused as a usage error', async () => {
       const ctx = context();
 
       const rejected = uninstallCommand(input(), ctx);
 
       await expect(rejected).rejects.toThrow(CliError);
-      await expect(rejected).rejects.toThrow('nada é assumido por padrão');
+      await expect(rejected).rejects.toThrow('nothing is assumed by default');
       expect(ctx.runner.commands).toEqual([]);
     });
   });
 
-  describe('guarda-corpo 2: --all exige confirmação interativa', () => {
+  describe('guard rail 2: --all requires interactive confirmation', () => {
     test('without confirmation, nothing executes', async () => {
       const uninstalled: string[] = [];
       const catalog = [
@@ -135,20 +135,20 @@ describe('uninstall command', () => {
       expect(uninstalled).toEqual(['slack', 'runtime']);
     });
 
-    test("the closing Resumo uses uninstall vocabulary, not install's", async () => {
-      const catalog = [tool('slack', 3, recipe()), tool('xcode', 3, unsupported('ferramenta exclusiva da Apple'))];
+    test("the closing summary uses uninstall vocabulary, not install's", async () => {
+      const catalog = [tool('slack', 3, recipe()), tool('xcode', 3, unsupported('Apple-only tool'))];
       const ctx = context({ catalog, prompts: confirming });
 
       await uninstallCommand(input({ all: true }), ctx);
 
       const summary = ctx.reporter.messages('block').join('\n');
-      expect(summary).toContain('desinstalados: 1');
-      expect(summary).not.toContain('\n  instalados:');
-      expect(summary).not.toContain('\n  já instalados:');
+      expect(summary).toContain('uninstalled: 1');
+      expect(summary).not.toContain('\n  installed:');
+      expect(summary).not.toContain('\n  already installed:');
     });
   });
 
-  describe('guarda-corpo 3: homebrew e mise nunca são alcançados por --all ou --tag', () => {
+  describe('guard rail 3: homebrew and mise are never reached through --all or --tag', () => {
     test('--tag skips Stage 0 and Stage 1 Tools even when they carry the Tag', async () => {
       const uninstalled: string[] = [];
       const remove = (id: string) => async () => {
@@ -184,7 +184,7 @@ describe('uninstall command', () => {
     });
   });
 
-  describe('guarda-corpo 4: execução na ordem inversa dos Stages', () => {
+  describe('guard rail 4: runs in reverse Stage order', () => {
     test('executes Stage 3 → 2 → 1 → 0, regardless of argument order', async () => {
       const order: string[] = [];
       const remove = (id: string) => async () => {
@@ -203,7 +203,7 @@ describe('uninstall command', () => {
     });
   });
 
-  describe('guarda-corpo: nenhum comando de purga é produzido', () => {
+  describe('guard rail: no purge command is ever produced', () => {
     const docker = defineTool({
       id: 'docker',
       stage: 3,
@@ -314,10 +314,10 @@ describe('uninstall command, as reported', () => {
 
     await uninstallCommand(input({ all: true }), ctx);
 
-    expect(ctx.reporter.messages('task')).toEqual(['Desinstalando slack', 'Desinstalando docker']);
-    expect(ctx.reporter.messages('succeed')).toEqual(['slack desinstalado', 'docker não estava instalado']);
+    expect(ctx.reporter.messages('task')).toEqual(['Uninstalling slack', 'Uninstalling docker']);
+    expect(ctx.reporter.messages('succeed')).toEqual(['slack uninstalled', 'docker was not installed']);
     expect(ctx.reporter.messages('block')).toEqual([
-      'Resumo:\n  desinstalados: 1\n  não estavam instalados: 1\n  não suportados: 0\n  falharam: 0',
+      'Summary:\n  uninstalled: 1\n  were not installed: 1\n  not supported: 0\n  failed: 0',
     ]);
   });
 
@@ -353,13 +353,13 @@ describe('formatUninstallSummary', () => {
       failures: [{ id: 'docker', error: 'network unreachable' }],
     });
 
-    expect(text).toContain('desinstalados: 1');
-    expect(text).toContain('não estavam instalados: 1');
-    expect(text).toContain('não suportados: 1');
-    expect(text).toContain('falharam: 1');
+    expect(text).toContain('uninstalled: 1');
+    expect(text).toContain('were not installed: 1');
+    expect(text).toContain('not supported: 1');
+    expect(text).toContain('failed: 1');
     expect(text).toContain('docker: network unreachable');
-    expect(text).not.toContain('\n  instalados:');
-    expect(text).not.toContain('\n  já instalados:');
+    expect(text).not.toContain('\n  installed:');
+    expect(text).not.toContain('\n  already installed:');
   });
 
   test('never prints the install-style bare labels, even with zero counts', () => {
@@ -371,8 +371,8 @@ describe('formatUninstallSummary', () => {
       failures: [],
     });
 
-    expect(text).toContain('desinstalados: 0');
-    expect(text).not.toContain('\n  instalados:');
-    expect(text).not.toContain('\n  já instalados:');
+    expect(text).toContain('uninstalled: 0');
+    expect(text).not.toContain('\n  installed:');
+    expect(text).not.toContain('\n  already installed:');
   });
 });

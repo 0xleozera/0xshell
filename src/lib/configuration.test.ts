@@ -124,7 +124,7 @@ describe('applyConfiguration', () => {
     writeFileSync(join(home, 'config'), 'a file, not a directory\n');
     const configuration: Configuration = { root: join(home, 'config', 'eza'), files: [{ path: 'theme.yml', content: 'x' }] };
 
-    await expect(applyConfiguration(configuration, runner, backup)).rejects.toThrow('comando falhou');
+    await expect(applyConfiguration(configuration, runner, backup)).rejects.toThrow('command failed');
   });
 });
 

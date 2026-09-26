@@ -24,30 +24,30 @@ export type UninstallResult =
 const GUARDED_STAGES = new Set([0, 1]);
 
 const GUARDED_STAGE_WARNINGS: Record<number, string> = {
-  0: 'Aviso: desinstalar o Homebrew (Stage 0) leva junto tudo que ele instalou.',
-  1: 'Aviso: desinstalar o mise (Stage 1) leva junto bun, pnpm, yarn, go, node e neovim.',
+  0: 'Warning: uninstalling Homebrew (Stage 0) takes everything it installed with it.',
+  1: 'Warning: uninstalling mise (Stage 1) takes bun, pnpm, yarn, go, node and neovim with it.',
 };
 
 function reportOutcome(task: ReporterTask, outcome: Outcome, platform: Platform): void {
   if (outcome.status === 'installed') {
-    return task.succeed(`${outcome.id} desinstalado`);
+    return task.succeed(`${outcome.id} uninstalled`);
   }
 
   if (outcome.status === 'already-installed') {
-    return task.succeed(`${outcome.id} não estava instalado`);
+    return task.succeed(`${outcome.id} was not installed`);
   }
 
   if (outcome.status === 'unsupported') {
-    return task.skip(`${outcome.id} não suportado em ${platform}: ${outcome.reason}`);
+    return task.skip(`${outcome.id} not supported on ${platform}: ${outcome.reason}`);
   }
 
-  task.fail(`${outcome.id} falhou: ${outcome.error}`);
+  task.fail(`${outcome.id} failed: ${outcome.error}`);
 }
 
 /**
  * Uninstall-flavored rendering of the shared `Summary`. `summarize()`, its
  * four counts and the failure detail are untouched and shared with
- * `install`; only the words differ, because "instalados: 12" reads as wrong
+ * `install`; only the words differ, because "installed: 12" reads as wrong
  * after twelve Tools were removed. `summary.installed` still means "the
  * action ran and changed the machine" and `summary.alreadyInstalled`
  * "already at the target end state" (see `lib/install-plan.ts`) — this only
@@ -55,20 +55,20 @@ function reportOutcome(task: ReporterTask, outcome: Outcome, platform: Platform)
  */
 export function formatUninstallSummary(summary: Summary): string {
   return [
-    `  desinstalados: ${summary.installed}`,
-    `  não estavam instalados: ${summary.alreadyInstalled}`,
-    `  não suportados: ${summary.unsupported}`,
-    `  falharam: ${summary.failed}`,
+    `  uninstalled: ${summary.installed}`,
+    `  were not installed: ${summary.alreadyInstalled}`,
+    `  not supported: ${summary.unsupported}`,
+    `  failed: ${summary.failed}`,
     ...formatFailures(summary),
   ].join('\n');
 }
 
 function closingMessage(summary: Summary): string {
   if (summary.failed === 0) {
-    return 'Desinstalação concluída.';
+    return 'Uninstall finished.';
   }
 
-  return summary.failed === 1 ? 'Concluído com 1 falha.' : `Concluído com ${summary.failed} falhas.`;
+  return summary.failed === 1 ? 'Finished with 1 failure.' : `Finished with ${summary.failed} failures.`;
 }
 
 /**
@@ -114,7 +114,7 @@ export async function uninstallCommand(input: UninstallInput, ctx: CliContext): 
   if (!named && !input.tag && !input.all) {
     throw new CliError(
       'usage',
-      '0xshell uninstall requer um Tool nomeado, --tag ou --all — nada é assumido por padrão.',
+      '0xshell uninstall requires a named Tool, --tag or --all — nothing is assumed by default.',
     );
   }
 
@@ -132,7 +132,7 @@ export async function uninstallCommand(input: UninstallInput, ctx: CliContext): 
     for (const line of formatDryRunPlan(plan, platform, 'uninstall')) {
       reporter.line(line);
     }
-    reporter.outro('Nada foi executado.');
+    reporter.outro('Nothing was executed.');
     return { dryRun: true, plan };
   }
 
@@ -143,7 +143,7 @@ export async function uninstallCommand(input: UninstallInput, ctx: CliContext): 
   const outcomes = await runInstallPlan(tools, runner, platform, {
     action: 'uninstall',
     onToolStart: (tool) => {
-      line = reporter.task(`Desinstalando ${tool.id}`);
+      line = reporter.task(`Uninstalling ${tool.id}`);
     },
     onOutcome: (outcome) => {
       if (line) {

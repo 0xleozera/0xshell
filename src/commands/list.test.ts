@@ -42,21 +42,21 @@ function context(catalog: readonly Tool[], platform: 'darwin' | 'linux' = 'darwi
 }
 
 describe('list command', () => {
-  test('reports every Tool with its Tag, Stage and support on the current Plataforma', () => {
+  test('reports every Tool with its Tag, Stage and support on the current Platform', () => {
     const ctx = context([tool('neovim', 2, recipe(), ['cli']), tool('slack', 3, recipe(), ['apps'])]);
 
     listCommand({}, ctx);
 
-    expect(ctx.reporter.output).toContain('neovim [stage 2] [tags: cli] ✓ suportado em darwin');
-    expect(ctx.reporter.output).toContain('slack [stage 3] [tags: apps] ✓ suportado em darwin');
+    expect(ctx.reporter.output).toContain('neovim [stage 2] [tags: cli] ✓ supported on darwin');
+    expect(ctx.reporter.output).toContain('slack [stage 3] [tags: apps] ✓ supported on darwin');
   });
 
   test('shows the declared reason for an unsupported Tool', () => {
-    const ctx = context([tool('xcode', 3, unsupported('ferramenta exclusiva da Apple'))], 'linux');
+    const ctx = context([tool('xcode', 3, unsupported('Apple-only tool'))], 'linux');
 
     listCommand({}, ctx);
 
-    expect(ctx.reporter.output).toContain('⊘ não suportado em linux: ferramenta exclusiva da Apple');
+    expect(ctx.reporter.output).toContain('⊘ not supported on linux: Apple-only tool');
   });
 
   test('includes the note that npm ships with node', () => {
@@ -69,7 +69,7 @@ describe('list command', () => {
   });
 
   test('never sends any command to the Runner', () => {
-    const ctx = context([tool('neovim', 2, recipe(), ['cli']), tool('xcode', 3, unsupported('motivo'))]);
+    const ctx = context([tool('neovim', 2, recipe(), ['cli']), tool('xcode', 3, unsupported('reason'))]);
 
     listCommand({}, ctx);
 
@@ -97,7 +97,7 @@ describe('list command, as reported', () => {
     // In Stage order, and as rows: `list` describes the Catalog, it does not
     // work on it, so there is no progress to report.
     expect(ctx.reporter.messages('line')).toEqual([
-      'neovim [stage 2] [tags: cli] ✓ suportado em darwin\nslack [stage 3] [tags: apps] ✓ suportado em darwin',
+      'neovim [stage 2] [tags: cli] ✓ supported on darwin\nslack [stage 3] [tags: apps] ✓ supported on darwin',
     ]);
     expect(ctx.reporter.messages('task')).toEqual([]);
   });
@@ -108,6 +108,6 @@ describe('list command, as reported', () => {
     listCommand({}, ctx);
 
     expect(ctx.reporter.messages('info').join()).toContain('npm');
-    expect(ctx.reporter.messages('outro')).toEqual(['1 ferramenta no Catálogo.']);
+    expect(ctx.reporter.messages('outro')).toEqual(['1 tool in the Catalog.']);
   });
 });

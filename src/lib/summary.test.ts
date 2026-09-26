@@ -8,7 +8,7 @@ describe('summarize', () => {
       { status: 'installed', id: 'slack' },
       { status: 'installed', id: 'mise' },
       { status: 'already-installed', id: 'git' },
-      { status: 'unsupported', id: 'xcode', reason: 'ferramenta exclusiva da Apple' },
+      { status: 'unsupported', id: 'xcode', reason: 'Apple-only tool' },
       { status: 'failed', id: 'docker', error: 'network unreachable' },
     ];
 
@@ -38,7 +38,7 @@ describe('formatFailures', () => {
   test('lists each failure under a header', () => {
     const summary = summarize([{ status: 'failed', id: 'docker', error: 'network unreachable' }]);
 
-    expect(formatFailures(summary)).toEqual(['Falhas:', '  ✗ docker: network unreachable']);
+    expect(formatFailures(summary)).toEqual(['Failures:', '  ✗ docker: network unreachable']);
   });
 
   test('says nothing at all when nothing failed', () => {

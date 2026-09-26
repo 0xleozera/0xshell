@@ -12,6 +12,6 @@ describe('logitech-g-hub tool', () => {
   });
 
   test('linux is unsupported, reported with a reason', () => {
-    expect(logitechGHub.linux).toEqual({ unsupported: true, reason: 'sem cliente Linux oficial' });
+    expect(logitechGHub.linux).toEqual({ unsupported: true, reason: 'no official Linux client' });
   });
 });

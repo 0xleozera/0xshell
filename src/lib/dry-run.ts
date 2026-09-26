@@ -32,8 +32,8 @@ const DIRECTION: Record<PlanAction, StageDirection> = {
  * "already installed" to `install` and as "not installed" to `uninstall`.
  */
 const NOTHING_TO_DO: Record<PlanAction, (id: string) => string> = {
-  install: (id) => `= ${id} já instalado, nada a fazer`,
-  uninstall: (id) => `= ${id} não instalado, nada a fazer`,
+  install: (id) => `= ${id} already installed, nothing to do`,
+  uninstall: (id) => `= ${id} not installed, nothing to do`,
 };
 
 async function record(entry: Recipe, action: PlanAction): Promise<readonly Command[]> {
@@ -117,7 +117,7 @@ export function formatDryRunPlan(
 ): readonly string[] {
   return plan.flatMap((entry) => {
     if (entry.status === 'unsupported') {
-      return [`⊘ ${entry.id} não suportado em ${platform}: ${entry.reason}`];
+      return [`⊘ ${entry.id} not supported on ${platform}: ${entry.reason}`];
     }
 
     if (entry.status === 'nothing-to-do') {
@@ -126,7 +126,7 @@ export function formatDryRunPlan(
 
     const lines = [
       ...entry.commands.map((command) => `→ ${entry.id}: ${command.join(' ')}`),
-      ...entry.writes.map((path) => `✎ ${entry.id}: escreve ${displayPath(path, homedir())}`),
+      ...entry.writes.map((path) => `✎ ${entry.id}: writes ${displayPath(path, homedir())}`),
     ];
 
     return lines.length === 0 ? [] : [lines.join('\n')];

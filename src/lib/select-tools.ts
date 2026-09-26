@@ -27,7 +27,7 @@ export function selectTools(catalog: readonly Tool[], options: SelectToolsOption
     const missing = found.filter((entry) => !entry.tool).map((entry) => entry.name);
 
     if (missing.length > 0) {
-      throw new CliError('usage', `Ferramenta(s) desconhecida(s) no Catálogo: ${missing.join(', ')}`);
+      throw new CliError('usage', `Unknown tool(s) in the Catalog: ${missing.join(', ')}`);
     }
 
     return found.flatMap((entry) => (entry.tool ? [entry.tool] : []));

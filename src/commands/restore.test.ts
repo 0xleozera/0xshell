@@ -96,7 +96,7 @@ describe('restore command', () => {
     await install(new Date(2026, 8, 26, 14, 30, 12));
 
     expect(reporter.messages('info')).toContain(
-      'Arquivos substituídos guardados no backup 20260926-143012: 0xshell restore 20260926-143012',
+      'Replaced files kept in backup 20260926-143012: 0xshell restore 20260926-143012',
     );
   });
 
@@ -131,7 +131,7 @@ describe('restore command', () => {
     await restoreCommand({ version: '20260926-143012', dryRun: true }, context());
 
     expect(reporter.messages('line')).toEqual([
-      '↺ ~/.zshrc: volta ao conteúdo do backup\n✗ ~/.antigenrc: removido (não existia)',
+      '↺ ~/.zshrc: back to the backup content\n✗ ~/.antigenrc: removed (did not exist)',
     ]);
     expect(read('.zshrc')).toBe('ZSH_THEME="tokyonight"\n');
     expect(existsSync(join(home, '.0xshell', 'backups', '20260926-150000'))).toBe(false);
@@ -145,14 +145,14 @@ describe('restore command', () => {
     const rejected = restoreCommand({ dryRun: false }, context());
 
     await expect(rejected).rejects.toBeInstanceOf(CliError);
-    await expect(rejected).rejects.toThrow('Backups disponíveis (mais recente primeiro):\n  20260927-090000\n  20260926-143012');
+    await expect(rejected).rejects.toThrow('Available backups (newest first):\n  20260927-090000\n  20260926-143012');
     expect(read('.zshrc')).toBe('ZSH_THEME="tokyonight"\n');
   });
 
   test('an unknown version is a usage error that says there are no backups yet', async () => {
     const rejected = restoreCommand({ version: '20200101-000000', dryRun: false }, context());
 
-    await expect(rejected).rejects.toThrow('O backup 20200101-000000 não existe.\nNenhum backup em ~/.0xshell/backups.');
+    await expect(rejected).rejects.toThrow('Backup 20200101-000000 does not exist.\nNo backups in ~/.0xshell/backups.');
   });
 
   test('a path whose saved copy is gone fails on its own and the rest is still restored', async () => {
@@ -171,7 +171,7 @@ describe('restore command', () => {
 
     const rejected = restoreCommand({ version: '20260926-143012', dryRun: false }, context());
 
-    await expect(rejected).rejects.toThrow('acabou de ser criado');
+    await expect(rejected).rejects.toThrow('was just created');
     expect(read('.zshrc')).toBe('ZSH_THEME="tokyonight"\n');
   });
 });

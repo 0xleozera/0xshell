@@ -17,7 +17,7 @@ describe('savedCopyPath', () => {
   });
 
   test('refuses a path outside the home instead of writing outside the backup', () => {
-    expect(() => savedCopyPath(backup, '/etc/zshrc')).toThrow('fora da home');
+    expect(() => savedCopyPath(backup, '/etc/zshrc')).toThrow('outside the home');
   });
 });
 
@@ -30,6 +30,6 @@ describe('parseManifest', () => {
   });
 
   test('rejects a line it does not understand rather than restoring a guess', () => {
-    expect(() => parseManifest('moved\t/home/leo/.zshrc\n')).toThrow('linha inválida');
+    expect(() => parseManifest('moved\t/home/leo/.zshrc\n')).toThrow('invalid line');
   });
 });

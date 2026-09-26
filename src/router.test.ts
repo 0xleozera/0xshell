@@ -108,7 +108,7 @@ describe('cli surface', () => {
 
     expect(ctx.reporter.messages('line')).toEqual(['\u2192 neovim: mise install neovim']);
     expect(ctx.runner.wasRun(['mise', 'install', 'neovim'])).toBe(false);
-    expect(ctx.reporter.messages('outro')).toEqual(['Nada foi executado.']);
+    expect(ctx.reporter.messages('outro')).toEqual(['Nothing was executed.']);
   });
 
   test('--tag is parsed as a value flag', async () => {

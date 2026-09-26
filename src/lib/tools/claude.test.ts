@@ -12,6 +12,6 @@ describe('claude tool', () => {
   });
 
   test('linux is unsupported, reported with a reason', () => {
-    expect(claude.linux).toEqual({ unsupported: true, reason: 'app desktop sem cliente Linux oficial' });
+    expect(claude.linux).toEqual({ unsupported: true, reason: 'desktop app with no official Linux client' });
   });
 });

@@ -47,7 +47,7 @@ export function savedCopyPath(backup: Backup, path: string): string {
   const inHome = relative(backup.home, path);
 
   if (inHome.startsWith('..') || isAbsolute(inHome)) {
-    throw new Error(`${path} está fora da home e não tem lugar no backup`);
+    throw new Error(`${path} is outside the home and has no place in the backup`);
   }
 
   return join(versionDir(backup), 'files', inHome);
@@ -113,7 +113,7 @@ export function parseManifest(text: string): readonly BackupEntry[] {
     .map((line) => {
       const [kind, ...path] = line.split('\t');
       if (!kind || !ENTRY_KINDS.has(kind) || path.length === 0) {
-        throw new Error(`linha inválida no manifesto do backup: ${line}`);
+        throw new Error(`invalid line in the backup manifest: ${line}`);
       }
       return { kind: kind as BackupEntry['kind'], path: path.join('\t') };
     });

@@ -86,7 +86,7 @@ describe('install command', () => {
       stage: 3,
       tags: [],
       darwin: brewCask('slack'),
-      linux: unsupported('não usado neste teste'),
+      linux: unsupported('not used in this test'),
     });
     const ctx = context({ catalog: [slack] });
     ctx.runner.failOn(['brew', 'list', '--cask', 'slack']);
@@ -102,14 +102,14 @@ describe('install command', () => {
       stage: 3,
       tags: [],
       darwin: brewCask('xcode'),
-      linux: unsupported('ferramenta exclusiva da Apple'),
+      linux: unsupported('Apple-only tool'),
     });
     const ctx = context({ catalog: [xcode], platform: 'linux' });
 
     const result = await installCommand(input({ tools: ['xcode'] }), ctx);
 
     expect(ctx.runner.commands).toEqual([]);
-    expect(ctx.reporter.messages('skip')).toEqual(['xcode não suportado em linux: ferramenta exclusiva da Apple']);
+    expect(ctx.reporter.messages('skip')).toEqual(['xcode not supported on linux: Apple-only tool']);
     expect(result).toMatchObject({ summary: { failed: 0, unsupported: 1 } });
   });
 
@@ -136,7 +136,7 @@ describe('install command', () => {
         0,
         recipe({
           install: async () => {
-            throw new Error('curl falhou');
+            throw new Error('curl failed');
           },
         }),
       ),
@@ -146,9 +146,9 @@ describe('install command', () => {
 
     const result = await installCommand(input(), ctx);
 
-    expect(ctx.reporter.messages('fail')).toEqual(['brew falhou: curl falhou']);
+    expect(ctx.reporter.messages('fail')).toEqual(['brew failed: curl failed']);
     expect(result).toMatchObject({ summary: { installed: 0, failed: 1 } });
-    expect(ctx.reporter.messages('block').join('\n')).toContain('instalados: 0');
+    expect(ctx.reporter.messages('block').join('\n')).toContain('installed: 0');
   });
 
   test('a failure outside Stage 0 is collected, later Tools still run, and the run is reported as failed', async () => {
@@ -170,8 +170,8 @@ describe('install command', () => {
     const result = await installCommand(input(), ctx);
 
     const summary = ctx.reporter.messages('block').join('\n');
-    expect(summary).toContain('instalados: 2');
-    expect(summary).toContain('falharam: 1');
+    expect(summary).toContain('installed: 2');
+    expect(summary).toContain('failed: 1');
     expect(summary).toContain('flaky: network unreachable');
     expect(result).toMatchObject({ summary: { installed: 2, failed: 1 } });
   });
@@ -180,7 +180,7 @@ describe('install command', () => {
     const catalog = [
       tool('brew', 0, recipe()),
       tool('git', 3, recipe({ isInstalled: async () => true })),
-      tool('xcode', 3, unsupported('ferramenta exclusiva da Apple')),
+      tool('xcode', 3, unsupported('Apple-only tool')),
     ];
 
     const result = await installCommand(input(), context({ catalog }));
@@ -262,7 +262,7 @@ describe('install command', () => {
 
     const rejected = installCommand(input({ tools: ['neovim', 'not-a-real-tool'] }), context({ catalog }));
 
-    await expect(rejected).rejects.toThrow('Ferramenta(s) desconhecida(s) no Catálogo: not-a-real-tool');
+    await expect(rejected).rejects.toThrow('Unknown tool(s) in the Catalog: not-a-real-tool');
     expect(installed).toEqual([]);
   });
 
@@ -362,21 +362,21 @@ describe('install command, as reported', () => {
 
     // The line is already open while `install()` runs — that is the whole
     // point of reporting before the command instead of after it.
-    expect(openWhileInstalling).toEqual(['Instalando brew']);
-    expect(ctx.reporter.messages('task', 'succeed')).toEqual(['Instalando brew', 'brew instalado']);
+    expect(openWhileInstalling).toEqual(['Installing brew']);
+    expect(ctx.reporter.messages('task', 'succeed')).toEqual(['Installing brew', 'brew installed']);
   });
 
   test('closes each line under the kind its Outcome deserves', async () => {
     const catalog = [
       tool('git', 0, recipe({ isInstalled: async () => true })),
       tool('slack', 3, recipe()),
-      tool('xcode', 3, unsupported('ferramenta exclusiva da Apple')),
+      tool('xcode', 3, unsupported('Apple-only tool')),
       tool(
         'docker',
         3,
         recipe({
           install: async () => {
-            throw new Error('curl falhou');
+            throw new Error('curl failed');
           },
         }),
       ),
@@ -385,9 +385,9 @@ describe('install command, as reported', () => {
 
     await installCommand(input(), ctx);
 
-    expect(ctx.reporter.messages('succeed')).toEqual(['git já estava instalado', 'slack instalado']);
-    expect(ctx.reporter.messages('skip')).toEqual(['xcode não suportado em darwin: ferramenta exclusiva da Apple']);
-    expect(ctx.reporter.messages('fail')).toEqual(['docker falhou: curl falhou']);
+    expect(ctx.reporter.messages('succeed')).toEqual(['git was already installed', 'slack installed']);
+    expect(ctx.reporter.messages('skip')).toEqual(['xcode not supported on darwin: Apple-only tool']);
+    expect(ctx.reporter.messages('fail')).toEqual(['docker failed: curl failed']);
   });
 
   test('reports a configuration that already matched the machine as up to date, installed or not', async () => {
@@ -401,8 +401,8 @@ describe('install command, as reported', () => {
     await installCommand(input({ tools: ['zsh', 'antigen'] }), ctx);
 
     expect(ctx.reporter.messages('succeed')).toEqual([
-      'zsh instalado · configuração em dia',
-      'antigen já estava instalado · configuração em dia',
+      'zsh installed · configuration up to date',
+      'antigen was already installed · configuration up to date',
     ]);
   });
 
@@ -415,7 +415,7 @@ describe('install command, as reported', () => {
 
     await installCommand(input({ tools: ['zsh'] }), ctx);
 
-    expect(ctx.reporter.messages('succeed')).toEqual(['zsh instalado · configuração aplicada']);
+    expect(ctx.reporter.messages('succeed')).toEqual(['zsh installed · configuration applied']);
   });
 
   test('files the closing summary under its own title and signs off', async () => {
@@ -424,9 +424,9 @@ describe('install command, as reported', () => {
     await installCommand(input(), ctx);
 
     expect(ctx.reporter.messages('block')).toEqual([
-      'Resumo:\n  instalados: 1\n  já instalados: 0\n  não suportados: 0\n  falharam: 0',
+      'Summary:\n  installed: 1\n  already installed: 0\n  not supported: 0\n  failed: 0',
     ]);
-    expect(ctx.reporter.messages('outro')).toEqual(['Tudo pronto.']);
+    expect(ctx.reporter.messages('outro')).toEqual(['All set.']);
   });
 
   test('a filtered run reports its Tools and skips the summary block', async () => {
@@ -434,7 +434,7 @@ describe('install command, as reported', () => {
 
     await installCommand(input({ tools: ['slack'] }), ctx);
 
-    expect(ctx.reporter.messages('succeed')).toEqual(['slack instalado']);
+    expect(ctx.reporter.messages('succeed')).toEqual(['slack installed']);
     expect(ctx.reporter.messages('block')).toEqual([]);
   });
 
@@ -457,10 +457,10 @@ describe('formatInstallSummary', () => {
       failures: [{ id: 'docker', error: 'network unreachable' }],
     });
 
-    expect(text).toContain('instalados: 1');
-    expect(text).toContain('já instalados: 0');
-    expect(text).toContain('não suportados: 0');
-    expect(text).toContain('falharam: 1');
+    expect(text).toContain('installed: 1');
+    expect(text).toContain('already installed: 0');
+    expect(text).toContain('not supported: 0');
+    expect(text).toContain('failed: 1');
     expect(text).toContain('docker: network unreachable');
   });
 });

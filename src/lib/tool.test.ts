@@ -10,22 +10,22 @@ describe('defineTool', () => {
       stage: 3,
       tags: ['apps'],
       darwin: brewCask('slack'),
-      linux: unsupported('sem receita Linux ainda'),
+      linux: unsupported('no Linux recipe yet'),
     });
 
     expect(tool.id).toBe('slack');
   });
 
-  test('accepts unsupported() as a Plataforma recipe', () => {
+  test('accepts unsupported() as a Platform recipe', () => {
     const tool = defineTool({
       id: 'xcode',
       stage: 3,
       tags: ['apps'],
       darwin: brewCask('xcode'),
-      linux: unsupported('ferramenta exclusiva da Apple'),
+      linux: unsupported('Apple-only tool'),
     });
 
-    expect(tool.linux).toEqual({ unsupported: true, reason: 'ferramenta exclusiva da Apple' });
+    expect(tool.linux).toEqual({ unsupported: true, reason: 'Apple-only tool' });
   });
 
   test('accepts an empty tags array', () => {
@@ -34,7 +34,7 @@ describe('defineTool', () => {
       stage: 3,
       tags: [],
       darwin: brewCask('slack'),
-      linux: unsupported('motivo'),
+      linux: unsupported('reason'),
     });
 
     expect(tool.tags).toEqual([]);
@@ -46,14 +46,14 @@ describe('defineTool', () => {
       stage: 3,
       tags: [],
       darwin: brewCask('slack'),
-      linux: unsupported('motivo'),
+      linux: unsupported('reason'),
     } as unknown as Tool;
 
     expect(() => defineTool(invalid)).toThrow();
   });
 
   test('rejects a Tool missing darwin recipe', () => {
-    const invalid = { id: 'slack', stage: 3, tags: [], linux: unsupported('motivo') } as unknown as Tool;
+    const invalid = { id: 'slack', stage: 3, tags: [], linux: unsupported('reason') } as unknown as Tool;
 
     expect(() => defineTool(invalid)).toThrow();
   });
@@ -70,7 +70,7 @@ describe('defineTool', () => {
       stage: 3,
       tags: [],
       darwin: { install: 'not-a-function' },
-      linux: unsupported('motivo'),
+      linux: unsupported('reason'),
     } as unknown as Tool;
 
     expect(() => defineTool(invalid)).toThrow();
@@ -81,7 +81,7 @@ describe('defineTool', () => {
       id: 'slack',
       tags: [],
       darwin: brewCask('slack'),
-      linux: unsupported('motivo'),
+      linux: unsupported('reason'),
     } as unknown as Tool;
 
     expect(() => defineTool(invalid)).toThrow();
@@ -93,7 +93,7 @@ describe('defineTool', () => {
       stage: 4,
       tags: [],
       darwin: brewCask('slack'),
-      linux: unsupported('motivo'),
+      linux: unsupported('reason'),
     } as unknown as Tool;
 
     expect(() => defineTool(invalid)).toThrow();
@@ -105,7 +105,7 @@ describe('defineTool', () => {
       stage: 1.5,
       tags: [],
       darwin: brewCask('slack'),
-      linux: unsupported('motivo'),
+      linux: unsupported('reason'),
     } as unknown as Tool;
 
     expect(() => defineTool(invalid)).toThrow();
@@ -117,7 +117,7 @@ describe('defineTool', () => {
       stage: 3,
       tags: [1],
       darwin: brewCask('slack'),
-      linux: unsupported('motivo'),
+      linux: unsupported('reason'),
     } as unknown as Tool;
 
     expect(() => defineTool(invalid)).toThrow();
@@ -126,15 +126,15 @@ describe('defineTool', () => {
 
 describe('unsupported', () => {
   test('carries the given reason', () => {
-    const entry = unsupported('sem cliente Linux oficial');
+    const entry = unsupported('no official Linux client');
 
-    expect(entry).toEqual({ unsupported: true, reason: 'sem cliente Linux oficial' });
+    expect(entry).toEqual({ unsupported: true, reason: 'no official Linux client' });
   });
 });
 
 describe('isUnsupported', () => {
   test('is true for an Unsupported value', () => {
-    expect(isUnsupported(unsupported('motivo'))).toBe(true);
+    expect(isUnsupported(unsupported('reason'))).toBe(true);
   });
 
   test('is false for a Recipe-shaped value', () => {
@@ -180,12 +180,12 @@ describe('resolveForPlatform', () => {
       stage: 3,
       tags: ['apps'],
       darwin: brewCask('xcode'),
-      linux: unsupported('ferramenta exclusiva da Apple'),
+      linux: unsupported('Apple-only tool'),
     });
 
     const entry = resolveForPlatform(tool, 'linux');
 
     expect(isUnsupported(entry)).toBe(true);
-    expect(entry).toEqual({ unsupported: true, reason: 'ferramenta exclusiva da Apple' });
+    expect(entry).toEqual({ unsupported: true, reason: 'Apple-only tool' });
   });
 });

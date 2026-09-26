@@ -9,7 +9,7 @@ import zsh from '../lib/tools/zsh';
 
 function fileOf(tool: typeof zsh, path: string): string {
   const file = tool.configuration?.files.find((entry) => entry.path === path);
-  if (!file) throw new Error(`${tool.id} não escreve ${path}`);
+  if (!file) throw new Error(`${tool.id} does not write ${path}`);
   return file.content;
 }
 

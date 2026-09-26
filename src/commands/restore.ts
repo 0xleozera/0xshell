@@ -43,14 +43,14 @@ function errorMessage(error: unknown): string {
 }
 
 function formatVersions(versions: readonly string[]): string {
-  return ['Backups disponíveis (mais recente primeiro):', ...versions.map((version) => `  ${version}`)].join('\n');
+  return ['Available backups (newest first):', ...versions.map((version) => `  ${version}`)].join('\n');
 }
 
 async function missingVersionError(ctx: CliContext, message: string): Promise<CliError> {
   const versions = await listBackupVersions(ctx.runner, ctx.home);
 
   if (versions.length === 0) {
-    return new CliError('usage', `${message}\nNenhum backup em ${displayPath(backupsDir(ctx.home), ctx.home)}.`);
+    return new CliError('usage', `${message}\nNo backups in ${displayPath(backupsDir(ctx.home), ctx.home)}.`);
   }
 
   return new CliError('usage', `${message}\n${formatVersions(versions)}`);
@@ -58,17 +58,17 @@ async function missingVersionError(ctx: CliContext, message: string): Promise<Cl
 
 function describeEntry(entry: BackupEntry, home: string): string {
   const path = displayPath(entry.path, home);
-  return entry.kind === 'saved' ? `↺ ${path}: volta ao conteúdo do backup` : `✗ ${path}: removido (não existia)`;
+  return entry.kind === 'saved' ? `↺ ${path}: back to the backup content` : `✗ ${path}: removed (did not exist)`;
 }
 
 function formatRestoreSummary(summary: RestoreSummary, home: string): string {
   return [
-    `  restaurados: ${summary.restored}`,
-    `  removidos: ${summary.removed}`,
-    `  falharam: ${summary.failed}`,
+    `  restored: ${summary.restored}`,
+    `  removed: ${summary.removed}`,
+    `  failed: ${summary.failed}`,
     ...(summary.failures.length === 0
       ? []
-      : ['Falhas:', ...summary.failures.map((failure) => `  ✗ ${displayPath(failure.path, home)}: ${failure.error}`)]),
+      : ['Failures:', ...summary.failures.map((failure) => `  ✗ ${displayPath(failure.path, home)}: ${failure.error}`)]),
   ].join('\n');
 }
 
@@ -86,7 +86,7 @@ function tally(entries: readonly BackupEntry[], failures: readonly RestoreFailur
 
 function reportEntry(task: ReporterTask, entry: BackupEntry, home: string): void {
   const path = displayPath(entry.path, home);
-  task.succeed(entry.kind === 'saved' ? `${path} restaurado` : `${path} removido (não existia no backup)`);
+  task.succeed(entry.kind === 'saved' ? `${path} restored` : `${path} removed (did not exist in the backup)`);
 }
 
 /**
@@ -102,14 +102,14 @@ export async function restoreCommand(input: RestoreInput, ctx: CliContext): Prom
   const { reporter, runner, home } = ctx;
 
   if (!input.version) {
-    throw await missingVersionError(ctx, 'Informe a versão: 0xshell restore <versão>.');
+    throw await missingVersionError(ctx, 'Provide a version: 0xshell restore <version>.');
   }
 
   const source: Backup = { home, version: input.version };
   const entries = await readBackup(runner, source);
 
   if (!entries) {
-    throw await missingVersionError(ctx, `O backup ${input.version} não existe.`);
+    throw await missingVersionError(ctx, `Backup ${input.version} does not exist.`);
   }
 
   reporter.intro(input.dryRun ? '0xshell restore --dry-run' : '0xshell restore');
@@ -118,7 +118,7 @@ export async function restoreCommand(input: RestoreInput, ctx: CliContext): Prom
     if (entries.length > 0) {
       reporter.line(entries.map((entry) => describeEntry(entry, home)).join('\n'));
     }
-    reporter.outro('Nada foi executado.');
+    reporter.outro('Nothing was executed.');
     return { dryRun: true, version: input.version, entries };
   }
 
@@ -127,13 +127,13 @@ export async function restoreCommand(input: RestoreInput, ctx: CliContext): Prom
   // Same second as the backup being restored: the snapshot would be written
   // into the very directory it is reading from.
   if (snapshot.version === source.version) {
-    throw new CliError('failed', `O backup ${source.version} acabou de ser criado; rode o restore de novo.`);
+    throw new CliError('failed', `Backup ${source.version} was just created; run restore again.`);
   }
 
   const failures: RestoreFailure[] = [];
 
   for (const entry of entries) {
-    const task = reporter.task(`Restaurando ${displayPath(entry.path, home)}`);
+    const task = reporter.task(`Restoring ${displayPath(entry.path, home)}`);
 
     try {
       await moveAside(runner, snapshot, entry.path);
@@ -141,16 +141,16 @@ export async function restoreCommand(input: RestoreInput, ctx: CliContext): Prom
       reportEntry(task, entry, home);
     } catch (error) {
       failures.push({ path: entry.path, error: errorMessage(error) });
-      task.fail(`${displayPath(entry.path, home)} falhou: ${errorMessage(error)}`);
+      task.fail(`${displayPath(entry.path, home)} failed: ${errorMessage(error)}`);
     }
   }
 
   const summary = tally(entries, failures);
 
   reporter.block(SUMMARY_TITLE, formatRestoreSummary(summary, home));
-  reporter.info(`O estado anterior foi guardado no backup ${snapshot.version}.`);
-  reporter.info('O próximo 0xshell install volta a aplicar a Configuração do 0xshell.');
-  reporter.outro(summary.failed === 0 ? `Backup ${source.version} restaurado.` : 'Restauração concluída com falhas.');
+  reporter.info(`The previous state was kept in backup ${snapshot.version}.`);
+  reporter.info('The next 0xshell install applies the 0xshell Configuration again.');
+  reporter.outro(summary.failed === 0 ? `Backup ${source.version} restored.` : 'Restore finished with failures.');
 
   return { dryRun: false, version: source.version, snapshot: snapshot.version, summary };
 }
