@@ -10,5 +10,10 @@ export default defineTool({
   // A C compiler: nvim-treesitter builds every parser from source, and
   // without one the neovim Configuration reports unmet requirements on every
   // file it opens.
+  //
+  // Uninstall removes build-essential only: apt keeps gcc, make and
+  // dpkg-dev around because `apt` itself suggests dpkg-dev, and naming them
+  // would also take down whatever depends on them (dkms, for the NVIDIA
+  // driver). The toolchain stays until the user removes it.
   linux: apt('build-essential'),
 });

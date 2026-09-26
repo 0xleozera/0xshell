@@ -22,8 +22,9 @@ export type AptRepoOptions = {
   /**
    * Files the package's own scripts write outside dpkg's bookkeeping — its
    * own copy of the source and keyring, a cron job that re-adds them — which
-   * `apt remove` leaves behind. `uninstall()` removes them with ours. Shell
-   * globs are allowed; these are constants of the Tool module, never input.
+   * `apt remove` leaves behind. `uninstall()` removes them with ours, and
+   * `install()` clears stale ones before writing its source. Shell globs are
+   * allowed; these are constants of the Tool module, never input.
    */
   readonly leftovers?: readonly string[];
 };
@@ -64,9 +65,21 @@ export function aptRepo({
   const { keyringPath, sourceListPath } = aptRepoPaths(repoName);
   const sourceLine = `deb [signed-by=${keyringPath}] ${repoUrl} ${distribution} ${components}`.trimEnd();
 
+  // Through a shell, so a leftover can be a glob: Spotify dates the name of
+  // the key it installs.
+  async function removeLeftovers(runner: Runner): Promise<void> {
+    if (leftovers.length > 0) {
+      await runChecked(runner, ['sudo', 'sh', '-c', `rm -rf ${leftovers.join(' ')}`]);
+    }
+  }
+
   return {
     requiresPrivilege: true,
     async install(runner: Runner): Promise<void> {
+      // A source the package wrote on an earlier install, signed by another
+      // keyring, makes apt refuse the one written below ("Conflicting values
+      // set for option Signed-By"). The package writes it again on install.
+      await removeLeftovers(runner);
       await runChecked(runner, ['sudo', 'mkdir', '-p', '/etc/apt/keyrings']);
       // --batch --yes: a keyring left by an earlier install is overwritten
       // instead of gpg asking about it on a terminal it does not have.
@@ -88,11 +101,7 @@ export function aptRepo({
     async uninstall(runner: Runner): Promise<void> {
       await runChecked(runner, aptGetRemove(packageName));
       await runChecked(runner, ['sudo', 'rm', '-f', sourceListPath, keyringPath]);
-      if (leftovers.length > 0) {
-        // Through a shell, so a leftover can be a glob: Spotify dates the
-        // name of the key it installs.
-        await runChecked(runner, ['sudo', 'sh', '-c', `rm -rf ${leftovers.join(' ')}`]);
-      }
+      await removeLeftovers(runner);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
       return isDpkgInstalled(runner, packageName);

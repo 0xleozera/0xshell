@@ -12,12 +12,13 @@ describe('1password tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', '1password']]);
   });
 
-  test('linux imports the 1Password signing key before apt update, then installs 1password', async () => {
+  test('linux clears the package\'s stale sources, imports the 1Password signing key before apt update, then installs 1password', async () => {
     const runner = createMockRunner();
 
     await onePassword.linux.install(runner);
 
     expect(runner.commands).toEqual([
+      ['sudo', 'sh', '-c', 'rm -rf /etc/apt/sources.list.d/1password.sources /usr/share/keyrings/1password-archive-keyring.gpg /usr/share/debsig/keyrings/AC2D62742012EA22 /etc/debsig/policies/AC2D62742012EA22'],
       ['sudo', 'mkdir', '-p', '/etc/apt/keyrings'],
       [
         'sudo',

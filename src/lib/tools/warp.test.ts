@@ -12,12 +12,13 @@ describe('warp tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'warp']]);
   });
 
-  test('linux imports the warp signing key before apt update, then installs warp-terminal', async () => {
+  test('linux clears the package\'s stale sources, imports the warp signing key before apt update, then installs warp-terminal', async () => {
     const runner = createMockRunner();
 
     await warp.linux.install(runner);
 
     expect(runner.commands).toEqual([
+      ['sudo', 'sh', '-c', 'rm -rf /etc/apt/trusted.gpg.d/warpdotdev.gpg /etc/apt/sources.list.d/warpdotdev.sources'],
       ['sudo', 'mkdir', '-p', '/etc/apt/keyrings'],
       [
         'sudo',

@@ -12,12 +12,13 @@ describe('spotify tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'spotify']]);
   });
 
-  test('linux imports the spotify signing key before apt update, then installs spotify-client', async () => {
+  test('linux clears the package\'s stale sources, imports the spotify signing key before apt update, then installs spotify-client', async () => {
     const runner = createMockRunner();
 
     await spotify.linux.install(runner);
 
     expect(runner.commands).toEqual([
+      ['sudo', 'sh', '-c', 'rm -rf /etc/apt/trusted.gpg.d/spotify-*.gpg'],
       ['sudo', 'mkdir', '-p', '/etc/apt/keyrings'],
       [
         'sudo',

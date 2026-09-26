@@ -12,12 +12,13 @@ describe('slack tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'slack']]);
   });
 
-  test('linux imports the packagecloud signing key before apt update, then installs slack-desktop', async () => {
+  test('linux clears the package\'s stale sources, imports the packagecloud signing key before apt update, then installs slack-desktop', async () => {
     const runner = createMockRunner();
 
     await slack.linux.install(runner);
 
     expect(runner.commands).toEqual([
+      ['sudo', 'sh', '-c', 'rm -rf /etc/cron.daily/slack /etc/default/slack /etc/apt/trusted.gpg.d/slack-desktop.gpg /etc/apt/trusted.gpg.d/packagecloud.gpg'],
       ['sudo', 'mkdir', '-p', '/etc/apt/keyrings'],
       [
         'sudo',

@@ -88,6 +88,22 @@ describe('aptRepo', () => {
     ]);
   });
 
+  test('install() clears stale leftovers before writing its own source', async () => {
+    const runner = createMockRunner();
+
+    await aptRepo({ ...options, leftovers: ['/etc/apt/sources.list.d/slack.sources'] }).install(runner);
+
+    expect(runner.commands[0]).toEqual(['sudo', 'sh', '-c', 'rm -rf /etc/apt/sources.list.d/slack.sources']);
+  });
+
+  test('install() without leftovers starts with the keyring directory', async () => {
+    const runner = createMockRunner();
+
+    await aptRepo(options).install(runner);
+
+    expect(runner.commands[0]).toEqual(['sudo', 'mkdir', '-p', '/etc/apt/keyrings']);
+  });
+
   test('install() takes the source back out when apt cannot use it, then fails', async () => {
     const runner = createMockRunner();
     runner.failOn(aptGetUpdate());
