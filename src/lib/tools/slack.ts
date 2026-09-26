@@ -14,5 +14,14 @@ export default defineTool({
     distribution: 'jessie',
     components: 'main',
     packageName: 'slack-desktop',
+    // A daily cron job (a conffile, so `apt remove` keeps it) rewrites
+    // slack.list in its own format and installs its keys in trusted.gpg.d —
+    // left alone, it brings the repository back every day after an uninstall.
+    leftovers: [
+      '/etc/cron.daily/slack',
+      '/etc/default/slack',
+      '/etc/apt/trusted.gpg.d/slack-desktop.gpg',
+      '/etc/apt/trusted.gpg.d/packagecloud.gpg',
+    ],
   }),
 });

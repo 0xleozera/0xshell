@@ -11,11 +11,11 @@ describe('claude-code tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'claude-code']]);
   });
 
-  test('linux pipes the official install script into sh', async () => {
+  test('linux pipes the official install script into bash', async () => {
     const runner = createMockRunner();
 
     await claudeCode.linux.install(runner);
 
-    expect(runner.commands).toEqual([['sh', '-c', 'curl -fsSL https://claude.ai/install.sh | sh']]);
+    expect(runner.commands).toEqual([['bash', '-c', 'set -o pipefail; curl -fsSL https://claude.ai/install.sh | bash']]);
   });
 });

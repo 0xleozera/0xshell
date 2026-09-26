@@ -7,6 +7,7 @@ import type { Outcome } from './outcome';
 import type { Recipe } from './recipe';
 import type { SudoSession } from './sudo-session';
 import { defineTool, unsupported, type Tool } from './tool';
+import { aptGetInstall, aptGetRemove } from './helpers/apt-get';
 
 function fakeSudoSession(events: string[]): SudoSession {
   return {
@@ -208,12 +209,12 @@ describe('runInstallPlan', () => {
 
     test('on linux, apt commands reach the Runner prefixed with sudo', async () => {
       const runner = createMockRunner();
-      runner.failOn(['dpkg', '-s', 'docker.io']);
+      runner.failOn(['dpkg-query', '-W', '-f=${Status}', 'docker.io']);
       const docker = defineTool({ id: 'docker', stage: 3, tags: ['apps'], darwin: brewCask('docker'), linux: apt('docker.io') });
 
       await runInstallPlan([docker], runner, 'linux', { createSudoSession: () => fakeSudoSession([]) });
 
-      expect(runner.wasRun(['sudo', 'apt', 'install', '-y', 'docker.io'])).toBe(true);
+      expect(runner.wasRun(aptGetInstall('docker.io'))).toBe(true);
     });
 
     test('on linux with a privileged Tool, the sudo session starts before the plan runs and stops after', async () => {
@@ -406,12 +407,13 @@ describe('runInstallPlan', () => {
       ).toBe(false);
 
       const linuxRunner = createMockRunner();
+      linuxRunner.respondTo(['dpkg-query', '-W', '-f=${Status}', 'docker.io'], { stdout: 'install ok installed' });
       await runInstallPlan([docker], linuxRunner, 'linux', {
         action: 'uninstall',
         createSudoSession: () => fakeSudoSession([]),
       });
 
-      expect(linuxRunner.wasRun(['sudo', 'apt', 'remove', '-y', 'docker.io'])).toBe(true);
+      expect(linuxRunner.wasRun(aptGetRemove('docker.io'))).toBe(true);
       expect(
         linuxRunner.commands.some((command) => command.some((arg) => arg.includes('purge') || arg.includes('--zap'))),
       ).toBe(false);

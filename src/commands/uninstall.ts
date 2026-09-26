@@ -101,7 +101,8 @@ function guard(tools: readonly Tool[], named: boolean, warn: (message: string) =
  *     `uninstall` never assumes "everything".
  *  2. `--all` asks for confirmation before touching anything — except under
  *     `--dry-run`, which never executes anything anyway and exists
- *     precisely so the user can decide *before* confirming.
+ *     precisely so the user can decide *before* confirming, and under
+ *     `--yes`, where the confirmation is given up front.
  *  3. Stage 0 (`homebrew`) and Stage 1 (`mise`) are never reached through
  *     `--all` or `--tag` — only by naming them, which warns first.
  *  4. Execution runs in reverse Stage order, so nothing is torn down before
@@ -120,7 +121,7 @@ export async function uninstallCommand(input: UninstallInput, ctx: CliContext): 
 
   reporter.intro(input.dryRun ? '0xshell uninstall --dry-run' : '0xshell uninstall');
 
-  if (input.all && !input.dryRun && !(await ctx.prompts.confirmUninstallAll())) {
+  if (input.all && !input.dryRun && !input.yes && !(await ctx.prompts.confirmUninstallAll())) {
     return { dryRun: false, confirmed: false };
   }
 

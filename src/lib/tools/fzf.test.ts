@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import fzf from './fzf';
+import { aptGetInstall } from '../helpers/apt-get';
 
 describe('fzf tool', () => {
   test('darwin installs the brew formula', async () => {
@@ -16,6 +17,6 @@ describe('fzf tool', () => {
 
     await fzf.linux.install(runner);
 
-    expect(runner.commands).toEqual([['sudo', 'apt', 'install', '-y', 'fzf']]);
+    expect(runner.commands).toEqual([aptGetInstall('fzf')]);
   });
 });

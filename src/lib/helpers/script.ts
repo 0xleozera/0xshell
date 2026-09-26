@@ -10,14 +10,20 @@ export type ScriptOptions = {
 };
 
 /**
- * Helper for Tools installed by piping a remote script into `sh` (ADR-0002)
- * — `curl | sh`, the classic third-party installer. The pipe needs a shell,
- * so `install()` is the one place in this Helper that reaches for `sh -c`.
+ * Helper for Tools installed by piping a remote script into a shell
+ * (ADR-0002) — `curl | bash`, the classic third-party installer. The pipe
+ * needs a shell, so `install()` is the one place in this Helper that reaches
+ * for `sh -c`.
+ *
+ * The script runs under `bash`, not `sh`: installers are written for bash
+ * (`[[ ]]`, `echo -e`), and on Debian/Ubuntu `sh` is dash, which stops or
+ * misbehaves on the first bash-ism. `pipefail` makes a failed download fail
+ * the install instead of feeding an empty script to a shell that exits 0.
  */
 export function script({ url, uninstallCommand, binName }: ScriptOptions): Recipe {
   return {
     async install(runner: Runner): Promise<void> {
-      await runChecked(runner, ['sh', '-c', `curl -fsSL ${url} | sh`]);
+      await runChecked(runner, ['bash', '-c', `set -o pipefail; curl -fsSL ${url} | bash`]);
     },
     async uninstall(runner: Runner): Promise<void> {
       await runChecked(runner, uninstallCommand);

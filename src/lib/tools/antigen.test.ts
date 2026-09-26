@@ -21,6 +21,14 @@ describe('antigen tool', () => {
     ]);
   });
 
+  test('uninstall removes antigen and the plugin bundles it cloned', async () => {
+    const runner = createMockRunner();
+
+    await antigen.linux.uninstall(runner);
+
+    expect(runner.commands).toEqual([['rm', '-rf', join(homedir(), 'antigen.zsh'), join(homedir(), '.antigen')]]);
+  });
+
   test('is installed when ~/antigen.zsh exists', async () => {
     const runner = createMockRunner();
     runner.failOn(['test', '-f', join(homedir(), 'antigen.zsh')]);

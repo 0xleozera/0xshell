@@ -8,7 +8,7 @@ describe('pnpm tool', () => {
 
     await pnpm.darwin.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'pnpm']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'pnpm@latest']]);
   });
 
   test('linux installs via mise', async () => {
@@ -16,6 +16,6 @@ describe('pnpm tool', () => {
 
     await pnpm.linux.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'pnpm']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'pnpm@latest']]);
   });
 });

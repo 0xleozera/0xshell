@@ -1,6 +1,7 @@
 import type { Tool } from './tool';
 import onePassword from './tools/1password';
 import antigen from './tools/antigen';
+import buildEssential from './tools/build-essential';
 import bun from './tools/bun';
 import carapace from './tools/carapace';
 import claude from './tools/claude';
@@ -10,6 +11,7 @@ import dbeaver from './tools/dbeaver';
 import dia from './tools/dia';
 import docker from './tools/docker';
 import eza from './tools/eza';
+import fd from './tools/fd';
 import fzf from './tools/fzf';
 import git from './tools/git';
 import go from './tools/go';
@@ -22,6 +24,7 @@ import ohMyZsh from './tools/oh-my-zsh';
 import orcaAi from './tools/orca-ai';
 import pnpm from './tools/pnpm';
 import raycast from './tools/raycast';
+import ripgrep from './tools/ripgrep';
 import slack from './tools/slack';
 import spotify from './tools/spotify';
 import warp from './tools/warp';
@@ -39,6 +42,11 @@ export const catalog: readonly Tool[] = [
   node,
   neovim,
   git,
+  // What the neovim Configuration (LazyVim) needs to work: a C compiler for
+  // the treesitter parsers, rg and fd for its pickers.
+  buildEssential,
+  ripgrep,
+  fd,
   // Shell: zsh writes ~/.zshrc before oh-my-zsh's installer looks for one,
   // and every other shell Tool is sourced from that file.
   zsh,

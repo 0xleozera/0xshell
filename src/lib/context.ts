@@ -8,7 +8,7 @@ import type { Tool } from './tool';
 /**
  * The closed vocabulary of questions this CLI asks a human. Every one of
  * them has a flag that answers it instead (`install neovim docker` for the
- * multiselect, `--dry-run` for the confirmation), so no script ever depends
+ * multiselect, `--yes` for the confirmation), so no script ever depends
  * on a prompt.
  *
  * Cancelling any of them throws `CliError('cancelled')`.
@@ -48,13 +48,15 @@ export type CliContext = {
  * how the terminal is rendered.
  */
 export function createCliContext(reporter: Reporter, prompts: CliPrompts): CliContext {
+  const home = homedir();
+
   return {
-    runner: createBunRunner(),
+    runner: createBunRunner(home),
     reporter,
     platform: resolvePlatform(),
     catalog,
     prompts,
-    home: homedir(),
+    home,
     now: () => new Date(),
   };
 }

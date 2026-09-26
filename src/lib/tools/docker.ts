@@ -1,6 +1,8 @@
 import type { Runner } from '../runner';
 import { defineTool } from '../tool';
 import { brewCask } from '../helpers/brew-cask';
+import { isDpkgInstalled } from '../helpers/apt';
+import { aptGetInstall, aptGetRemove, aptGetUpdate } from '../helpers/apt-get';
 import { custom } from '../helpers/custom';
 import { runChecked } from '../helpers/run-checked';
 
@@ -36,18 +38,27 @@ export default defineTool({
         'sudo',
         'sh',
         '-c',
-        `. /etc/os-release && curl -fsSL ${keyUrl} | gpg --dearmor -o ${keyringPath}`,
+        `. /etc/os-release && curl -fsSL ${keyUrl} | gpg --batch --yes --dearmor -o ${keyringPath}`,
       ]);
       await runChecked(runner, ['sudo', 'sh', '-c', `. /etc/os-release && echo "${sourceLine}" > ${sourceListPath}`]);
-      await runChecked(runner, ['sudo', 'apt', 'update']);
-      await runChecked(runner, ['sudo', 'apt', 'install', '-y', ...packages]);
+      try {
+        await runChecked(runner, aptGetUpdate());
+        await runChecked(runner, aptGetInstall(...packages));
+      } catch (error) {
+        // A source apt cannot read breaks every apt Tool after this one.
+        await runner.run(['sudo', 'rm', '-f', sourceListPath, keyringPath]);
+        throw error;
+      }
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runChecked(runner, ['sudo', 'apt', 'remove', '-y', ...packages]);
+      // Images and volumes in /var/lib/docker stay: they are the user's data.
+      // /opt/containerd is not: containerd creates it at runtime, empty, and
+      // no package owns it.
+      await runChecked(runner, aptGetRemove(...packages));
+      await runChecked(runner, ['sudo', 'rm', '-rf', sourceListPath, keyringPath, '/opt/containerd']);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
-      const result = await runner.run(['dpkg', '-s', 'docker-ce']);
-      return result.exitCode === 0;
+      return isDpkgInstalled(runner, 'docker-ce');
     },
   }),
 });

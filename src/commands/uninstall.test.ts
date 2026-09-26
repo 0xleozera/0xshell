@@ -9,6 +9,7 @@ import type { Recipe } from '../lib/recipe';
 import { defineTool, unsupported, type Tool, type Unsupported } from '../lib/tool';
 import type { UninstallInput } from '../schemas/commands';
 import { formatUninstallSummary, uninstallCommand } from './uninstall';
+import { aptGetRemove } from '../lib/helpers/apt-get';
 
 function recipe(overrides: Partial<Recipe> = {}): Recipe {
   return {
@@ -54,7 +55,7 @@ function context(overrides: Partial<CliContext> = {}): TestContext {
 }
 
 function input(overrides: Partial<UninstallInput> = {}): UninstallInput {
-  return { tools: [], all: false, dryRun: false, ...overrides };
+  return { tools: [], all: false, yes: false, dryRun: false, ...overrides };
 }
 
 describe('uninstall command', () => {
@@ -225,10 +226,11 @@ describe('uninstall command', () => {
 
     test('an apt (linux) uninstall runs "remove", never "purge"', async () => {
       const ctx = context({ catalog: [docker], platform: 'linux' });
+      ctx.runner.respondTo(['dpkg-query', '-W', '-f=${Status}', 'docker.io'], { stdout: 'install ok installed' });
 
       await uninstallCommand(input({ tools: ['docker'] }), ctx);
 
-      expect(ctx.runner.wasRun(['sudo', 'apt', 'remove', '-y', 'docker.io'])).toBe(true);
+      expect(ctx.runner.wasRun(aptGetRemove('docker.io'))).toBe(true);
       expect(
         ctx.runner.commands.some((command) => command.some((arg) => arg.includes('purge') || arg.includes('--zap'))),
       ).toBe(false);
@@ -295,6 +297,35 @@ describe('uninstall command', () => {
       expect(promptCalled).toBe(false);
       expect(ctx.reporter.messages('line')).toEqual(['→ slack: brew uninstall --cask slack']);
       expect(ctx.runner.wasRun(['brew', 'uninstall', '--cask', 'slack'])).toBe(false);
+    });
+
+    test('--all --yes never asks for confirmation, and runs', async () => {
+      let promptCalled = false;
+      const prompts: CliPrompts = {
+        ...noPrompts,
+        confirmUninstallAll: async () => {
+          promptCalled = true;
+          return false;
+        },
+      };
+      const catalog = [
+        tool(
+          'slack',
+          3,
+          recipe({
+            isInstalled: async () => true,
+            uninstall: async (r) => {
+              await r.run(['brew', 'uninstall', '--cask', 'slack']);
+            },
+          }),
+        ),
+      ];
+      const ctx = context({ catalog, prompts });
+
+      await uninstallCommand(input({ all: true, yes: true }), ctx);
+
+      expect(promptCalled).toBe(false);
+      expect(ctx.runner.wasRun(['brew', 'uninstall', '--cask', 'slack'])).toBe(true);
     });
   });
 

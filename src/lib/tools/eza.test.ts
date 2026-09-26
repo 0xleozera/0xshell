@@ -3,6 +3,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { createMockRunner } from '../mock-runner';
 import eza from './eza';
+import { aptGetInstall } from '../helpers/apt-get';
 
 describe('eza tool', () => {
   test('darwin installs the brew formula', async () => {
@@ -24,7 +25,7 @@ describe('eza tool', () => {
       '-c',
       'echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" > /etc/apt/sources.list.d/gierens.list',
     ]);
-    expect(runner.commands.at(-1)).toEqual(['sudo', 'apt', 'install', '-y', 'eza']);
+    expect(runner.commands.at(-1)).toEqual(aptGetInstall('eza'));
   });
 
   test('writes the theme where EZA_CONFIG_DIR points', () => {

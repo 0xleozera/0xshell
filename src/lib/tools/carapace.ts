@@ -1,6 +1,8 @@
 import type { Runner } from '../runner';
 import { defineTool } from '../tool';
 import { brewFormula } from '../helpers/brew-formula';
+import { isDpkgInstalled } from '../helpers/apt';
+import { aptGetInstall, aptGetRemove, aptGetUpdate } from '../helpers/apt-get';
 import { custom } from '../helpers/custom';
 import { runChecked } from '../helpers/run-checked';
 
@@ -19,15 +21,15 @@ export default defineTool({
     requiresPrivilege: true,
     async install(runner: Runner): Promise<void> {
       await runChecked(runner, ['sudo', 'sh', '-c', `echo "${sourceLine}" > ${sourceListPath}`]);
-      await runChecked(runner, ['sudo', 'apt', 'update']);
-      await runChecked(runner, ['sudo', 'apt', 'install', '-y', packageName]);
+      await runChecked(runner, aptGetUpdate());
+      await runChecked(runner, aptGetInstall(packageName));
     },
     async uninstall(runner: Runner): Promise<void> {
-      await runChecked(runner, ['sudo', 'apt', 'remove', '-y', packageName]);
+      await runChecked(runner, aptGetRemove(packageName));
+      await runChecked(runner, ['sudo', 'rm', '-f', sourceListPath]);
     },
     async isInstalled(runner: Runner): Promise<boolean> {
-      const result = await runner.run(['dpkg', '-s', packageName]);
-      return result.exitCode === 0;
+      return isDpkgInstalled(runner, packageName);
     },
   }),
 });

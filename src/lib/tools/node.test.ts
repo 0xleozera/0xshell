@@ -8,7 +8,7 @@ describe('node tool', () => {
 
     await node.darwin.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'node']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'node@latest']]);
   });
 
   test('linux installs via mise', async () => {
@@ -16,6 +16,6 @@ describe('node tool', () => {
 
     await node.linux.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'node']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'node@latest']]);
   });
 });

@@ -35,10 +35,17 @@ export type CreateSudoSessionOptions = {
 
 /**
  * Real SudoSession: `sudo -v` up front (prompts for the password if needed),
- * then again on a timer until `stop()` is called. Runs every `sudo -v`
+ * then `sudo -n -v` on a timer until `stop()` is called. Runs every sudo
  * through the given Runner, same as any other command (ADR-0003) — the
  * timer is the only part that doesn't fit the Runner's request/response
  * shape, so it's isolated here instead of leaking a raw interval elsewhere.
+ *
+ * `sudo -n true` goes first: when sudo already lets this user in without a
+ * password (NOPASSWD, or a credential still cached), there is nothing to ask.
+ * `sudo -v` itself cannot be the test — it demands a password whenever any
+ * sudoers rule for the user has one, even next to a NOPASSWD rule, and fails
+ * outright with no terminal to ask on. The refresh is `-n` so a lapsed
+ * credential never opens a prompt in the middle of the run.
  */
 export function createSudoSession(runner: Runner, options: CreateSudoSessionOptions = {}): SudoSession {
   const {
@@ -52,13 +59,16 @@ export function createSudoSession(runner: Runner, options: CreateSudoSessionOpti
 
   return {
     async start(): Promise<void> {
-      warn(WARNING);
-      const result = await runner.run(['sudo', '-v']);
-      if (result.exitCode !== 0) {
-        throw new Error('could not validate the sudo credentials');
+      const allowed = await runner.run(['sudo', '-n', 'true']);
+      if (allowed.exitCode !== 0) {
+        warn(WARNING);
+        const result = await runner.run(['sudo', '-v']);
+        if (result.exitCode !== 0) {
+          throw new Error('could not validate the sudo credentials');
+        }
       }
       timer = setIntervalFn(() => {
-        void runner.run(['sudo', '-v']);
+        void runner.run(['sudo', '-n', '-v']);
       }, intervalMs);
     },
     stop(): void {

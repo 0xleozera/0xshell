@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import spotify from './spotify';
+import { aptGetInstall, aptGetUpdate } from '../helpers/apt-get';
 
 describe('spotify tool', () => {
   test('darwin produces the exact brew cask install command', async () => {
@@ -22,7 +23,7 @@ describe('spotify tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | gpg --dearmor -o /etc/apt/keyrings/spotify.gpg',
+        'curl -fsSL https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --batch --yes --dearmor -o /etc/apt/keyrings/spotify.gpg',
       ],
       [
         'sudo',
@@ -30,8 +31,8 @@ describe('spotify tool', () => {
         '-c',
         'echo "deb [signed-by=/etc/apt/keyrings/spotify.gpg] http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list',
       ],
-      ['sudo', 'apt', 'update'],
-      ['sudo', 'apt', 'install', '-y', 'spotify-client'],
+      aptGetUpdate(),
+      aptGetInstall('spotify-client'),
     ]);
   });
 });

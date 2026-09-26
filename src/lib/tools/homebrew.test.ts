@@ -3,13 +3,13 @@ import { createMockRunner } from '../mock-runner';
 import homebrew from './homebrew';
 
 describe('homebrew tool', () => {
-  test('darwin pipes the official install script into sh', async () => {
+  test('darwin pipes the official install script into bash', async () => {
     const runner = createMockRunner();
 
     await homebrew.darwin.install(runner);
 
     expect(runner.commands).toEqual([
-      ['sh', '-c', 'curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | sh'],
+      ['bash', '-c', 'set -o pipefail; curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash'],
     ]);
   });
 

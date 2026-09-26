@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import slack from './slack';
+import { aptGetInstall, aptGetUpdate } from '../helpers/apt-get';
 
 describe('slack tool', () => {
   test('darwin produces the exact brew cask install command', async () => {
@@ -22,7 +23,7 @@ describe('slack tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://packagecloud.io/slacktechnologies/slack/gpgkey | gpg --dearmor -o /etc/apt/keyrings/slack.gpg',
+        'curl -fsSL https://packagecloud.io/slacktechnologies/slack/gpgkey | gpg --batch --yes --dearmor -o /etc/apt/keyrings/slack.gpg',
       ],
       [
         'sudo',
@@ -30,8 +31,8 @@ describe('slack tool', () => {
         '-c',
         'echo "deb [signed-by=/etc/apt/keyrings/slack.gpg] https://packagecloud.io/slacktechnologies/slack/debian/ jessie main" > /etc/apt/sources.list.d/slack.list',
       ],
-      ['sudo', 'apt', 'update'],
-      ['sudo', 'apt', 'install', '-y', 'slack-desktop'],
+      aptGetUpdate(),
+      aptGetInstall('slack-desktop'),
     ]);
   });
 });

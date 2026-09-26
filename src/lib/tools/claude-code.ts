@@ -11,7 +11,9 @@ export default defineTool({
   darwin: brewCask('claude-code'),
   linux: script({
     url: 'https://claude.ai/install.sh',
-    uninstallCommand: ['rm', '-f', join(homedir(), '.local', 'bin', 'claude')],
+    // The native installer's own uninstall steps: the launcher and the
+    // versions it points at. ~/.claude (settings, history) is left alone.
+    uninstallCommand: ['rm', '-rf', join(homedir(), '.local', 'bin', 'claude'), join(homedir(), '.local', 'share', 'claude')],
     binName: 'claude',
   }),
 });

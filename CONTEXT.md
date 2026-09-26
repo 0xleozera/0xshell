@@ -34,6 +34,12 @@ A Helper carries three things: `install()`, its paired `uninstall()`, and the de
 `isInstalled()` for that install method (e.g. `brewCask` checks
 `brew list --cask <id>`). The Tool module can override any of the three.
 
+Every apt write goes through `helpers/apt-get.ts` (`apt-get` under `sudo`,
+non-interactive, waiting for the dpkg lock), and "installed" for an apt package means
+`dpkg-query` reports `install ok installed` — a removed package keeps its
+configuration and `dpkg -s` would still find it. `aptRepo` removes its source and
+keyring on `uninstall`: a source left behind is fetched by every later `apt update`.
+
 ### Stage
 
 A fixed execution phase, from `0` to `3`. It replaces a dependency graph:

@@ -3,8 +3,20 @@ import { createMockRunner } from './mock-runner';
 import { createSudoSession } from './sudo-session';
 
 describe('createSudoSession', () => {
-  test('start() warns before running sudo -v', async () => {
+  test('start() neither warns nor asks when sudo already lets the user in', async () => {
     const runner = createMockRunner();
+    const warnings: string[] = [];
+
+    await createSudoSession(runner, { warn: (message) => warnings.push(message) }).start();
+
+    expect(warnings).toEqual([]);
+    expect(runner.commands[0]).toEqual(['sudo', '-n', 'true']);
+    expect(runner.wasRun(['sudo', '-v'])).toBe(false);
+  });
+
+  test('start() warns before running sudo -v when a password is needed', async () => {
+    const runner = createMockRunner();
+    runner.failOn(['sudo', '-n', 'true']);
     const warnings: string[] = [];
 
     await createSudoSession(runner, { warn: (message) => warnings.push(message) }).start();
@@ -16,13 +28,15 @@ describe('createSudoSession', () => {
 
   test('start() rejects when sudo -v fails, e.g. a wrong password', async () => {
     const runner = createMockRunner();
+    runner.failOn(['sudo', '-n', 'true']);
     runner.failOn(['sudo', '-v']);
 
     await expect(createSudoSession(runner, { warn: () => {} }).start()).rejects.toThrow();
   });
 
-  test('start() schedules a recurring sudo -v to keep the credential alive', async () => {
+  test('start() schedules a recurring non-interactive sudo -n -v to keep the credential alive', async () => {
     const runner = createMockRunner();
+    runner.failOn(['sudo', '-n', 'true']);
     let scheduledCallback: (() => void) | undefined;
     let scheduledMs: number | undefined;
 
@@ -45,7 +59,7 @@ describe('createSudoSession', () => {
     scheduledCallback?.();
     await Promise.resolve();
 
-    expect(runner.commands.filter((c) => c.join(' ') === 'sudo -v')).toHaveLength(2);
+    expect(runner.commands.filter((c) => c.join(' ') === 'sudo -n -v')).toHaveLength(1);
   });
 
   test('stop() clears the keep-alive timer', async () => {

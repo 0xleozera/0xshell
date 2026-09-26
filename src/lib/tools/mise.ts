@@ -5,7 +5,17 @@ import { script } from '../helpers/script';
 
 const installer = script({
   url: 'https://mise.run',
-  uninstallCommand: ['rm', '-rf', join(homedir(), '.local', 'bin', 'mise'), join(homedir(), '.local', 'share', 'mise')],
+  // The binary, the installed runtimes, and the global config, cache and state
+  // that `mise use --global` and every install leave behind.
+  uninstallCommand: [
+    'rm',
+    '-rf',
+    join(homedir(), '.local', 'bin', 'mise'),
+    join(homedir(), '.local', 'share', 'mise'),
+    join(homedir(), '.local', 'state', 'mise'),
+    join(homedir(), '.config', 'mise'),
+    join(homedir(), '.cache', 'mise'),
+  ],
   binName: 'mise',
 });
 

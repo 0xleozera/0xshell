@@ -10,7 +10,7 @@ describe('neovim tool', () => {
 
     await neovim.darwin.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'aqua:neovim/neovim']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'aqua:neovim/neovim@latest']]);
   });
 
   test('linux installs the aqua backend via mise, not the apt package', async () => {
@@ -18,7 +18,7 @@ describe('neovim tool', () => {
 
     await neovim.linux.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'aqua:neovim/neovim']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'aqua:neovim/neovim@latest']]);
   });
 });
 

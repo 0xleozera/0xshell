@@ -23,6 +23,9 @@ nor any other runtime installed.
 0xshell install --dry-run       # shows what would run, without running it
 0xshell install neovim --dry-run  # boolean flags come after the ids
 0xshell install --tag shell     # zsh, oh-my-zsh, antigen, fzf, eza and carapace
+0xshell uninstall docker        # removes the named Tools (never their configuration)
+0xshell uninstall --all         # removes the whole Catalog but mise, after asking
+0xshell uninstall --all --yes   # the same, without asking (scripts)
 ```
 
 ## Configuration

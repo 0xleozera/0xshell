@@ -98,7 +98,7 @@ describe('cli surface', () => {
     const catalog = [
       tool('neovim', 2, {
         install: async (runner) => {
-          await runner.run(['mise', 'install', 'neovim']);
+          await runner.run(['mise', 'use', '--global', 'neovim@latest']);
         },
       }),
     ];
@@ -106,8 +106,8 @@ describe('cli surface', () => {
 
     await run(['install', 'neovim', '--dry-run'], ctx);
 
-    expect(ctx.reporter.messages('line')).toEqual(['\u2192 neovim: mise install neovim']);
-    expect(ctx.runner.wasRun(['mise', 'install', 'neovim'])).toBe(false);
+    expect(ctx.reporter.messages('line')).toEqual(['\u2192 neovim: mise use --global neovim@latest']);
+    expect(ctx.runner.wasRun(['mise', 'use', '--global', 'neovim@latest'])).toBe(false);
     expect(ctx.reporter.messages('outro')).toEqual(['Nothing was executed.']);
   });
 

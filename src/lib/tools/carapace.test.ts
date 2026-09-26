@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import carapace from './carapace';
+import { aptGetInstall, aptGetRemove, aptGetUpdate } from '../helpers/apt-get';
 
 describe('carapace tool', () => {
   test('darwin installs the brew formula', async () => {
@@ -18,8 +19,19 @@ describe('carapace tool', () => {
 
     expect(runner.commands).toEqual([
       ['sudo', 'sh', '-c', 'echo "deb [trusted=yes] https://apt.fury.io/rsteube/ /" > /etc/apt/sources.list.d/fury.list'],
-      ['sudo', 'apt', 'update'],
-      ['sudo', 'apt', 'install', '-y', 'carapace-bin'],
+      aptGetUpdate(),
+      aptGetInstall('carapace-bin'),
+    ]);
+  });
+
+  test('linux uninstall removes carapace-bin, then the fury repository', async () => {
+    const runner = createMockRunner();
+
+    await carapace.linux.uninstall(runner);
+
+    expect(runner.commands).toEqual([
+      aptGetRemove('carapace-bin'),
+      ['sudo', 'rm', '-f', '/etc/apt/sources.list.d/fury.list'],
     ]);
   });
 

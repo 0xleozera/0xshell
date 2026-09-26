@@ -9,12 +9,12 @@ const options = {
 };
 
 describe('script', () => {
-  test('install() pipes the remote script into sh', async () => {
+  test('install() pipes the remote script into bash', async () => {
     const runner = createMockRunner();
 
     await script(options).install(runner);
 
-    expect(runner.wasRun(['sh', '-c', `curl -fsSL ${options.url} | sh`])).toBe(true);
+    expect(runner.wasRun(['bash', '-c', `set -o pipefail; curl -fsSL ${options.url} | bash`])).toBe(true);
   });
 
   test('uninstall() runs the caller-supplied uninstall command', async () => {
@@ -41,7 +41,7 @@ describe('script', () => {
 
   test('install() rejects when the remote script fails', async () => {
     const runner = createMockRunner();
-    runner.failOn(['sh', '-c', `curl -fsSL ${options.url} | sh`]);
+    runner.failOn(['bash', '-c', `set -o pipefail; curl -fsSL ${options.url} | bash`]);
 
     await expect(script(options).install(runner)).rejects.toThrow();
   });

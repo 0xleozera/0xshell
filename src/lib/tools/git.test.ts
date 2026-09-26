@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import git from './git';
+import { aptGetInstall } from '../helpers/apt-get';
 
 describe('git tool', () => {
   test('darwin installs the brew formula, not the Apple git', async () => {
@@ -16,7 +17,7 @@ describe('git tool', () => {
 
     await git.linux.install(runner);
 
-    expect(runner.commands).toEqual([['sudo', 'apt', 'install', '-y', 'git']]);
+    expect(runner.commands).toEqual([aptGetInstall('git')]);
   });
 
   test('linux declares that it needs privilege', () => {
