@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import { aptGetInstall, aptGetRemove } from './apt-get';
-import { deb, debFromUrl } from './deb';
+import { deb, debFromGitHubRelease, debFromUrl } from './deb';
 
 const options = { packageName: 'discord', download: debFromUrl('https://example.com/download?format=deb&os=linux') };
 const debPath = '/tmp/0xshell-discord.deb';
@@ -52,5 +52,14 @@ describe('deb', () => {
     runner.respondTo(['dpkg-query', '-W', '-f=${Status}', 'discord'], { stdout: 'install ok installed' });
 
     expect(await deb(options).isInstalled(runner)).toBe(true);
+  });
+
+  test('debFromGitHubRelease() takes the newest release that has the asset, and fails loudly without one', () => {
+    const script = debFromGitHubRelease('acme/app', 'app_[^/"]+_amd64\\.deb');
+
+    expect(script).toContain('https://api.github.com/repos/acme/app/releases?per_page=20');
+    expect(script).toContain("grep -oE 'https://github.com/acme/app/releases/download/[^\"]+/app_[^/\"]+_amd64\\.deb' | head -1");
+    expect(script).toContain('[ -n "$url" ] || {');
+    expect(script).toEndWith('curl -fsSL "$url" -o "$1"');
   });
 });

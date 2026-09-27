@@ -24,7 +24,7 @@ describe('warp tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://releases.warp.dev/linux/keys/warp.asc | gpg --batch --yes --dearmor -o /etc/apt/keyrings/warpdotdev.gpg',
+        'curl -fsSL \"https://releases.warp.dev/linux/keys/warp.asc\" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/warpdotdev.gpg',
       ],
       [
         'sudo',

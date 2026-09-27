@@ -1,8 +1,6 @@
 import { defineTool } from '../tool';
 import { brewCask } from '../helpers/brew-cask';
-import { deb } from '../helpers/deb';
-
-const releases = 'https://github.com/stablyai/orca/releases';
+import { deb, debFromGitHubRelease } from '../helpers/deb';
 
 export default defineTool({
   id: 'orca-ai',
@@ -15,14 +13,8 @@ export default defineTool({
   // entry and the dependencies an AppImage would leave to the user (FUSE).
   // Checked by package, not by `command -v orca`: that name belongs to the
   // GNOME screen reader every Ubuntu desktop ships.
-  //
-  // The .deb carries the version in its file name, so the latest one is
-  // found by following the /releases/latest redirect to its tag (v1.4.212) —
-  // no API call, so no rate limit.
   linux: deb({
     packageName: 'orca-ide',
-    download:
-      `tag=$(curl -fsSLI -o /dev/null -w '%{url_effective}' ${releases}/latest); version=\${tag##*/v}; ` +
-      `curl -fsSL ${releases}/download/v\${version}/orca-ide_\${version}_amd64.deb -o "$1"`,
+    download: debFromGitHubRelease('stablyai/orca', 'orca-ide_[^/"]+_amd64\\.deb'),
   }),
 });

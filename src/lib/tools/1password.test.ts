@@ -24,7 +24,7 @@ describe('1password tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://downloads.1password.com/linux/keys/1password.asc | gpg --batch --yes --dearmor -o /etc/apt/keyrings/1password.gpg',
+        'curl -fsSL \"https://downloads.1password.com/linux/keys/1password.asc\" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/1password.gpg',
       ],
       [
         'sudo',

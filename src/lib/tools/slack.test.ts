@@ -24,7 +24,7 @@ describe('slack tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://packagecloud.io/slacktechnologies/slack/gpgkey | gpg --batch --yes --dearmor -o /etc/apt/keyrings/slack.gpg',
+        'curl -fsSL \"https://packagecloud.io/slacktechnologies/slack/gpgkey\" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/slack.gpg',
       ],
       [
         'sudo',

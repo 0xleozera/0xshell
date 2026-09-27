@@ -21,6 +21,23 @@ export function debFromUrl(url: string): string {
 }
 
 /**
+ * A `download` script for a .deb attached to a GitHub release, whose file
+ * name carries the version. It takes the newest release that has the asset,
+ * not /releases/latest: projects also publish releases with no Linux build
+ * at all (Obsidian's mobile-only ones), and "latest" is then one of those.
+ * Releases come newest first, so the first match wins. `assetPattern` is an
+ * extended regex for the file name.
+ */
+export function debFromGitHubRelease(repo: string, assetPattern: string): string {
+  return (
+    `url=$(curl -fsSL "https://api.github.com/repos/${repo}/releases?per_page=20" ` +
+    `| grep -oE 'https://github.com/${repo}/releases/download/[^"]+/${assetPattern}' | head -1); ` +
+    `[ -n "$url" ] || { echo "no matching .deb in the releases of ${repo}" >&2; exit 1; }; ` +
+    `curl -fsSL "$url" -o "$1"`
+  );
+}
+
+/**
  * Helper for Linux apps published as a standalone .deb, with no apt
  * repository behind it (ADR-0002). `apt-get install` on the downloaded file,
  * not `dpkg -i`, so the package's dependencies come along; the download is

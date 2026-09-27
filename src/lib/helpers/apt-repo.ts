@@ -82,12 +82,13 @@ export function aptRepo({
       await removeLeftovers(runner);
       await runChecked(runner, ['sudo', 'mkdir', '-p', '/etc/apt/keyrings']);
       // --batch --yes: a keyring left by an earlier install is overwritten
-      // instead of gpg asking about it on a terminal it does not have.
+      // instead of gpg asking about it on a terminal it does not have. The
+      // URL is quoted: a keyserver lookup carries `?` and `&`.
       await runChecked(runner, [
         'sudo',
         'sh',
         '-c',
-        `curl -fsSL ${keyUrl} | gpg --batch --yes --dearmor -o ${keyringPath}`,
+        `curl -fsSL "${keyUrl}" | gpg --batch --yes --dearmor -o ${keyringPath}`,
       ]);
       await runChecked(runner, ['sudo', 'sh', '-c', `echo "${sourceLine}" > ${sourceListPath}`]);
       try {

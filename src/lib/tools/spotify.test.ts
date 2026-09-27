@@ -24,7 +24,7 @@ describe('spotify tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg | gpg --batch --yes --dearmor -o /etc/apt/keyrings/spotify.gpg',
+        'curl -fsSL \"https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg\" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/spotify.gpg',
       ],
       [
         'sudo',

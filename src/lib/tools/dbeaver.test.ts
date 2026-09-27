@@ -23,7 +23,7 @@ describe('dbeaver tool', () => {
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://dbeaver.io/debs/dbeaver.gpg.key | gpg --batch --yes --dearmor -o /etc/apt/keyrings/dbeaver.gpg',
+        'curl -fsSL \"https://dbeaver.io/debs/dbeaver.gpg.key\" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/dbeaver.gpg',
       ],
       [
         'sudo',

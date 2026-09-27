@@ -24,7 +24,7 @@ describe('aptRepo', () => {
 
     expect(runner.commands).toEqual([
       ['sudo', 'mkdir', '-p', '/etc/apt/keyrings'],
-      ['sudo', 'sh', '-c', `curl -fsSL ${options.keyUrl} | gpg --batch --yes --dearmor -o /etc/apt/keyrings/slack.gpg`],
+      ['sudo', 'sh', '-c', `curl -fsSL "${options.keyUrl}" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/slack.gpg`],
       [
         'sudo',
         'sh',
@@ -145,7 +145,7 @@ describe('aptRepo', () => {
 
   test('install() rejects when the key import fails', async () => {
     const runner = createMockRunner();
-    runner.failOn(['sudo', 'sh', '-c', `curl -fsSL ${options.keyUrl} | gpg --batch --yes --dearmor -o /etc/apt/keyrings/slack.gpg`]);
+    runner.failOn(['sudo', 'sh', '-c', `curl -fsSL "${options.keyUrl}" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/slack.gpg`]);
 
     await expect(aptRepo(options).install(runner)).rejects.toThrow();
   });

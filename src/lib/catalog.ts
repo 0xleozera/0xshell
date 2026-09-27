@@ -1,6 +1,7 @@
 import type { Tool } from './tool';
 import onePassword from './tools/1password';
 import antigen from './tools/antigen';
+import bruno from './tools/bruno';
 import buildEssential from './tools/build-essential';
 import bun from './tools/bun';
 import carapace from './tools/carapace';
@@ -17,11 +18,13 @@ import fzf from './tools/fzf';
 import gh from './tools/gh';
 import git from './tools/git';
 import go from './tools/go';
+import hermesAgent from './tools/hermes-agent';
 import homebrew from './tools/homebrew';
 import logitechGHub from './tools/logitech-g-hub';
 import mise from './tools/mise';
 import neovim from './tools/neovim';
 import node from './tools/node';
+import obsidian from './tools/obsidian';
 import ohMyZsh from './tools/oh-my-zsh';
 import orcaAi from './tools/orca-ai';
 import pnpm from './tools/pnpm';
@@ -67,10 +70,13 @@ export const catalog: readonly Tool[] = [
   claudeCode,
   claude,
   cursorCli,
+  hermesAgent,
   raycast,
   onePassword,
   docker,
   dbeaver,
+  bruno,
+  obsidian,
   spotify,
   logitechGHub,
 ];
