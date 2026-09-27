@@ -8,7 +8,7 @@ describe('bun tool', () => {
 
     await bun.darwin.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'bun']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'bun@latest']]);
   });
 
   test('linux installs via mise', async () => {
@@ -16,6 +16,6 @@ describe('bun tool', () => {
 
     await bun.linux.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'bun']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'bun@latest']]);
   });
 });

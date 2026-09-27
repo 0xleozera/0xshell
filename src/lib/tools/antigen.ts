@@ -16,7 +16,9 @@ const recipe = custom({
     await runChecked(runner, ['curl', '-fsSL', antigenUrl, '-o', antigenPath]);
   },
   async uninstall(runner: Runner): Promise<void> {
-    await runChecked(runner, ['rm', '-f', antigenPath]);
+    // ~/.antigen holds the plugin bundles antigen cloned; without antigen
+    // nothing loads them.
+    await runChecked(runner, ['rm', '-rf', antigenPath, join(homedir(), '.antigen')]);
   },
   async isInstalled(runner: Runner): Promise<boolean> {
     const result = await runner.run(['test', '-f', antigenPath]);

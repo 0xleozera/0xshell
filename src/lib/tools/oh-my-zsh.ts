@@ -1,6 +1,6 @@
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import theme from '../../dotfiles/oh-my-zsh/tokyonight.zsh-theme' with { type: 'text' };
+import theme from '../../dotfiles/oh-my-zsh/gruvbox.zsh-theme' with { type: 'text' };
 import type { Runner } from '../runner';
 import { defineTool } from '../tool';
 import { custom } from '../helpers/custom';
@@ -34,6 +34,6 @@ export default defineTool({
   linux: recipe,
   configuration: {
     root: join(ohMyZshDir, 'custom', 'themes'),
-    files: [{ path: 'tokyonight.zsh-theme', content: theme }],
+    files: [{ path: 'gruvbox.zsh-theme', content: theme }],
   },
 });

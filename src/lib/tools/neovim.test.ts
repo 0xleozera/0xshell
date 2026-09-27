@@ -10,7 +10,7 @@ describe('neovim tool', () => {
 
     await neovim.darwin.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'aqua:neovim/neovim']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'aqua:neovim/neovim@latest']]);
   });
 
   test('linux installs the aqua backend via mise, not the apt package', async () => {
@@ -18,7 +18,7 @@ describe('neovim tool', () => {
 
     await neovim.linux.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'aqua:neovim/neovim']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'aqua:neovim/neovim@latest']]);
   });
 });
 
@@ -28,10 +28,14 @@ describe('neovim configuration', () => {
     expect(neovim.configuration?.ownsRoot).toBe(true);
   });
 
-  test('selects the night style of tokyonight', () => {
+  test('selects gruvbox, dark and medium contrast', () => {
     const colorscheme = neovim.configuration?.files.find((file) => file.path === 'lua/plugins/colorscheme.lua');
+    const lazy = neovim.configuration?.files.find((file) => file.path === 'lua/config/lazy.lua');
 
-    expect(colorscheme?.content).toContain('colorscheme = "tokyonight"');
-    expect(colorscheme?.content).toContain('style = "night"');
+    expect(colorscheme?.content).toContain('"ellisonleao/gruvbox.nvim"');
+    expect(colorscheme?.content).toContain('colorscheme = "gruvbox"');
+    expect(colorscheme?.content).toContain('contrast = ""');
+    expect(lazy?.content).toContain('colorscheme = { "gruvbox", "habamax" }');
+    expect(lazy?.content).not.toContain('tokyonight');
   });
 });

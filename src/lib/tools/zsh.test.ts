@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { userInfo } from 'node:os';
 import { createMockRunner } from '../mock-runner';
 import zsh from './zsh';
+import { aptGetInstall, aptGetRemove } from '../helpers/apt-get';
 
 const user = userInfo().username;
 const loginShell = ['sh', '-c', 'getent passwd "$1" | cut -d: -f7', 'sh', user];
@@ -21,7 +22,7 @@ describe('zsh tool', () => {
     await zsh.linux.install(runner);
 
     expect(runner.commands).toEqual([
-      ['sudo', 'apt', 'install', '-y', 'zsh'],
+      aptGetInstall('zsh'),
       ['sudo', 'chsh', '-s', '/usr/bin/zsh', user],
     ]);
   });
@@ -33,7 +34,7 @@ describe('zsh tool', () => {
 
     expect(runner.commands).toEqual([
       ['sudo', 'chsh', '-s', '/bin/bash', user],
-      ['sudo', 'apt', 'remove', '-y', 'zsh'],
+      aptGetRemove('zsh'),
     ]);
   });
 
@@ -44,6 +45,7 @@ describe('zsh tool', () => {
   test('linux counts as installed only when zsh is also the login shell', async () => {
     const runner = createMockRunner();
     runner.respondTo(loginShell, { stdout: '/bin/bash\n' });
+    runner.respondTo(['dpkg-query', '-W', '-f=${Status}', 'zsh'], { stdout: 'install ok installed' });
 
     expect(await zsh.linux.isInstalled(runner)).toBe(false);
 

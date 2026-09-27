@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import antigen from '../lib/tools/antigen';
@@ -57,5 +57,37 @@ describe.skipIf(!Bun.which('zsh'))('~/.zshrc on a machine where nothing else is 
     expect(shell.stdout.toString().trim()).toBe('ready');
     expect(shell.stderr.toString()).not.toContain('no such file');
     expect(shell.stderr.toString()).not.toContain('command not found');
+  });
+});
+
+// Everything themed is Gruvbox (dark): a color from another palette left in
+// any dotfile shows up as the odd one out on screen.
+describe('one theme: gruvbox dark', () => {
+  const gruvbox = new Set([
+    '#1d2021', '#282828', '#3c3836', '#504945', '#665c54', '#7c6f64', '#928374', '#a89984',
+    '#bdae93', '#d5c4a1', '#ebdbb2', '#fbf1c7',
+    '#fb4934', '#b8bb26', '#fabd2f', '#83a598', '#d3869b', '#8ec07c', '#fe8019',
+    '#cc241d', '#98971a', '#d79921', '#458588', '#b16286', '#689d6a', '#d65d0e',
+  ]);
+
+  test('every hex color in the dotfiles comes from the gruvbox palette', () => {
+    const offenders: string[] = [];
+    for (const file of new Bun.Glob('**/*').scanSync({ cwd: import.meta.dir })) {
+      if (file.endsWith('.test.ts')) continue;
+      const text = readFileSync(join(import.meta.dir, file), 'utf8');
+      for (const color of text.match(/#[0-9a-fA-F]{6}\b/g) ?? []) {
+        if (!gruvbox.has(color.toLowerCase())) offenders.push(`${file}: ${color}`);
+      }
+    }
+
+    expect(offenders).toEqual([]);
+  });
+
+  test('no dotfile still names tokyonight', () => {
+    const offenders = [...new Bun.Glob('**/*').scanSync({ cwd: import.meta.dir })]
+      .filter((file) => !file.endsWith('.test.ts'))
+      .filter((file) => /tokyo/i.test(readFileSync(join(import.meta.dir, file), 'utf8')));
+
+    expect(offenders).toEqual([]);
   });
 });

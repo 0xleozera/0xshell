@@ -76,6 +76,28 @@ export async function moveAside(runner: Runner, backup: Backup, path: string): P
 }
 
 /**
+ * Keeps a copy of `path` before it is edited in place: the file stays where
+ * it is, for the app that owns it, and the copy is recorded as `saved` — or
+ * `created` when there was nothing yet — so `restore` treats it like any
+ * file `moveAside` cleared.
+ */
+export async function copyAside(runner: Runner, backup: Backup, path: string): Promise<void> {
+  const manifest = join(versionDir(backup), MANIFEST);
+
+  await runChecked(runner, [
+    'sh',
+    '-c',
+    'mkdir -p "$(dirname "$3")" && if [ -e "$1" ]; then ' +
+      'mkdir -p "$(dirname "$2")" && cp -p "$1" "$2" && printf "saved\\t%s\\n" "$1" >> "$3"; ' +
+      'else printf "created\\t%s\\n" "$1" >> "$3"; fi',
+    'sh',
+    path,
+    savedCopyPath(backup, path),
+    manifest,
+  ]);
+}
+
+/**
  * Puts one entry back as it was when the backup was taken. The saved copy is
  * copied, not moved, so the same version can be restored again later. The
  * caller clears `path` first (with `moveAside`).

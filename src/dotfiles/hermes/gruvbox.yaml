@@ -1,0 +1,29 @@
+# Managed by 0xshell: `0xshell install hermes-agent` backs up local edits and
+# rewrites this file. Gruvbox (dark) for the Hermes CLI; every key left out
+# comes from the built-in default skin.
+name: gruvbox
+description: Gruvbox (dark)
+
+colors:
+  banner_border: "#d79921"
+  banner_title: "#fabd2f"
+  banner_accent: "#fe8019"
+  banner_dim: "#928374"
+  banner_text: "#ebdbb2"
+  ui_accent: "#fabd2f"
+  ui_label: "#83a598"
+  ui_ok: "#b8bb26"
+  ui_error: "#fb4934"
+  ui_warn: "#fe8019"
+  prompt: "#ebdbb2"
+  input_rule: "#665c54"
+  response_border: "#8ec07c"
+  session_label: "#d3869b"
+  session_border: "#665c54"
+  status_bar_bg: "#3c3836"
+  voice_status_bg: "#3c3836"
+  selection_bg: "#504945"
+  completion_menu_bg: "#3c3836"
+  completion_menu_current_bg: "#504945"
+  completion_menu_meta_bg: "#3c3836"
+  completion_menu_meta_current_bg: "#504945"

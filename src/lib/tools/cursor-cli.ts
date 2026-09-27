@@ -11,7 +11,15 @@ export default defineTool({
   darwin: brewCask('cursor-cli'),
   linux: script({
     url: 'https://cursor.com/install',
-    uninstallCommand: ['rm', '-f', join(homedir(), '.local', 'bin', 'cursor-agent')],
+    // The installer links the same binary as `agent` and `cursor-agent`, and
+    // keeps every version it downloaded under ~/.local/share/cursor-agent.
+    uninstallCommand: [
+      'rm',
+      '-rf',
+      join(homedir(), '.local', 'bin', 'agent'),
+      join(homedir(), '.local', 'bin', 'cursor-agent'),
+      join(homedir(), '.local', 'share', 'cursor-agent'),
+    ],
     binName: 'cursor-agent',
   }),
 });

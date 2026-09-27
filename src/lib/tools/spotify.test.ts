@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import spotify from './spotify';
+import { aptGetInstall, aptGetUpdate } from '../helpers/apt-get';
 
 describe('spotify tool', () => {
   test('darwin produces the exact brew cask install command', async () => {
@@ -11,18 +12,19 @@ describe('spotify tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'spotify']]);
   });
 
-  test('linux imports the spotify signing key before apt update, then installs spotify-client', async () => {
+  test('linux clears the package\'s stale sources, imports the spotify signing key before apt update, then installs spotify-client', async () => {
     const runner = createMockRunner();
 
     await spotify.linux.install(runner);
 
     expect(runner.commands).toEqual([
+      ['sudo', 'sh', '-c', 'rm -rf /etc/apt/trusted.gpg.d/spotify-*.gpg'],
       ['sudo', 'mkdir', '-p', '/etc/apt/keyrings'],
       [
         'sudo',
         'sh',
         '-c',
-        'curl -fsSL https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | gpg --dearmor -o /etc/apt/keyrings/spotify.gpg',
+        'curl -fsSL \"https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.gpg\" | gpg --batch --yes --dearmor -o /etc/apt/keyrings/spotify.gpg',
       ],
       [
         'sudo',
@@ -30,8 +32,8 @@ describe('spotify tool', () => {
         '-c',
         'echo "deb [signed-by=/etc/apt/keyrings/spotify.gpg] http://repository.spotify.com stable non-free" > /etc/apt/sources.list.d/spotify.list',
       ],
-      ['sudo', 'apt', 'update'],
-      ['sudo', 'apt', 'install', '-y', 'spotify-client'],
+      aptGetUpdate(),
+      aptGetInstall('spotify-client'),
     ]);
   });
 });

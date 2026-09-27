@@ -8,7 +8,7 @@ describe('yarn tool', () => {
 
     await yarn.darwin.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'yarn']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'yarn@latest']]);
   });
 
   test('linux installs via mise', async () => {
@@ -16,6 +16,6 @@ describe('yarn tool', () => {
 
     await yarn.linux.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'yarn']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'yarn@latest']]);
   });
 });

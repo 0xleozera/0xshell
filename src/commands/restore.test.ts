@@ -41,7 +41,7 @@ function shellTool(): Tool {
     configuration: {
       root: home,
       files: [
-        { path: '.zshrc', content: 'ZSH_THEME="tokyonight"\n' },
+        { path: '.zshrc', content: 'ZSH_THEME="gruvbox"\n' },
         { path: '.antigenrc', content: 'antigen apply\n' },
       ],
     },
@@ -108,7 +108,7 @@ describe('restore command', () => {
 
     await restoreCommand({ version: '20260926-150000', dryRun: false }, context());
 
-    expect(read('.zshrc')).toBe('ZSH_THEME="tokyonight"\n');
+    expect(read('.zshrc')).toBe('ZSH_THEME="gruvbox"\n');
     expect(read('.antigenrc')).toBe('antigen apply\n');
   });
 
@@ -133,7 +133,7 @@ describe('restore command', () => {
     expect(reporter.messages('line')).toEqual([
       '↺ ~/.zshrc: back to the backup content\n✗ ~/.antigenrc: removed (did not exist)',
     ]);
-    expect(read('.zshrc')).toBe('ZSH_THEME="tokyonight"\n');
+    expect(read('.zshrc')).toBe('ZSH_THEME="gruvbox"\n');
     expect(existsSync(join(home, '.0xshell', 'backups', '20260926-150000'))).toBe(false);
   });
 
@@ -146,7 +146,7 @@ describe('restore command', () => {
 
     await expect(rejected).rejects.toBeInstanceOf(CliError);
     await expect(rejected).rejects.toThrow('Available backups (newest first):\n  20260927-090000\n  20260926-143012');
-    expect(read('.zshrc')).toBe('ZSH_THEME="tokyonight"\n');
+    expect(read('.zshrc')).toBe('ZSH_THEME="gruvbox"\n');
   });
 
   test('an unknown version is a usage error that says there are no backups yet', async () => {
@@ -172,6 +172,6 @@ describe('restore command', () => {
     const rejected = restoreCommand({ version: '20260926-143012', dryRun: false }, context());
 
     await expect(rejected).rejects.toThrow('was just created');
-    expect(read('.zshrc')).toBe('ZSH_THEME="tokyonight"\n');
+    expect(read('.zshrc')).toBe('ZSH_THEME="gruvbox"\n');
   });
 });

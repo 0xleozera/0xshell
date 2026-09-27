@@ -20,6 +20,7 @@ export const UninstallInputSchema = z.object({
   tools: toolIds.describe('ids of the tools to uninstall (e.g. neovim docker)'),
   tag: z.string().min(1).optional().describe('uninstalls only the Tools with this Tag'),
   all: z.boolean().default(false).describe('uninstalls the whole Catalog; asks for interactive confirmation before running'),
+  yes: z.boolean().default(false).describe('confirms --all without asking, for scripts'),
   dryRun: z.boolean().default(false).describe('shows what would be removed, without running anything'),
 });
 

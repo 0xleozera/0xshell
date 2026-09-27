@@ -1,13 +1,14 @@
 return {
   {
-    "folke/tokyonight.nvim",
-    -- LazyVim defaults tokyonight to "moon"; "night" is the darkest style.
-    opts = { style = "night" },
+    "ellisonleao/gruvbox.nvim",
+    priority = 1000,
+    -- Dark, medium contrast: the #282828 background Warp's Gruvbox Dark uses.
+    opts = { contrast = "" },
   },
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "tokyonight",
+      colorscheme = "gruvbox",
     },
   },
 }

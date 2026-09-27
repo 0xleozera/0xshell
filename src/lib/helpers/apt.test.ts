@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { createMockRunner } from '../mock-runner';
 import { apt } from './apt';
+import { aptGetInstall, aptGetRemove } from './apt-get';
 
 describe('apt', () => {
   test('declares that it requires privilege', () => {
@@ -12,7 +13,7 @@ describe('apt', () => {
 
     await apt('ripgrep').install(runner);
 
-    expect(runner.wasRun(['sudo', 'apt', 'install', '-y', 'ripgrep'])).toBe(true);
+    expect(runner.wasRun(aptGetInstall('ripgrep'))).toBe(true);
   });
 
   test('uninstall() runs sudo apt remove -y <package>', async () => {
@@ -20,12 +21,12 @@ describe('apt', () => {
 
     await apt('ripgrep').uninstall(runner);
 
-    expect(runner.wasRun(['sudo', 'apt', 'remove', '-y', 'ripgrep'])).toBe(true);
+    expect(runner.wasRun(aptGetRemove('ripgrep'))).toBe(true);
   });
 
   test('isInstalled() checks dpkg -s <package> without sudo', async () => {
     const runner = createMockRunner();
-    runner.respondTo(['dpkg', '-s', 'ripgrep'], { exitCode: 0 });
+    runner.respondTo(['dpkg-query', '-W', '-f=${Status}', 'ripgrep'], { exitCode: 0, stdout: 'install ok installed' });
 
     expect(await apt('ripgrep').isInstalled(runner)).toBe(true);
     expect(runner.commands.some((command) => command.includes('sudo'))).toBe(false);
@@ -33,21 +34,21 @@ describe('apt', () => {
 
   test('isInstalled() is false when dpkg -s <package> fails', async () => {
     const runner = createMockRunner();
-    runner.failOn(['dpkg', '-s', 'ripgrep']);
+    runner.failOn(['dpkg-query', '-W', '-f=${Status}', 'ripgrep']);
 
     expect(await apt('ripgrep').isInstalled(runner)).toBe(false);
   });
 
   test('install() rejects when sudo apt install -y <package> fails', async () => {
     const runner = createMockRunner();
-    runner.failOn(['sudo', 'apt', 'install', '-y', 'ripgrep']);
+    runner.failOn(aptGetInstall('ripgrep'));
 
     await expect(apt('ripgrep').install(runner)).rejects.toThrow();
   });
 
   test('uninstall() rejects when sudo apt remove -y <package> fails', async () => {
     const runner = createMockRunner();
-    runner.failOn(['sudo', 'apt', 'remove', '-y', 'ripgrep']);
+    runner.failOn(aptGetRemove('ripgrep'));
 
     await expect(apt('ripgrep').uninstall(runner)).rejects.toThrow();
   });

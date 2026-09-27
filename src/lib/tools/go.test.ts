@@ -8,7 +8,7 @@ describe('go tool', () => {
 
     await go.darwin.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'go']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'go@latest']]);
   });
 
   test('linux installs via mise', async () => {
@@ -16,6 +16,6 @@ describe('go tool', () => {
 
     await go.linux.install(runner);
 
-    expect(runner.commands).toEqual([['mise', 'install', 'go']]);
+    expect(runner.commands).toEqual([['mise', 'use', '--global', 'go@latest']]);
   });
 });

@@ -27,8 +27,8 @@ describe('oh-my-zsh tool', () => {
     expect(runner.commands).toEqual([['rm', '-rf', join(homedir(), '.oh-my-zsh')]]);
   });
 
-  test('writes the tokyonight theme into the custom themes directory', () => {
+  test('writes the gruvbox theme into the custom themes directory', () => {
     expect(ohMyZsh.configuration?.root).toBe(join(homedir(), '.oh-my-zsh', 'custom', 'themes'));
-    expect(ohMyZsh.configuration?.files.map((file) => file.path)).toEqual(['tokyonight.zsh-theme']);
+    expect(ohMyZsh.configuration?.files.map((file) => file.path)).toEqual(['gruvbox.zsh-theme']);
   });
 });

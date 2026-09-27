@@ -4,8 +4,8 @@
 # Path to Oh My Zsh installation
 export ZSH="$HOME/.oh-my-zsh"
 
-# Theme: Tokyo Night, written to $ZSH/custom/themes by `0xshell install oh-my-zsh`
-ZSH_THEME="tokyonight"
+# Theme: Gruvbox (dark), written to $ZSH/custom/themes by `0xshell install oh-my-zsh`
+ZSH_THEME="gruvbox"
 
 # Disable auto-update for Oh My Zsh
 export DISABLE_AUTO_UPDATE=true
@@ -40,8 +40,8 @@ elif [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
   source /usr/share/doc/fzf/examples/key-bindings.zsh
 fi
 
-# FZF colors: Tokyo Night (night)
-export FZF_DEFAULT_OPTS="--color=bg+:#283457,bg:#16161e,border:#27a1b9,fg:#c0caf5,gutter:#16161e,header:#ff9e64,hl+:#2ac3de,hl:#2ac3de,info:#545c7e,marker:#ff007c,pointer:#ff007c,prompt:#2ac3de,query:#c0caf5,scrollbar:#27a1b9,separator:#ff9e64,spinner:#ff007c"
+# FZF colors: Gruvbox (dark)
+export FZF_DEFAULT_OPTS="--color=bg+:#3c3836,bg:#282828,border:#665c54,fg:#ebdbb2,gutter:#282828,header:#fe8019,hl+:#fabd2f,hl:#fabd2f,info:#83a598,marker:#fe8019,pointer:#fb4934,prompt:#8ec07c,query:#ebdbb2,scrollbar:#665c54,separator:#504945,spinner:#fb4934"
 
 # Eza configuration: eza reads theme.yml from this directory
 export EZA_CONFIG_DIR=~/.config/eza
@@ -76,38 +76,38 @@ if [ -f "$HOME/antigen.zsh" ]; then
   antigen init ~/.antigenrc
 fi
 
-# Plugin colors: Tokyo Night (night). Set after antigen so they override the
+# Plugin colors: Gruvbox (dark). Set after antigen so they override the
 # plugins' defaults.
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#565f89'
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#7c6f64'
 
 typeset -gA ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[default]='fg=#c0caf5'
-ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#f7768e'
-ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#bb9af7'
-ZSH_HIGHLIGHT_STYLES[alias]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[builtin]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[function]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[command]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[arg0]='fg=#7aa2f7'
-ZSH_HIGHLIGHT_STYLES[precommand]='fg=#7dcfff,italic'
-ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#7dcfff,italic'
-ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#89ddff'
-ZSH_HIGHLIGHT_STYLES[redirection]='fg=#89ddff'
-ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#e0af68'
-ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#e0af68'
-ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#9ece6a'
-ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#9ece6a'
-ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#9ece6a'
-ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#bb9af7'
-ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=#7dcfff'
-ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]='fg=#bb9af7'
-ZSH_HIGHLIGHT_STYLES[globbing]='fg=#ff9e64'
-ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#ff9e64'
-ZSH_HIGHLIGHT_STYLES[path]='fg=#c0caf5,underline'
-ZSH_HIGHLIGHT_STYLES[comment]='fg=#565f89'
+ZSH_HIGHLIGHT_STYLES[default]='fg=#ebdbb2'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#fb4934'
+ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=#d3869b'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[global-alias]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[builtin]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[function]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[command]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=#83a598'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#8ec07c,italic'
+ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#8ec07c,italic'
+ZSH_HIGHLIGHT_STYLES[commandseparator]='fg=#fe8019'
+ZSH_HIGHLIGHT_STYLES[redirection]='fg=#fe8019'
+ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='fg=#fabd2f'
+ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='fg=#fabd2f'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#b8bb26'
+ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#b8bb26'
+ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#b8bb26'
+ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='fg=#d3869b'
+ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=#8ec07c'
+ZSH_HIGHLIGHT_STYLES[command-substitution-delimiter]='fg=#d3869b'
+ZSH_HIGHLIGHT_STYLES[globbing]='fg=#fe8019'
+ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=#fe8019'
+ZSH_HIGHLIGHT_STYLES[path]='fg=#ebdbb2,underline'
+ZSH_HIGHLIGHT_STYLES[comment]='fg=#928374'
 
 # Machine-specific settings, never touched by 0xshell
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local

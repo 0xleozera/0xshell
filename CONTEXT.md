@@ -28,11 +28,17 @@ The set of all registered Tools. It is the single source of truth about what
 ### Helper
 
 A function that builds a Tool's install recipe for one Platform: `brewCask`,
-`brewFormula`, `apt`, `aptRepo`, `mise`, `dmg`, `appImage`, `script`, `custom`.
+`brewFormula`, `apt`, `aptRepo`, `mise`, `deb`, `dmg`, `appImage`, `script`, `custom`.
 
 A Helper carries three things: `install()`, its paired `uninstall()`, and the default
 `isInstalled()` for that install method (e.g. `brewCask` checks
 `brew list --cask <id>`). The Tool module can override any of the three.
+
+Every apt write goes through `helpers/apt-get.ts` (`apt-get` under `sudo`,
+non-interactive, waiting for the dpkg lock), and "installed" for an apt package means
+`dpkg-query` reports `install ok installed` — a removed package keeps its
+configuration and `dpkg -s` would still find it. `aptRepo` removes its source and
+keyring on `uninstall`: a source left behind is fetched by every later `apt update`.
 
 ### Stage
 
@@ -114,6 +120,10 @@ each Tool's Configuration right after installing it or finding it installed;
 A file that already matches the disk is not touched (`configuration up to date`). One
 that differs is moved into the run's Backup before being rewritten. With `ownsRoot`,
 the whole directory belongs to the Configuration and goes into the Backup as a unit.
+
+A Configuration can also set single keys (`settings`) in a file the app owns and keeps
+writing, such as Warp's `settings.toml`: only that key changes, and the file is copied
+into the Backup first. See [ADR-0007](docs/adr/0007-configuration-sets-keys-in-app-owned-files.md).
 
 _Avoid as a synonym:_ "setup", "settings", "dotfiles" as the name of the concept.
 "Dotfiles" is only the directory where the content lives.

@@ -11,11 +11,11 @@ describe('cursor-cli tool', () => {
     expect(runner.commands).toEqual([['brew', 'install', '--cask', 'cursor-cli']]);
   });
 
-  test('linux pipes the official install script into sh', async () => {
+  test('linux pipes the official install script into bash', async () => {
     const runner = createMockRunner();
 
     await cursorCli.linux.install(runner);
 
-    expect(runner.commands).toEqual([['sh', '-c', 'curl -fsSL https://cursor.com/install | sh']]);
+    expect(runner.commands).toEqual([['bash', '-c', 'set -o pipefail; curl -fsSL https://cursor.com/install | bash']]);
   });
 });
