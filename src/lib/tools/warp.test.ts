@@ -37,3 +37,12 @@ describe('warp tool', () => {
     ]);
   });
 });
+
+describe('warp configuration', () => {
+  test('selects the built-in Gruvbox Dark in settings.toml, and only that key', () => {
+    expect(warp.configuration?.files).toEqual([]);
+    expect(warp.configuration?.settings).toEqual([
+      { path: 'settings.toml', format: 'toml', section: 'appearance.themes', key: 'theme', value: '"gruvbox_dark"' },
+    ]);
+  });
+});

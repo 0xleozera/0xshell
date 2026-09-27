@@ -39,3 +39,14 @@ describe('hermes-agent tool', () => {
     expect(hermesAgent.darwin).toBe(hermesAgent.linux);
   });
 });
+
+describe('hermes-agent configuration', () => {
+  test('writes a gruvbox skin and selects it in config.yaml', () => {
+    const skin = hermesAgent.configuration?.files.find((file) => file.path === 'skins/gruvbox.yaml');
+
+    expect(skin?.content).toContain('name: gruvbox');
+    expect(hermesAgent.configuration?.settings).toEqual([
+      { path: 'config.yaml', format: 'yaml', section: 'display', key: 'skin', value: 'gruvbox' },
+    ]);
+  });
+});

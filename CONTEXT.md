@@ -121,6 +121,10 @@ A file that already matches the disk is not touched (`configuration up to date`)
 that differs is moved into the run's Backup before being rewritten. With `ownsRoot`,
 the whole directory belongs to the Configuration and goes into the Backup as a unit.
 
+A Configuration can also set single keys (`settings`) in a file the app owns and keeps
+writing, such as Warp's `settings.toml`: only that key changes, and the file is copied
+into the Backup first. See [ADR-0007](docs/adr/0007-configuration-sets-keys-in-app-owned-files.md).
+
 _Avoid as a synonym:_ "setup", "settings", "dotfiles" as the name of the concept.
 "Dotfiles" is only the directory where the content lives.
 

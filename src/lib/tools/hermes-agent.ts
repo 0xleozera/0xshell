@@ -1,3 +1,6 @@
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import skin from '../../dotfiles/hermes/gruvbox.yaml' with { type: 'text' };
 import type { Runner } from '../runner';
 import { defineTool } from '../tool';
 import { custom } from '../helpers/custom';
@@ -55,4 +58,11 @@ export default defineTool({
   // Nous Research's own installer, the same on both Platforms.
   darwin: recipe,
   linux: recipe,
+  // A Gruvbox skin, selected in config.yaml — only that key: the rest of the
+  // file is the user's (model, providers, every other display option).
+  configuration: {
+    root: join(homedir(), '.hermes'),
+    files: [{ path: 'skins/gruvbox.yaml', content: skin }],
+    settings: [{ path: 'config.yaml', format: 'yaml', section: 'display', key: 'skin', value: 'gruvbox' }],
+  },
 });

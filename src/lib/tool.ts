@@ -46,11 +46,25 @@ const unsupportedSchema = z.custom<Unsupported>(isUnsupported, {
 
 const platformEntrySchema = z.union([recipeSchema, unsupportedSchema]);
 
-const configurationSchema = z.object({
-  root: z.string().min(1, 'root cannot be empty'),
-  files: z.array(z.object({ path: z.string().min(1), content: z.string() })).min(1),
-  ownsRoot: z.boolean().optional(),
-}) satisfies z.ZodType<Configuration>;
+const settingSchema = z.object({
+  path: z.string().min(1),
+  format: z.enum(['toml', 'yaml', 'json']),
+  // '' is the top level of a JSON document; TOML and YAML always name one.
+  section: z.string(),
+  key: z.string().regex(/^[A-Za-z0-9_-]+$/, 'key must be a bare key'),
+  value: z.string().min(1),
+});
+
+const configurationSchema = z
+  .object({
+    root: z.string().min(1, 'root cannot be empty'),
+    files: z.array(z.object({ path: z.string().min(1), content: z.string() })),
+    ownsRoot: z.boolean().optional(),
+    settings: z.array(settingSchema).optional(),
+  })
+  .refine((configuration) => configuration.files.length > 0 || (configuration.settings?.length ?? 0) > 0, {
+    message: 'a Configuration writes at least one file or setting',
+  }) satisfies z.ZodType<Configuration>;
 
 /**
  * Schema for a Tool (ADR-0002). Each Platform (`darwin`, `linux`) resolves

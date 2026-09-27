@@ -47,8 +47,8 @@ async function record(entry: Recipe, action: PlanAction): Promise<readonly Comma
 async function configurationWrites(tool: Tool, runner: Runner, action: PlanAction): Promise<readonly string[]> {
   if (action === 'uninstall' || !tool.configuration) return [];
 
-  const { writes } = await planConfiguration(tool.configuration, runner);
-  return writes.map((file) => file.path);
+  const { writes, edits } = await planConfiguration(tool.configuration, runner);
+  return [...writes.map((file) => file.path), ...edits.map((edit) => `${edit.path} (${edit.section}.${edit.key} = ${edit.value})`)];
 }
 
 /**
